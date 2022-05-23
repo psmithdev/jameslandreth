@@ -7,4 +7,5 @@ Version 2 was Wix.  A slight improvement, still pain to get going.  My problem w
 
 After learning some basic HTML and CSS on my own, my next attempt is full autonomy and see what I can do on my own.  Time to fire up VS code and get to work.
 
+Inspected page source of Wix and it's 900 lines of code.  I don't need nor want majority of it.  I am confident I can design a website with several pages at a fraction of that.  That is my challenge. K.I.S.S. Keep It Simple, Stupid!
 
