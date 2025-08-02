@@ -1,0 +1,100 @@
+[02-Aug-2025 07:21:34 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:34 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:37 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:40 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:40 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:43 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:43 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:44 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:44 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:47 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:47 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:49 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:49 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:52 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:21:52 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(56): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:22:40 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/class-wpdb.php on line 1988
+[02-Aug-2025 07:25:57 UTC] PHP Warning:  require_once(/home/parker/the_odin_project/jameslandreth/version.php): Failed to open stream: No such file or directory in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
+[02-Aug-2025 07:25:57 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/parker/the_odin_project/jameslandreth/version.php' (include_path='.:/usr/share/php') in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php:12
+Stack trace:
+#0 /home/parker/the_odin_project/jameslandreth/wordpress/wp-includes/load.php(708): require_once()
+#1 /home/parker/the_odin_project/jameslandreth/wordpress/wp-settings.php(134): require_wp_db()
+#2 /home/parker/the_odin_project/jameslandreth/wordpress/wp-config.php(42): require_once('...')
+#3 /home/parker/the_odin_project/jameslandreth/wordpress/wp-load.php(50): require_once('...')
+#4 /home/parker/the_odin_project/jameslandreth/wordpress/wp-blog-header.php(13): require_once('...')
+#5 /home/parker/the_odin_project/jameslandreth/wordpress/index.php(17): require('...')
+#6 {main}
+  thrown in /home/parker/the_odin_project/jameslandreth/wordpress/wp-content/db.php on line 12
