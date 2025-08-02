@@ -350,12 +350,13 @@ body {
     background-position: center;
     border-radius: 6px;
     z-index: 1;
-    opacity: 0.6;
-    transition: opacity 0.3s ease;
+    opacity: 1;
+    transition: all 0.3s ease;
 }
 
 .document-card:hover .doc-image-overlay {
-    opacity: 0.8;
+    opacity: 1;
+    transform: scale(1.02);
 }
 
 .doc-image-overlay-gradient {
@@ -366,10 +367,10 @@ body {
     bottom: 0;
     background: linear-gradient(
         135deg,
-        rgba(255,255,255,0.9) 0%,
-        rgba(255,255,255,0.7) 30%,
-        rgba(255,255,255,0.4) 60%,
-        rgba(255,255,255,0.8) 100%
+        rgba(255,255,255,0.75) 0%,
+        rgba(255,255,255,0.5) 30%,
+        rgba(255,255,255,0.2) 60%,
+        rgba(255,255,255,0.7) 100%
     );
     border-radius: 6px;
 }
@@ -378,24 +379,48 @@ body {
 .doc-paper {
     position: relative;
     z-index: 2;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(1px);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255,255,255,0.8);
 }
 
 /* Enhanced styling for documents with image overlays */
 .document-preview:has(.doc-image-overlay) .doc-paper {
-    background: rgba(255,255,255,0.92);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.9);
 }
 
 .document-preview:has(.doc-image-overlay) .doc-title-text {
     color: #1a202c;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    text-shadow: 0 1px 3px rgba(255,255,255,0.9);
+    font-weight: 700;
 }
 
 .document-preview:has(.doc-image-overlay) .doc-subtitle-text {
-    color: #4a5568;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.6);
+    color: #2d3748;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    font-weight: 600;
+}
+
+.document-preview:has(.doc-image-overlay) .doc-line {
+    background: rgba(45, 55, 72, 0.4);
+}
+
+/* Alternative: Corner image peek */
+.doc-image-corner {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 45px;
+    height: 30px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+    z-index: 3;
+    opacity: 0.8;
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .doc-map-placeholder {
@@ -1254,7 +1279,7 @@ function shouldUseImageOverlay(doc) {
 // Generate subtle image overlay
 function generateImageOverlay(doc) {
     const imageId = getImageIdForDocument(doc);
-    const imageUrl = `https://picsum.photos/id/${imageId}/200/120?blur=2`;
+    const imageUrl = `https://picsum.photos/id/${imageId}/300/200?blur=1`;
     
     return `
         <div class="doc-image-overlay" style="background-image: url('${imageUrl}');">
