@@ -305,6 +305,21 @@ body {
 .doc-line.short { width: 45%; }
 
 /* Special Elements */
+.doc-photo-space {
+    width: 40px;
+    height: 25px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 3px;
+    margin: 4px 0;
+    position: relative;
+    border: 1px dashed rgba(0,0,0,0.1);
+}
+
+.doc-photo-space.large {
+    width: 60px;
+    height: 35px;
+}
+
 .doc-photo-placeholder {
     width: 40px;
     height: 25px;
@@ -322,6 +337,65 @@ body {
     transform: translate(-50%, -50%);
     font-size: 8px;
     opacity: 0.6;
+}
+
+/* Image Overlay System */
+.doc-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    border-radius: 6px;
+    z-index: 1;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.document-card:hover .doc-image-overlay {
+    opacity: 0.8;
+}
+
+.doc-image-overlay-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.9) 0%,
+        rgba(255,255,255,0.7) 30%,
+        rgba(255,255,255,0.4) 60%,
+        rgba(255,255,255,0.8) 100%
+    );
+    border-radius: 6px;
+}
+
+/* Ensure document content stays above overlay */
+.doc-paper {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(1px);
+}
+
+/* Enhanced styling for documents with image overlays */
+.document-preview:has(.doc-image-overlay) .doc-paper {
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+}
+
+.document-preview:has(.doc-image-overlay) .doc-title-text {
+    color: #1a202c;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+.document-preview:has(.doc-image-overlay) .doc-subtitle-text {
+    color: #4a5568;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.6);
 }
 
 .doc-map-placeholder {
@@ -1165,7 +1239,52 @@ function generateDocumentPreview(doc) {
         'Photography': generatePhotographyDocument(doc)
     };
     
-    return templates[doc.category] || generateGenericDocument(doc);
+    const cssPreview = templates[doc.category] || generateGenericDocument(doc);
+    const imageOverlay = shouldUseImageOverlay(doc) ? generateImageOverlay(doc) : '';
+    
+    return cssPreview + imageOverlay;
+}
+
+// Determine if document should have image overlay
+function shouldUseImageOverlay(doc) {
+    const imageCategories = ['Travel Journal', 'Travel', 'Photography', 'Family Newsletter'];
+    return imageCategories.includes(doc.category);
+}
+
+// Generate subtle image overlay
+function generateImageOverlay(doc) {
+    const imageId = getImageIdForDocument(doc);
+    const imageUrl = `https://picsum.photos/id/${imageId}/200/120?blur=2`;
+    
+    return `
+        <div class="doc-image-overlay" style="background-image: url('${imageUrl}');">
+            <div class="doc-image-overlay-gradient"></div>
+        </div>
+    `;
+}
+
+// Get image ID for document category
+function getImageIdForDocument(doc) {
+    const categoryImages = {
+        'Travel Journal': 111, // Mountains/landscape
+        'Travel': 116,         // Nature/travel  
+        'Family Newsletter': 91, // Vintage/family feel
+        'Family': 91,          // Same as newsletter
+        'Photography': 159,    // Camera/artistic
+    };
+    
+    return categoryImages[doc.category] || (Math.abs(hashCode(doc.id)) % 200) + 1;
+}
+
+// Simple hash function for consistent image selection
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash;
 }
 
 function generateFamilyNewsletter(doc) {
@@ -1179,7 +1298,7 @@ function generateFamilyNewsletter(doc) {
                 <div class="doc-line long"></div>
                 <div class="doc-line medium"></div>
                 <div class="doc-line long"></div>
-                <div class="doc-photo-placeholder"></div>
+                <div class="doc-photo-space"></div>
                 <div class="doc-line short"></div>
                 <div class="doc-line medium"></div>
                 <div class="doc-line long"></div>
@@ -1193,11 +1312,12 @@ function generateTravelDocument(doc) {
         <div class="doc-paper">
             <div class="doc-header">
                 <div class="doc-title-text">${doc.title.substring(0, 20)}...</div>
+                <div class="doc-subtitle-text">Travel Journal</div>
             </div>
             <div class="doc-content-lines">
                 <div class="doc-line long"></div>
                 <div class="doc-line medium"></div>
-                <div class="doc-map-placeholder">🗺️</div>
+                <div class="doc-photo-space"></div>
                 <div class="doc-line short"></div>
                 <div class="doc-line long"></div>
                 <div class="doc-line medium"></div>
@@ -1249,13 +1369,10 @@ function generatePhotographyDocument(doc) {
         <div class="doc-paper">
             <div class="doc-header">
                 <div class="doc-title-text">Through the Lens</div>
+                <div class="doc-subtitle-text">Photography Collection</div>
             </div>
             <div class="doc-content-lines">
-                <div class="doc-photo-grid">
-                    <div class="doc-small-photo">📷</div>
-                    <div class="doc-small-photo">🏔️</div>
-                    <div class="doc-small-photo">🌸</div>
-                </div>
+                <div class="doc-photo-space large"></div>
                 <div class="doc-line medium"></div>
                 <div class="doc-line short"></div>
                 <div class="doc-line long"></div>
