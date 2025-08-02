@@ -736,27 +736,410 @@ body {
 </main>
 
 <script>
-// Document card click handling
-document.querySelectorAll('.document-card').forEach(card => {
+// Document data for filtering and search
+const documentData = [
+    {
+        id: 'famille-2017',
+        title: 'Les Nouvelles de Famille 2017',
+        category: 'Family Newsletter',
+        excerpt: 'Being a yearly news report of the adventures of Aleda, Jim, Mark and Leanne for 2017. Features family updates, travels, and memorable moments from the year.',
+        date: 'December 2017',
+        year: 2017,
+        location: 'United States',
+        tags: ['family', 'newsletter', '2017', 'travel', 'updates'],
+        pages: '4 pages',
+        type: 'PDF',
+        featured: true
+    },
+    {
+        id: 'plague-year',
+        title: 'Our Journal of the Plague Year',
+        category: 'Travel Journal',
+        excerpt: 'With apologies to Daniel Defoe. The further adventures of Aleda, Jim, Mark and Leanne in 2020. A unique perspective on traveling during unprecedented times.',
+        date: 'December 2020',
+        year: 2020,
+        location: 'United States',
+        tags: ['travel', 'journal', '2020', 'covid', 'adventures'],
+        pages: '6 pages',
+        type: 'PDF',
+        featured: true
+    },
+    {
+        id: 'ties-talk',
+        title: 'If Ties Could Talk',
+        category: 'Essay',
+        excerpt: 'A thoughtful reflection on the stories behind a collection of neckties, each representing different chapters of life, career, and personal relationships.',
+        date: 'March 2024',
+        year: 2024,
+        location: 'United States',
+        tags: ['essay', 'personal', 'reflection', 'career'],
+        pages: '3 pages',
+        type: 'Word',
+        featured: true
+    },
+    {
+        id: 'japan-2023',
+        title: 'Japan Adventures 2023',
+        category: 'Travel',
+        excerpt: 'A comprehensive guide to our latest journey through Japan, including hidden gems, cultural experiences, and photography tips.',
+        date: 'November 2023',
+        year: 2023,
+        location: 'Japan',
+        tags: ['travel', 'japan', 'photography', 'culture', 'adventure'],
+        pages: '12 pages',
+        type: 'PDF',
+        featured: false
+    },
+    {
+        id: 'medical-reflections',
+        title: 'Reflections on Medical Practice',
+        category: 'Medical',
+        excerpt: 'Looking back on 40 years of medical practice, the evolution of healthcare, and lessons learned from patients.',
+        date: 'June 2023',
+        year: 2023,
+        location: 'United States',
+        tags: ['medical', 'healthcare', 'career', 'reflection'],
+        pages: '8 pages',
+        type: 'Word',
+        featured: false
+    },
+    {
+        id: 'photography-2022',
+        title: 'Through the Lens: 2022',
+        category: 'Photography',
+        excerpt: 'A collection of favorite photographs from 2022 with stories behind each image and technical notes for fellow photographers.',
+        date: 'January 2023',
+        year: 2023,
+        location: 'Europe',
+        tags: ['photography', 'images', 'technical', 'stories'],
+        pages: '16 pages',
+        type: 'PDF',
+        featured: false
+    },
+    {
+        id: 'family-history',
+        title: 'Family History Project',
+        category: 'Family',
+        excerpt: 'Tracing our family lineage through historical records, interviews, and discovered documents spanning three generations.',
+        date: 'September 2022',
+        year: 2022,
+        location: 'United States',
+        tags: ['family', 'history', 'genealogy', 'research'],
+        pages: '24 pages',
+        type: 'Word',
+        featured: false
+    },
+    {
+        id: 'europe-railway',
+        title: 'European Railway Journey',
+        category: 'Travel',
+        excerpt: 'Six weeks traveling through Europe by train, discovering small towns, meeting locals, and documenting the changing landscape.',
+        date: 'August 2022',
+        year: 2022,
+        location: 'Europe',
+        tags: ['travel', 'europe', 'railway', 'train', 'adventure'],
+        pages: '18 pages',
+        type: 'PDF',
+        featured: false
+    },
+    {
+        id: 'retirement-art',
+        title: 'The Art of Retirement',
+        category: 'Essay',
+        excerpt: 'Navigating the transition from active medical practice to retirement, finding new purposes, and embracing life\'s next chapter.',
+        date: 'May 2022',
+        year: 2022,
+        location: 'United States',
+        tags: ['retirement', 'transition', 'purpose', 'life'],
+        pages: '5 pages',
+        type: 'Word',
+        featured: false
+    }
+];
+
+// Current filter state
+let currentFilters = {
+    search: '',
+    category: '',
+    year: '',
+    location: '',
+    activeTag: 'Recent'
+};
+
+// Initialize search and filtering
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSearch();
+    initializeFilters();
+    applyFilters();
+});
+
+// Search functionality
+function initializeSearch() {
+    const searchInput = document.querySelector('.search-input');
+    const searchBtn = document.querySelector('.search-btn');
+    
+    searchInput.addEventListener('input', function() {
+        currentFilters.search = this.value.toLowerCase();
+        debounce(applyFilters, 300)();
+    });
+    
+    searchBtn.addEventListener('click', function() {
+        applyFilters();
+    });
+    
+    // Enter key search
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyFilters();
+        }
+    });
+}
+
+// Filter controls
+function initializeFilters() {
+    // Category filter
+    const categorySelect = document.querySelector('.filter-select');
+    categorySelect.addEventListener('change', function() {
+        currentFilters.category = this.value;
+        applyFilters();
+    });
+    
+    // Year filter
+    const yearSelects = document.querySelectorAll('.filter-select');
+    if (yearSelects[1]) {
+        yearSelects[1].addEventListener('change', function() {
+            currentFilters.year = this.value;
+            applyFilters();
+        });
+    }
+    
+    // Location filter
+    if (yearSelects[2]) {
+        yearSelects[2].addEventListener('change', function() {
+            currentFilters.location = this.value;
+            applyFilters();
+        });
+    }
+    
+    // Filter tags
+    document.querySelectorAll('.filter-tag').forEach(tag => {
+        tag.addEventListener('click', function() {
+            document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentFilters.activeTag = this.textContent;
+            applyFilters();
+        });
+    });
+    
+    // Timeline years
+    document.querySelectorAll('.timeline-year').forEach(year => {
+        year.addEventListener('click', function() {
+            document.querySelectorAll('.timeline-year').forEach(y => y.classList.remove('active'));
+            this.classList.add('active');
+            currentFilters.year = this.textContent;
+            
+            // Update year dropdown
+            const yearSelect = document.querySelectorAll('.filter-select')[1];
+            if (yearSelect) {
+                yearSelect.value = this.textContent;
+            }
+            
+            applyFilters();
+        });
+    });
+}
+
+// Apply filters and search
+function applyFilters() {
+    let filteredDocuments = [...documentData];
+    
+    // Apply search filter
+    if (currentFilters.search) {
+        filteredDocuments = filteredDocuments.filter(doc => 
+            doc.title.toLowerCase().includes(currentFilters.search) ||
+            doc.excerpt.toLowerCase().includes(currentFilters.search) ||
+            doc.category.toLowerCase().includes(currentFilters.search) ||
+            doc.tags.some(tag => tag.toLowerCase().includes(currentFilters.search))
+        );
+    }
+    
+    // Apply category filter
+    if (currentFilters.category && currentFilters.category !== 'All Categories') {
+        filteredDocuments = filteredDocuments.filter(doc => 
+            doc.category.includes(currentFilters.category) || 
+            doc.category.toLowerCase().includes(currentFilters.category.toLowerCase())
+        );
+    }
+    
+    // Apply year filter
+    if (currentFilters.year && currentFilters.year !== 'All Years') {
+        filteredDocuments = filteredDocuments.filter(doc => 
+            doc.year.toString() === currentFilters.year
+        );
+    }
+    
+    // Apply location filter
+    if (currentFilters.location && currentFilters.location !== 'All Locations') {
+        filteredDocuments = filteredDocuments.filter(doc => 
+            doc.location === currentFilters.location
+        );
+    }
+    
+    // Apply tag-based filters
+    if (currentFilters.activeTag !== 'Recent') {
+        const tagFilters = {
+            'Family': doc => doc.tags.includes('family') || doc.category.toLowerCase().includes('family'),
+            'Travel': doc => doc.tags.includes('travel') || doc.category.toLowerCase().includes('travel'),
+            'Medical': doc => doc.tags.includes('medical') || doc.category.toLowerCase().includes('medical'),
+            'Photography': doc => doc.tags.includes('photography') || doc.category.toLowerCase().includes('photography'),
+            'Essays': doc => doc.tags.includes('essay') || doc.category.toLowerCase().includes('essay')
+        };
+        
+        if (tagFilters[currentFilters.activeTag]) {
+            filteredDocuments = filteredDocuments.filter(tagFilters[currentFilters.activeTag]);
+        }
+    }
+    
+    // Sort by date (most recent first)
+    filteredDocuments.sort((a, b) => b.year - a.year);
+    
+    // Update display
+    updateDocumentDisplay(filteredDocuments);
+    updateResultsCount(filteredDocuments.length);
+}
+
+// Update document display
+function updateDocumentDisplay(documents) {
+    const featuredSection = document.querySelector('.featured-grid');
+    const documentsSection = document.querySelector('.documents-section');
+    
+    // Clear existing content
+    featuredSection.innerHTML = '';
+    documentsSection.innerHTML = '';
+    
+    if (documents.length === 0) {
+        showNoResults();
+        return;
+    }
+    
+    // Separate featured and regular documents
+    const featuredDocs = documents.filter(doc => doc.featured);
+    const regularDocs = documents.filter(doc => !doc.featured);
+    
+    // Populate featured section
+    featuredDocs.forEach(doc => {
+        featuredSection.appendChild(createDocumentCard(doc, true));
+    });
+    
+    // Populate regular documents section
+    regularDocs.forEach(doc => {
+        documentsSection.appendChild(createDocumentCard(doc, false));
+    });
+    
+    // Hide featured section if no featured documents
+    const featuredSectionContainer = document.querySelector('.featured-section');
+    if (featuredDocs.length === 0) {
+        featuredSectionContainer.style.display = 'none';
+    } else {
+        featuredSectionContainer.style.display = 'block';
+    }
+}
+
+// Create document card element
+function createDocumentCard(doc, isFeatured = false) {
+    const card = document.createElement('div');
+    card.className = isFeatured ? 'document-card' : 'document-card';
+    card.dataset.docId = doc.id;
+    
+    const previewClass = doc.id === 'famille-2017' ? 'document-preview with-image' : 'document-preview';
+    
+    card.innerHTML = `
+        <div class="${previewClass}">
+            <div class="document-type">${doc.type}</div>
+        </div>
+        <div class="document-info">
+            <div class="document-category">${doc.category}</div>
+            <h3 class="document-title">${doc.title}</h3>
+            <p class="document-excerpt">${doc.excerpt}</p>
+            <div class="document-meta">
+                <span class="document-date">${doc.date}</span>
+                <span class="document-pages">${doc.pages}</span>
+            </div>
+        </div>
+    `;
+    
+    // Add click handler
     card.addEventListener('click', () => {
-        // Navigate to document viewer
         window.location.href = 'viewer.html';
     });
-});
+    
+    return card;
+}
 
-document.querySelectorAll('.filter-tag').forEach(tag => {
-    tag.addEventListener('click', () => {
-        document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
-        tag.classList.add('active');
-    });
-});
+// Show no results message
+function showNoResults() {
+    const documentsSection = document.querySelector('.documents-section');
+    const featuredSection = document.querySelector('.featured-section');
+    
+    featuredSection.style.display = 'none';
+    
+    documentsSection.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: rgba(255, 255, 255, 0.9); border-radius: 15px; backdrop-filter: blur(10px);">
+            <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+            <h3 style="font-size: 1.5rem; color: #2c3e50; margin-bottom: 10px;">No Documents Found</h3>
+            <p style="color: #7f8c8d; margin-bottom: 20px;">Try adjusting your search terms or filters to find what you're looking for.</p>
+            <button onclick="clearAllFilters()" style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer;">Clear All Filters</button>
+        </div>
+    `;
+}
 
-document.querySelectorAll('.timeline-year').forEach(year => {
-    year.addEventListener('click', () => {
-        document.querySelectorAll('.timeline-year').forEach(y => y.classList.remove('active'));
-        year.classList.add('active');
-    });
-});
+// Update results count
+function updateResultsCount(count) {
+    let resultText = '';
+    if (currentFilters.search || currentFilters.category || currentFilters.year || currentFilters.location || currentFilters.activeTag !== 'Recent') {
+        resultText = ` (${count} result${count !== 1 ? 's' : ''})`;
+    }
+    
+    // Update featured header if exists
+    const featuredHeader = document.querySelector('.featured-header h2');
+    if (featuredHeader) {
+        featuredHeader.textContent = `Featured Documents${resultText}`;
+    }
+}
+
+// Clear all filters
+function clearAllFilters() {
+    currentFilters = {
+        search: '',
+        category: '',
+        year: '',
+        location: '',
+        activeTag: 'Recent'
+    };
+    
+    // Reset form controls
+    document.querySelector('.search-input').value = '';
+    document.querySelectorAll('.filter-select').forEach(select => select.selectedIndex = 0);
+    document.querySelectorAll('.filter-tag').forEach(tag => tag.classList.remove('active'));
+    document.querySelector('.filter-tag').classList.add('active');
+    document.querySelectorAll('.timeline-year').forEach(year => year.classList.remove('active'));
+    document.querySelector('.timeline-year').classList.add('active');
+    
+    applyFilters();
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 </script>
 
 </body>
