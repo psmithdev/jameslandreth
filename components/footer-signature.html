@@ -1,0 +1,126 @@
+<!-- Footer Signature Component -->
+<style>
+/* Footer Signature Styles */
+.footer-signature-container {
+    display: inline-block;
+    position: relative;
+    padding: 16px 24px;
+    cursor: pointer;
+}
+
+.footer-signature {
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    margin: 0;
+    font-weight: 400;
+    position: relative;
+    z-index: 2;
+}
+
+.footer-link {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #3b82f6;
+}
+
+/* Animated Box Effect */
+.signature-box {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    pointer-events: none;
+}
+
+/* Four box lines that animate from middle/sides to corners */
+.box-line {
+    position: absolute;
+    background: #3b82f6;
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Top line - grows from center outward */
+.box-line.top {
+    top: 0;
+    left: 50%;
+    right: 50%;
+    height: 1px;
+    transform: translateX(-50%);
+}
+
+/* Right line - grows from middle outward */
+.box-line.right {
+    right: 0;
+    top: 50%;
+    bottom: 50%;
+    width: 1px;
+    transform: translateY(-50%);
+}
+
+/* Bottom line - grows from center outward */
+.box-line.bottom {
+    bottom: 0;
+    left: 50%;
+    right: 50%;
+    height: 1px;
+    transform: translateX(-50%);
+}
+
+/* Left line - grows from middle outward */
+.box-line.left {
+    left: 0;
+    top: 50%;
+    bottom: 50%;
+    width: 1px;
+    transform: translateY(-50%);
+}
+
+/* Hover state - lines grow toward corners but don't fully connect */
+.footer-signature-container:hover .box-line {
+    opacity: 1;
+}
+
+.footer-signature-container:hover .box-line.top {
+    left: 8%;
+    right: 8%;
+}
+
+.footer-signature-container:hover .box-line.right {
+    top: 8%;
+    bottom: 8%;
+}
+
+.footer-signature-container:hover .box-line.bottom {
+    left: 8%;
+    right: 8%;
+}
+
+.footer-signature-container:hover .box-line.left {
+    top: 8%;
+    bottom: 8%;
+}
+
+/* Subtle glow effect on hover */
+.footer-signature-container:hover .footer-signature {
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+</style>
+
+<div class="footer-signature-container">
+    <div class="signature-box">
+        <div class="box-line top"></div>
+        <div class="box-line right"></div>
+        <div class="box-line bottom"></div>
+        <div class="box-line left"></div>
+    </div>
+    <p class="footer-signature">
+        Crafted by <a href="https://www.psmith.dev" class="footer-link" target="_blank" rel="noopener">Parker</a>
+    </p>
+</div>

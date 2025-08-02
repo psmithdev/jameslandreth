@@ -194,26 +194,6 @@ body {
     text-align: center;
 }
 
-.footer-signature {
-    font-size: 0.8125rem;
-    color: #94a3b8;
-    margin: 0;
-    font-weight: 400;
-}
-
-.footer-link {
-    color: #64748b;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid transparent;
-}
-
-.footer-link:hover {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
-}
-
 .upload-link {
     background: #059669;
     color: white;
@@ -1103,15 +1083,33 @@ body {
 <!-- Footer -->
 <footer class="site-footer">
     <div class="footer-container">
-        <div class="footer-content">
-            <p class="footer-signature">
-                Crafted by <a href="https://www.psmith.dev" class="footer-link" target="_blank" rel="noopener">Parker</a>
-            </p>
+        <div class="footer-content" id="footer-signature-placeholder">
+            <!-- Footer signature will be loaded here -->
         </div>
     </div>
 </footer>
 
 <script>
+// Load footer signature component
+async function loadFooterSignature() {
+    try {
+        const response = await fetch('components/footer-signature.html');
+        const html = await response.text();
+        document.getElementById('footer-signature-placeholder').innerHTML = html;
+    } catch (error) {
+        console.log('Footer signature component not found, using fallback');
+        // Fallback footer signature
+        document.getElementById('footer-signature-placeholder').innerHTML = `
+            <p style="font-size: 0.8125rem; color: #94a3b8; margin: 0; font-weight: 400;">
+                Crafted by <a href="https://www.psmith.dev" style="color: #64748b; text-decoration: none; font-weight: 500;" target="_blank" rel="noopener">Parker</a>
+            </p>
+        `;
+    }
+}
+
+// Load footer signature on page load
+document.addEventListener('DOMContentLoaded', loadFooterSignature);
+
 // Document data for filtering and search
 const documentData = [
     {
