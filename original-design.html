@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. James Landreth - Document Archive</title>
+    <style>
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+/* Header Styles */
+.site-header {
+    background: linear-gradient(135deg, #6b46c1 0%, #5b21b6 100%);
+    color: white;
+    padding: 20px 0;
+    position: relative;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+    letter-spacing: 4px;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.search-form {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.search-form input[type="search"] {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    font-size: 14px;
+}
+
+.search-form button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* Navigation Styles */
+.main-navigation {
+    background-color: rgba(0,0,0,0.1);
+    padding: 0;
+}
+
+.nav-menu {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0 20px;
+}
+
+.nav-menu li {
+    margin: 0;
+}
+
+.nav-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 15px 20px;
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.nav-menu a:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* Main Content Area */
+.site-main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+
+/* Content Sections */
+.content-section {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: #6b46c1;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Post Grid */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.post-item {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.post-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.post-category {
+    color: #6b46c1;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.post-title {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.post-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: #6b46c1;
+}
+
+.post-author {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Sidebar */
+.sidebar {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    height: fit-content;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Archives Section */
+.archives-section {
+    grid-column: 1 / -1;
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+.archives-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 1.8rem;
+    line-height: 1.8;
+    text-align: center;
+}
+
+.archives-categories span {
+    color: #6b46c1;
+    font-weight: 500;
+}
+
+.archives-categories span:not(:last-child):after {
+    content: ".";
+    margin-left: 15px;
+    color: #333;
+}
+
+/* Newsletter Section */
+.newsletter-section {
+    background: #6b46c1;
+    color: white;
+    text-align: center;
+    padding: 50px 30px;
+    margin: 40px 0;
+}
+
+.newsletter-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    font-weight: 400;
+    max-width: 800px;
+    margin: 0 auto 20px;
+}
+
+.newsletter-section p {
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+.newsletter-form {
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+}
+
+.newsletter-form button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Footer */
+.site-footer {
+    background: #1f2937;
+    color: white;
+    padding: 40px 0;
+    text-align: center;
+}
+
+.footer-nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.footer-nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.footer-nav a:hover {
+    color: #6b46c1;
+}
+
+/* Social Icons */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.social-links a {
+    color: white;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.social-links a:hover {
+    color: #6b46c1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .site-title {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .site-main {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin: 20px auto;
+    }
+    
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .nav-menu a {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+    
+    .archives-categories {
+        font-size: 1.4rem;
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+    
+    .search-form {
+        position: static;
+        margin-top: 15px;
+    }
+    
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-container">
+        <h1 class="site-title">JAMES LANDRETH</h1>
+        <form class="search-form">
+            <input type="search" placeholder="Search">
+            <button type="submit">🔍</button>
+        </form>
+    </div>
+    
+    <nav class="main-navigation">
+        <ul class="nav-menu">
+            <li><a href="#">About Me</a></li>
+            <li><a href="#">Annual Adventures</a></li>
+            <li><a href="#">Essays</a></li>
+            <li><a href="#">Family History</a></li>
+            <li><a href="#">Favorite Cartoons</a></li>
+            <li><a href="#">Inventory</a></li>
+            <li><a href="#">Loretto Perfectus</a></li>
+            <li><a href="#">Music</a></li>
+            <li><a href="#">Photos</a></li>
+            <li><a href="#">Travels ⌄</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="site-main">
+    <div class="main-content">
+        
+        <!-- Latest Section -->
+        <section class="content-section">
+            <h2 class="section-title">Latest</h2>
+            <div class="posts-grid">
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">If ties could talk part 1 test</a></h3>
+                    <div class="post-author">if-ties-could-talk-no1Download<br>Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">This is my title</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">If ties</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">Perils of Pauline Part 2</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">The Perils of Pauline</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Trending Section -->
+        <section class="content-section">
+            <h2 class="section-title">Trending</h2>
+            <div class="posts-grid">
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">If ties could talk part 1 test</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">This is my title</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">If ties</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+                
+                <article class="post-item">
+                    <div class="post-category">Uncategorized</div>
+                    <h3 class="post-title"><a href="#">Perils of Pauline Part 2</a></h3>
+                    <div class="post-author">Aleda Littlefield</div>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    <aside class="sidebar">
+        <div class="widget">
+            <h3>Subscribe</h3>
+            <p>Get the latest updates</p>
+            <button style="background: #6b46c1; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Subscribe</button>
+        </div>
+    </aside>
+</main>
+
+<!-- Archives Section -->
+<section class="archives-section">
+    <h2 class="section-title">Archives</h2>
+    <div class="archives-categories">
+        <span>Health</span><span>Fashion</span><span>Food</span><span>Shopping</span><span>Events</span><span>Fiction</span><span>Travel</span><span>Japan</span><span>Education</span>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section">
+    <h3>James celebrates the very best in independent journalism. Through the online content we publish, we share our opinions and thoughts on the various problems that the world is facing right now.</h3>
+    <p>Subscribe to our newsletters. We'll keep you in the loop.</p>
+    <form class="newsletter-form">
+        <input type="email" placeholder="Type your email...">
+        <button type="submit">→</button>
+    </form>
+</section>
+
+<footer class="site-footer">
+    <nav class="footer-nav">
+        <a href="#">About Me</a>
+        <a href="#">Annual Adventures</a>
+        <a href="#">Essays</a>
+        <a href="#">Family History</a>
+        <a href="#">Favorite Cartoons</a>
+        <a href="#">Inventory</a>
+        <a href="#">Loretto Perfectus</a>
+        <a href="#">Music</a>
+        <a href="#">Photos</a>
+        <a href="#">Travels</a>
+    </nav>
+    <div class="social-links">
+        <a href="#">📘</a>
+        <a href="#">🐦</a>
+        <a href="#">📷</a>
+        <a href="#">📺</a>
+    </div>
+</footer>
+
+</body>
+</html>

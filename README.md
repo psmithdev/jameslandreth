@@ -1,11 +1,64 @@
-# jameslandreth
-Personal website/blog for retired Doctor
+# Dr. James Landreth - Document Archive
 
-Version 1 was a simple WordPress setup.  Became painful overtime with too many plugins full of bloat.  Hosting did not get renewed and only had a few older backups to restore from.
+Personal website for Dr. James Landreth featuring his travel journals, family newsletters, essays, and photography collection.
 
-Version 2 was Wix.  A slight improvement, still pain to get going.  My problem with WYSIWYG (What-You-See-Is-What-You-Get) web design programs is they limit creativity.  Here is a box and a few tools, have fun and dont you dare step outside your box.
+## 🚀 Live Preview
 
-After learning some basic HTML and CSS on my own, my next attempt is full autonomy and see what I can do on my own.  Time to fire up VS code and get to work.
+**GitHub Pages:** https://YOUR_USERNAME.github.io/jameslandreth/
 
-Inspected page source of Wix and it's 900 lines of code.  I don't need nor want majority of it.  I am confident I can design a website with several pages at a fraction of that.  That is my challenge. K.I.S.S. Keep It Simple, Stupid!
+## 📁 Files Overview
 
+- `index.html` - Main document archive homepage
+- `original-design.html` - Original purple design recreation
+- `wordpress/` - Complete WordPress development environment
+- `wordpress/wp-content/themes/jameslandreth/` - Custom WordPress theme
+
+## 🎯 Features
+
+### Document Archive Interface
+- **Senior-friendly design** optimized for 80-year-old users
+- **Advanced filtering** by category, year, location
+- **Document preview cards** with formatting preservation
+- **Timeline navigation** for chronological browsing
+- **Statistics dashboard** showing collection scope
+- **Responsive design** for all devices
+
+### Content Categories
+- Travel Journals (especially Japan)
+- Family Newsletters 
+- Essays and Personal Narratives
+- Medical Experiences
+- Photography Collections
+- Annual Adventures
+
+## 🛠 Development Setup
+
+### Local WordPress Development
+```bash
+cd wordpress
+php -S localhost:8080
+```
+
+### GitHub Pages Deployment
+1. Push to `gh-pages` branch
+2. Enable GitHub Pages in repository settings
+3. Site automatically deploys
+
+## 📚 Project Goals
+
+Convert hundreds of beautifully formatted Microsoft Word documents (PDFs) into web-friendly format while preserving:
+- Professional layout and typography
+- Image placement and formatting
+- Readability and visual appeal
+- Consistent styling across documents
+
+## 🎨 Design Philosophy
+
+**Beautiful, functional, fast, and snappy** interface designed specifically for:
+- Dr. Landreth (80-year-old content creator)
+- Family and friends (readers)
+- Fellow travelers and photography enthusiasts
+
+---
+
+Built with ❤️ for preserving and sharing life's adventures
