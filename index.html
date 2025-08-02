@@ -238,12 +238,22 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    transition: transform 0.3s ease;
 }
 
-.document-preview.with-image {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23f8f9fa" width="400" height="300"/><text x="20" y="40" font-family="Georgia" font-size="16" fill="%23495057">Les Nouvelles de Famille</text><text x="20" y="65" font-family="Georgia" font-size="12" fill="%237f8c8d">Being a yearly news report of...</text><rect x="250" y="80" width="120" height="90" fill="%23dee2e6" rx="5"/><text x="20" y="110" font-family="Georgia" font-size="10" fill="%236c757d">Maura Walsh - This just in...</text><text x="20" y="125" font-family="Georgia" font-size="10" fill="%236c757d">It is with sadness that I report...</text></svg>');
-    background-size: cover;
-    background-position: center;
+.document-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.document-preview img[data-src] {
+    opacity: 0;
+}
+
+.document-preview img.loaded {
+    opacity: 1;
 }
 
 .document-type {
@@ -969,10 +979,12 @@ function createDocumentCard(doc, isFeatured = false) {
     card.className = isFeatured ? 'document-card' : 'document-card';
     card.dataset.docId = doc.id;
     
-    const previewClass = doc.id === 'famille-2017' ? 'document-preview with-image' : 'document-preview';
+    // Generate optimized placeholder image URL
+    const imageId = getImageIdForDocument(doc);
+    const imageUrl = `https://picsum.photos/id/${imageId}/300/200?blur=1`;
     
     card.innerHTML = `
-        <div class="${previewClass}">
+        <div class="document-preview" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${imageUrl}'); background-size: cover; background-position: center;">
             <div class="document-type">${doc.type}</div>
         </div>
         <div class="document-info">
@@ -992,6 +1004,35 @@ function createDocumentCard(doc, isFeatured = false) {
     });
     
     return card;
+}
+
+// Get consistent image ID based on document content
+function getImageIdForDocument(doc) {
+    // Map document categories to appropriate image IDs (small, optimized images)
+    const categoryImages = {
+        'Travel Journal': 111, // Mountains/landscape
+        'Travel': 116,         // Nature/travel  
+        'Family Newsletter': 91, // Vintage/family feel
+        'Family': 91,          // Same as newsletter
+        'Essay': 24,           // Classic/literary
+        'Medical': 48,         // Clean/professional
+        'Photography': 159,    // Camera/artistic
+        'Medical Experience': 48
+    };
+    
+    // Return category-based image, or use doc ID hash as fallback
+    return categoryImages[doc.category] || (Math.abs(hashCode(doc.id)) % 200) + 1;
+}
+
+// Simple hash function for consistent image selection
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash;
 }
 
 // Show no results message
