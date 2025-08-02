@@ -176,6 +176,44 @@ body {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Footer */
+.site-footer {
+    margin-top: 80px;
+    padding: 32px 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    background: rgba(248, 250, 252, 0.5);
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 30px;
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-signature {
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    margin: 0;
+    font-weight: 400;
+}
+
+.footer-link {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.footer-link:hover {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
 .upload-link {
     background: #059669;
     color: white;
@@ -861,6 +899,15 @@ body {
     .timeline-section, .welcome-banner {
         padding: 32px 24px;
     }
+    
+    .site-footer {
+        margin-top: 48px;
+        padding: 24px 0;
+    }
+    
+    .footer-container {
+        padding: 0 20px;
+    }
 }
 
 /* Loading Animation */
@@ -1052,6 +1099,17 @@ body {
     </section>
 
 </main>
+
+<!-- Footer -->
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <p class="footer-signature">
+                Crafted by <a href="https://www.psmith.dev" class="footer-link" target="_blank" rel="noopener">Parker</a>
+            </p>
+        </div>
+    </div>
+</footer>
 
 <script>
 // Document data for filtering and search
