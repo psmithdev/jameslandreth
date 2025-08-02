@@ -90,11 +90,11 @@ body {
 
 /* Main Container */
 .main-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 30px;
     display: grid;
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: 320px 1fr;
     gap: 30px;
 }
 
@@ -103,11 +103,12 @@ body {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 20px;
-    padding: 30px;
+    padding: 25px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     height: fit-content;
     position: sticky;
     top: 120px;
+    order: 1;
 }
 
 .document-header {
@@ -212,6 +213,8 @@ body {
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     position: relative;
+    order: 2;
+    min-height: calc(100vh - 200px);
 }
 
 .viewer-toolbar {
@@ -295,7 +298,7 @@ body {
 
 /* Document Content */
 .document-content {
-    padding: 40px;
+    padding: 30px;
     max-height: calc(100vh - 250px);
     overflow-y: auto;
     position: relative;
@@ -303,13 +306,14 @@ body {
 
 /* PDF-style document rendering */
 .document-page {
-    max-width: 100%;
+    max-width: 800px;
+    width: 100%;
     margin: 0 auto 30px;
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    padding: 60px;
-    min-height: 800px;
+    padding: 50px;
+    min-height: 700px;
     transform-origin: top center;
     transition: transform 0.3s ease;
 }
@@ -438,7 +442,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 968px) {
+@media (max-width: 1100px) {
     .main-container {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -448,6 +452,10 @@ body {
     .document-info {
         order: 2;
         position: static;
+    }
+    
+    .document-viewer {
+        order: 1;
     }
     
     .header-container {
@@ -467,6 +475,7 @@ body {
     
     .document-page {
         padding: 30px;
+        max-width: 100%;
     }
     
     .page-controls {
