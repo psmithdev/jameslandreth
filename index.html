@@ -232,28 +232,174 @@ body {
 
 .document-preview {
     height: 200px;
-    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     transition: transform 0.3s ease;
+    padding: 15px;
 }
 
-.document-preview img {
+/* Document Paper Effect */
+.doc-paper {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: opacity 0.3s ease;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 12px;
+    position: relative;
+    transform: perspective(300px) rotateX(5deg) rotateY(-2deg);
+    transition: transform 0.3s ease;
 }
 
-.document-preview img[data-src] {
-    opacity: 0;
+.document-card:hover .doc-paper {
+    transform: perspective(300px) rotateX(0deg) rotateY(0deg);
 }
 
-.document-preview img.loaded {
-    opacity: 1;
+/* Document Header */
+.doc-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.doc-title-text {
+    font-size: 10px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-family: "Georgia", serif;
+    line-height: 1.2;
+}
+
+.doc-subtitle-text {
+    font-size: 8px;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.doc-author-text {
+    font-size: 8px;
+    color: #6c757d;
+    margin-top: 3px;
+}
+
+/* Document Content Lines */
+.doc-content-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.doc-line {
+    height: 2px;
+    background: #dee2e6;
+    border-radius: 1px;
+}
+
+.doc-line.long { width: 85%; }
+.doc-line.medium { width: 65%; }
+.doc-line.short { width: 45%; }
+
+/* Special Elements */
+.doc-photo-placeholder {
+    width: 40px;
+    height: 25px;
+    background: linear-gradient(45deg, #e9ecef, #dee2e6);
+    border-radius: 3px;
+    margin: 4px 0;
+    position: relative;
+}
+
+.doc-photo-placeholder::after {
+    content: "📷";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    opacity: 0.6;
+}
+
+.doc-map-placeholder {
+    font-size: 16px;
+    text-align: center;
+    margin: 4px 0;
+    opacity: 0.7;
+}
+
+.doc-chart-placeholder {
+    font-size: 14px;
+    text-align: center;
+    margin: 4px 0;
+    opacity: 0.7;
+}
+
+.doc-family-tree {
+    font-size: 12px;
+    text-align: center;
+    margin: 4px 0;
+    opacity: 0.7;
+}
+
+.doc-photo-grid {
+    display: flex;
+    gap: 3px;
+    margin: 4px 0;
+}
+
+.doc-small-photo {
+    width: 15px;
+    height: 10px;
+    background: #f8f9fa;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    opacity: 0.8;
+}
+
+/* PDF vs Word Document Styling */
+.document-preview-pdf .doc-paper {
+    background: #fefefe;
+    border: 1px solid #e9ecef;
+}
+
+.document-preview-word .doc-paper {
+    background: #fafbfc;
+    border: 1px solid #4285f4;
+    border-left: 3px solid #4285f4;
+}
+
+/* Subtle animations */
+.doc-paper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .doc-paper {
+        transform: none;
+        padding: 8px;
+    }
+    
+    .doc-title-text {
+        font-size: 9px;
+    }
+    
+    .doc-subtitle-text, .doc-author-text {
+        font-size: 7px;
+    }
 }
 
 .document-type {
@@ -979,12 +1125,12 @@ function createDocumentCard(doc, isFeatured = false) {
     card.className = isFeatured ? 'document-card' : 'document-card';
     card.dataset.docId = doc.id;
     
-    // Generate optimized placeholder image URL
-    const imageId = getImageIdForDocument(doc);
-    const imageUrl = `https://picsum.photos/id/${imageId}/300/200?blur=1`;
+    // Generate document preview based on type and category
+    const documentPreview = generateDocumentPreview(doc);
     
     card.innerHTML = `
-        <div class="document-preview" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${imageUrl}'); background-size: cover; background-position: center;">
+        <div class="document-preview document-preview-${doc.type.toLowerCase()}">
+            ${documentPreview}
             <div class="document-type">${doc.type}</div>
         </div>
         <div class="document-info">
@@ -1006,34 +1152,152 @@ function createDocumentCard(doc, isFeatured = false) {
     return card;
 }
 
-// Get consistent image ID based on document content
-function getImageIdForDocument(doc) {
-    // Map document categories to appropriate image IDs (small, optimized images)
-    const categoryImages = {
-        'Travel Journal': 111, // Mountains/landscape
-        'Travel': 116,         // Nature/travel  
-        'Family Newsletter': 91, // Vintage/family feel
-        'Family': 91,          // Same as newsletter
-        'Essay': 24,           // Classic/literary
-        'Medical': 48,         // Clean/professional
-        'Photography': 159,    // Camera/artistic
-        'Medical Experience': 48
+// Generate realistic document preview based on content
+function generateDocumentPreview(doc) {
+    const templates = {
+        'Travel Journal': generateTravelDocument(doc),
+        'Travel': generateTravelDocument(doc),
+        'Family Newsletter': generateFamilyNewsletter(doc),
+        'Family': generateFamilyDocument(doc),
+        'Essay': generateEssayDocument(doc),
+        'Medical': generateMedicalDocument(doc),
+        'Medical Experience': generateMedicalDocument(doc),
+        'Photography': generatePhotographyDocument(doc)
     };
     
-    // Return category-based image, or use doc ID hash as fallback
-    return categoryImages[doc.category] || (Math.abs(hashCode(doc.id)) % 200) + 1;
+    return templates[doc.category] || generateGenericDocument(doc);
 }
 
-// Simple hash function for consistent image selection
-function hashCode(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-    }
-    return hash;
+function generateFamilyNewsletter(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">Les Nouvelles de Famille</div>
+                <div class="doc-subtitle-text">2017 Annual Newsletter</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-line long"></div>
+                <div class="doc-photo-placeholder"></div>
+                <div class="doc-line short"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-line long"></div>
+            </div>
+        </div>
+    `;
 }
+
+function generateTravelDocument(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">${doc.title.substring(0, 20)}...</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-map-placeholder">🗺️</div>
+                <div class="doc-line short"></div>
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+            </div>
+        </div>
+    `;
+}
+
+function generateEssayDocument(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">${doc.title.substring(0, 18)}...</div>
+                <div class="doc-author-text">Dr. James Landreth</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-line long"></div>
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-line long"></div>
+                <div class="doc-line short"></div>
+                <div class="doc-line long"></div>
+            </div>
+        </div>
+    `;
+}
+
+function generateMedicalDocument(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">Medical Reflections</div>
+                <div class="doc-subtitle-text">Professional Practice</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-line long"></div>
+                <div class="doc-chart-placeholder">📊</div>
+                <div class="doc-line short"></div>
+                <div class="doc-line medium"></div>
+            </div>
+        </div>
+    `;
+}
+
+function generatePhotographyDocument(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">Through the Lens</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-photo-grid">
+                    <div class="doc-small-photo">📷</div>
+                    <div class="doc-small-photo">🏔️</div>
+                    <div class="doc-small-photo">🌸</div>
+                </div>
+                <div class="doc-line medium"></div>
+                <div class="doc-line short"></div>
+                <div class="doc-line long"></div>
+            </div>
+        </div>
+    `;
+}
+
+function generateFamilyDocument(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">Family History</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-family-tree">👨‍👩‍👧‍👦</div>
+                <div class="doc-line short"></div>
+                <div class="doc-line long"></div>
+            </div>
+        </div>
+    `;
+}
+
+function generateGenericDocument(doc) {
+    return `
+        <div class="doc-paper">
+            <div class="doc-header">
+                <div class="doc-title-text">Document</div>
+            </div>
+            <div class="doc-content-lines">
+                <div class="doc-line long"></div>
+                <div class="doc-line medium"></div>
+                <div class="doc-line long"></div>
+                <div class="doc-line short"></div>
+                <div class="doc-line medium"></div>
+            </div>
+        </div>
+    `;
+}
+
 
 // Show no results message
 function showNoResults() {
