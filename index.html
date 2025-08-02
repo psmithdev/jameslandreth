@@ -474,6 +474,34 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
+
+/* Search Results Banner Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth scroll to results */
+.scroll-to-results {
+    animation: highlightSection 2s ease;
+}
+
+@keyframes highlightSection {
+    0% { 
+        background: rgba(16, 185, 129, 0.1);
+        transform: scale(1.01);
+    }
+    100% { 
+        background: transparent;
+        transform: scale(1);
+    }
+}
     </style>
 </head>
 <body>
@@ -737,7 +765,6 @@ let currentFilters = {
 
 // Initialize search and filtering
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Document loaded, initializing search and filters...');
     initializeSearch();
     initializeFilters();
     applyFilters();
@@ -745,32 +772,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Search functionality
 function initializeSearch() {
-    console.log('Initializing search...');
     const searchInput = document.querySelector('.search-input');
     const searchBtn = document.querySelector('.search-btn');
     
-    if (!searchInput) {
-        console.error('Search input not found!');
-        return;
-    }
-    
-    console.log('Search input found, adding event listeners...');
+    if (!searchInput) return;
     
     searchInput.addEventListener('input', function() {
-        console.log('Search input changed:', this.value);
         currentFilters.search = this.value.toLowerCase();
-        setTimeout(() => applyFilters(), 100); // Simplified debounce
+        setTimeout(() => applyFilters(), 100);
     });
     
     searchBtn.addEventListener('click', function() {
-        console.log('Search button clicked');
         applyFilters();
     });
     
     // Enter key search
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            console.log('Enter key pressed in search');
             applyFilters();
         }
     });
@@ -832,20 +850,16 @@ function initializeFilters() {
 
 // Apply filters and search
 function applyFilters() {
-    console.log('Applying filters with:', currentFilters);
     let filteredDocuments = [...documentData];
-    console.log('Starting with', filteredDocuments.length, 'documents');
     
     // Apply search filter
     if (currentFilters.search) {
-        console.log('Applying search filter for:', currentFilters.search);
         filteredDocuments = filteredDocuments.filter(doc => 
             doc.title.toLowerCase().includes(currentFilters.search) ||
             doc.excerpt.toLowerCase().includes(currentFilters.search) ||
             doc.category.toLowerCase().includes(currentFilters.search) ||
             doc.tags.some(tag => tag.toLowerCase().includes(currentFilters.search))
         );
-        console.log('After search filter:', filteredDocuments.length, 'documents');
     }
     
     // Apply category filter
@@ -891,25 +905,36 @@ function applyFilters() {
     // Update display
     updateDocumentDisplay(filteredDocuments);
     updateResultsCount(filteredDocuments.length);
+    
+    // Auto-scroll to results if search is active and results found
+    const isFiltered = currentFilters.search || currentFilters.category || currentFilters.year || currentFilters.location || currentFilters.activeTag !== 'Recent';
+    if (isFiltered && filteredDocuments.length > 0) {
+        setTimeout(() => {
+            const resultsSection = document.querySelector('.featured-section');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                resultsSection.classList.add('scroll-to-results');
+                setTimeout(() => resultsSection.classList.remove('scroll-to-results'), 2000);
+            }
+        }, 100);
+    }
 }
 
 // Update document display
 function updateDocumentDisplay(documents) {
-    console.log('Updating display with', documents.length, 'documents');
     const featuredSection = document.querySelector('.featured-grid');
     const documentsSection = document.querySelector('.documents-section');
     
-    if (!featuredSection || !documentsSection) {
-        console.error('Could not find document sections!');
-        return;
-    }
+    if (!featuredSection || !documentsSection) return;
     
     // Clear existing content
     featuredSection.innerHTML = '';
     documentsSection.innerHTML = '';
     
     if (documents.length === 0) {
-        console.log('No documents found, showing no results message');
         showNoResults();
         return;
     }
@@ -985,17 +1010,64 @@ function showNoResults() {
     `;
 }
 
-// Update results count
+// Update results count with prominent display
 function updateResultsCount(count) {
-    let resultText = '';
-    if (currentFilters.search || currentFilters.category || currentFilters.year || currentFilters.location || currentFilters.activeTag !== 'Recent') {
-        resultText = ` (${count} result${count !== 1 ? 's' : ''})`;
-    }
+    const isFiltered = currentFilters.search || currentFilters.category || currentFilters.year || currentFilters.location || currentFilters.activeTag !== 'Recent';
     
-    // Update featured header if exists
+    // Update featured header
     const featuredHeader = document.querySelector('.featured-header h2');
     if (featuredHeader) {
-        featuredHeader.textContent = `Featured Documents${resultText}`;
+        if (isFiltered) {
+            featuredHeader.textContent = `Search Results (${count} document${count !== 1 ? 's' : ''} found)`;
+        } else {
+            featuredHeader.textContent = 'Featured Documents';
+        }
+    }
+    
+    // Add/update search results banner at top
+    addSearchResultsBanner(count, isFiltered);
+}
+
+// Add prominent search results banner
+function addSearchResultsBanner(count, isFiltered) {
+    let banner = document.getElementById('search-results-banner');
+    
+    if (isFiltered) {
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'search-results-banner';
+            banner.style.cssText = `
+                background: rgba(16, 185, 129, 0.1);
+                border: 2px solid #10b981;
+                border-radius: 15px;
+                padding: 20px;
+                margin: 20px 0;
+                text-align: center;
+                backdrop-filter: blur(10px);
+                animation: slideDown 0.3s ease;
+            `;
+            
+            const welcomeBanner = document.querySelector('.welcome-banner');
+            welcomeBanner.parentNode.insertBefore(banner, welcomeBanner.nextSibling);
+        }
+        
+        let searchText = '';
+        if (currentFilters.search) searchText = ` for "${currentFilters.search}"`;
+        if (currentFilters.category && currentFilters.category !== 'All Categories') searchText += ` in ${currentFilters.category}`;
+        if (currentFilters.year && currentFilters.year !== 'All Years') searchText += ` from ${currentFilters.year}`;
+        
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; color: #047857; font-weight: 600; margin-bottom: 5px;">
+                ${count} document${count !== 1 ? 's' : ''} found${searchText}
+            </div>
+            <div style="color: #065f46; font-size: 14px;">
+                ${count === 0 ? 'Try different search terms or ' : ''}
+                <button onclick="clearAllFilters()" style="background: none; border: none; color: #10b981; text-decoration: underline; cursor: pointer; font-weight: 600;">Clear all filters</button>
+                ${count > 0 ? ' to see all documents' : ''}
+            </div>
+        `;
+    } else if (banner) {
+        banner.remove();
     }
 }
 
