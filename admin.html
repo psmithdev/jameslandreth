@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Management - Dr. James Landreth</title>
+    <style>
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Georgia", "Times New Roman", serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+/* Header */
+.site-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-title {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #2c3e50;
+    letter-spacing: 1px;
+}
+
+.site-subtitle {
+    font-size: 1rem;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-link, .btn-action {
+    background: #667eea;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.back-link:hover, .btn-action:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-success {
+    background: #10b981;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-warning {
+    background: #f59e0b;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+.btn-danger {
+    background: #ef4444;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* Main Container */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+/* Admin Dashboard */
+.admin-dashboard {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+
+.dashboard-subtitle {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.action-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+.action-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.action-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.action-description {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+/* Document Management Table */
+.document-management {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.management-title {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.search-and-filter {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.search-input {
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    width: 250px;
+    font-size: 14px;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    min-width: 120px;
+}
+
+/* Document Table */
+.document-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.document-table th,
+.document-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.document-table th {
+    background: rgba(102, 126, 234, 0.1);
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.document-table tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.document-title {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.document-category {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.document-status {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-published {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-archived {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.document-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #2563eb;
+}
+
+.btn-archive {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-archive:hover {
+    background: #4b5563;
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #000;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .header-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .main-container {
+        padding: 20px 15px;
+    }
+    
+    .search-and-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .document-table {
+        font-size: 14px;
+    }
+    
+    .document-table th,
+    .document-table td {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+}
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-container">
+        <div class="site-branding">
+            <h1 class="site-title">Dr. James Landreth</h1>
+            <p class="site-subtitle">Content Management System</p>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="back-link">← View Archive</a>
+            <a href="upload.html" class="btn-action btn-success">📤 Upload Documents</a>
+            <button class="btn-action btn-warning" onclick="exportData()">📊 Export Data</button>
+        </div>
+    </div>
+</header>
+
+<main class="main-container">
+    
+    <!-- Admin Dashboard -->
+    <section class="admin-dashboard">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Content Management Dashboard</h1>
+            <p class="dashboard-subtitle">Manage your document archive with powerful tools designed for ease of use</p>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalDocs">9</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="publishedDocs">7</div>
+                <div class="stat-label">Published</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="draftDocs">2</div>
+                <div class="stat-label">Drafts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="monthlyViews">1,247</div>
+                <div class="stat-label">Monthly Views</div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="window.location.href='upload.html'">
+                <div class="action-icon">📤</div>
+                <div class="action-title">Upload Documents</div>
+                <div class="action-description">Add new PDF or Word documents to your archive</div>
+            </div>
+            
+            <div class="action-card" onclick="bulkEdit()">
+                <div class="action-icon">✏️</div>
+                <div class="action-title">Bulk Edit</div>
+                <div class="action-description">Edit multiple documents at once</div>
+            </div>
+            
+            <div class="action-card" onclick="organizeCategories()">
+                <div class="action-icon">🗂️</div>
+                <div class="action-title">Organize Categories</div>
+                <div class="action-description">Manage document categories and tags</div>
+            </div>
+            
+            <div class="action-card" onclick="viewAnalytics()">
+                <div class="action-icon">📊</div>
+                <div class="action-title">View Analytics</div>
+                <div class="action-description">See which documents are most popular</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Document Management -->
+    <section class="document-management">
+        <div class="management-header">
+            <h2 class="management-title">Document Management</h2>
+            <div class="search-and-filter">
+                <input type="text" class="search-input" placeholder="Search documents..." id="adminSearch">
+                <select class="filter-select" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                </select>
+                <select class="filter-select" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="travel">Travel</option>
+                    <option value="family">Family</option>
+                    <option value="essay">Essay</option>
+                    <option value="medical">Medical</option>
+                    <option value="photography">Photography</option>
+                </select>
+            </div>
+        </div>
+        
+        <table class="document-table" id="documentTable">
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="documentTableBody">
+                <!-- Documents will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<!-- Edit Document Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Document</h3>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <form id="editForm">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input" id="editTitle" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="editCategory" required>
+                    <option value="travel">Travel Journal</option>
+                    <option value="family">Family Newsletter</option>
+                    <option value="essay">Essay</option>
+                    <option value="medical">Medical Experience</option>
+                    <option value="photography">Photography</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="editStatus" required>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="editDescription" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tags (comma separated)</label>
+                <input type="text" class="form-input" id="editTags" placeholder="travel, photography, family">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-action" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-action btn-success">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Sample document data for admin management
+const adminDocuments = [
+    {
+        id: 'famille-2017',
+        title: 'Les Nouvelles de Famille 2017',
+        category: 'family',
+        categoryDisplay: 'Family Newsletter',
+        date: 'December 2017',
+        status: 'published',
+        views: 342,
+        description: 'Being a yearly news report of the adventures of Aleda, Jim, Mark and Leanne for 2017.',
+        tags: ['family', 'newsletter', '2017', 'travel']
+    },
+    {
+        id: 'plague-year',
+        title: 'Our Journal of the Plague Year',
+        category: 'travel',
+        categoryDisplay: 'Travel Journal',
+        date: 'December 2020',
+        status: 'published',
+        views: 567,
+        description: 'With apologies to Daniel Defoe. The further adventures during unprecedented times.',
+        tags: ['travel', 'journal', '2020', 'covid']
+    },
+    {
+        id: 'ties-talk',
+        title: 'If Ties Could Talk',
+        category: 'essay',
+        categoryDisplay: 'Essay',
+        date: 'March 2024',
+        status: 'published',
+        views: 189,
+        description: 'A thoughtful reflection on the stories behind a collection of neckties.',
+        tags: ['essay', 'personal', 'reflection']
+    },
+    {
+        id: 'japan-2023',
+        title: 'Japan Adventures 2023',
+        category: 'travel',
+        categoryDisplay: 'Travel',
+        date: 'November 2023',
+        status: 'published',
+        views: 423,
+        description: 'A comprehensive guide to our latest journey through Japan.',
+        tags: ['travel', 'japan', 'photography', 'culture']
+    },
+    {
+        id: 'medical-reflections',
+        title: 'Reflections on Medical Practice',
+        category: 'medical',
+        categoryDisplay: 'Medical',
+        date: 'June 2023',
+        status: 'draft',
+        views: 45,
+        description: 'Looking back on 40 years of medical practice and healthcare evolution.',
+        tags: ['medical', 'healthcare', 'career', 'reflection']
+    },
+    {
+        id: 'photography-2022',
+        title: 'Through the Lens: 2022',
+        category: 'photography',
+        categoryDisplay: 'Photography',
+        date: 'January 2023',
+        status: 'published',
+        views: 298,
+        description: 'A collection of favorite photographs from 2022 with stories behind each image.',
+        tags: ['photography', 'images', 'technical']
+    },
+    {
+        id: 'family-history',
+        title: 'Family History Project',
+        category: 'family',
+        categoryDisplay: 'Family',
+        date: 'September 2022',
+        status: 'published',
+        views: 156,
+        description: 'Tracing our family lineage through historical records and interviews.',
+        tags: ['family', 'history', 'genealogy', 'research']
+    },
+    {
+        id: 'europe-railway',
+        title: 'European Railway Journey',
+        category: 'travel',
+        categoryDisplay: 'Travel',
+        date: 'August 2022',
+        status: 'published',
+        views: 389,
+        description: 'Six weeks traveling through Europe by train, discovering small towns.',
+        tags: ['travel', 'europe', 'railway', 'train']
+    },
+    {
+        id: 'retirement-art',
+        title: 'The Art of Retirement',
+        category: 'essay',
+        categoryDisplay: 'Essay',
+        date: 'May 2022',
+        status: 'draft',
+        views: 23,
+        description: 'Navigating the transition from active medical practice to retirement.',
+        tags: ['retirement', 'transition', 'purpose', 'life']
+    }
+];
+
+let currentEditingId = null;
+
+// Initialize admin interface
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatistics();
+    populateDocumentTable();
+    initializeFilters();
+});
+
+// Update dashboard statistics
+function updateStatistics() {
+    const published = adminDocuments.filter(doc => doc.status === 'published').length;
+    const drafts = adminDocuments.filter(doc => doc.status === 'draft').length;
+    const totalViews = adminDocuments.reduce((sum, doc) => sum + doc.views, 0);
+    
+    document.getElementById('totalDocs').textContent = adminDocuments.length;
+    document.getElementById('publishedDocs').textContent = published;
+    document.getElementById('draftDocs').textContent = drafts;
+    document.getElementById('monthlyViews').textContent = totalViews.toLocaleString();
+}
+
+// Populate document management table
+function populateDocumentTable(documents = adminDocuments) {
+    const tableBody = document.getElementById('documentTableBody');
+    tableBody.innerHTML = '';
+    
+    documents.forEach(doc => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div class="document-title">${doc.title}</div>
+                <div style="font-size: 12px; color: #7f8c8d; margin-top: 2px;">${doc.description.substring(0, 60)}...</div>
+            </td>
+            <td><span class="document-category">${doc.categoryDisplay}</span></td>
+            <td>${doc.date}</td>
+            <td><span class="document-status status-${doc.status}">${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</span></td>
+            <td>${doc.views}</td>
+            <td>
+                <div class="document-actions">
+                    <button class="btn-small btn-edit" onclick="editDocument('${doc.id}')">Edit</button>
+                    <button class="btn-small btn-archive" onclick="toggleArchive('${doc.id}')">${doc.status === 'archived' ? 'Restore' : 'Archive'}</button>
+                    <button class="btn-small btn-delete" onclick="deleteDocument('${doc.id}')">Delete</button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Initialize search and filter functionality
+function initializeFilters() {
+    const searchInput = document.getElementById('adminSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    function applyFilters() {
+        let filtered = [...adminDocuments];
+        
+        // Apply search filter
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+            filtered = filtered.filter(doc => 
+                doc.title.toLowerCase().includes(searchTerm) ||
+                doc.description.toLowerCase().includes(searchTerm) ||
+                doc.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        // Apply status filter
+        if (statusFilter.value) {
+            filtered = filtered.filter(doc => doc.status === statusFilter.value);
+        }
+        
+        // Apply category filter
+        if (categoryFilter.value) {
+            filtered = filtered.filter(doc => doc.category === categoryFilter.value);
+        }
+        
+        populateDocumentTable(filtered);
+    }
+    
+    searchInput.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+}
+
+// Edit document functionality
+function editDocument(docId) {
+    const doc = adminDocuments.find(d => d.id === docId);
+    if (!doc) return;
+    
+    currentEditingId = docId;
+    
+    // Populate form
+    document.getElementById('editTitle').value = doc.title;
+    document.getElementById('editCategory').value = doc.category;
+    document.getElementById('editStatus').value = doc.status;
+    document.getElementById('editDescription').value = doc.description;
+    document.getElementById('editTags').value = doc.tags.join(', ');
+    
+    // Show modal
+    document.getElementById('editModal').style.display = 'block';
+}
+
+// Save document changes
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!currentEditingId) return;
+    
+    const docIndex = adminDocuments.findIndex(d => d.id === currentEditingId);
+    if (docIndex === -1) return;
+    
+    // Update document
+    adminDocuments[docIndex].title = document.getElementById('editTitle').value;
+    adminDocuments[docIndex].category = document.getElementById('editCategory').value;
+    adminDocuments[docIndex].status = document.getElementById('editStatus').value;
+    adminDocuments[docIndex].description = document.getElementById('editDescription').value;
+    adminDocuments[docIndex].tags = document.getElementById('editTags').value.split(',').map(tag => tag.trim());
+    
+    // Update category display
+    const categoryMap = {
+        'travel': 'Travel Journal',
+        'family': 'Family Newsletter',
+        'essay': 'Essay',
+        'medical': 'Medical Experience',
+        'photography': 'Photography'
+    };
+    adminDocuments[docIndex].categoryDisplay = categoryMap[adminDocuments[docIndex].category];
+    
+    // Refresh display
+    updateStatistics();
+    populateDocumentTable();
+    closeModal();
+    
+    // Show success message
+    showNotification('Document updated successfully!', 'success');
+});
+
+// Toggle archive status
+function toggleArchive(docId) {
+    const docIndex = adminDocuments.findIndex(d => d.id === docId);
+    if (docIndex === -1) return;
+    
+    const doc = adminDocuments[docIndex];
+    doc.status = doc.status === 'archived' ? 'published' : 'archived';
+    
+    updateStatistics();
+    populateDocumentTable();
+    showNotification(`Document ${doc.status === 'archived' ? 'archived' : 'restored'} successfully!`, 'success');
+}
+
+// Delete document
+function deleteDocument(docId) {
+    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+        return;
+    }
+    
+    const docIndex = adminDocuments.findIndex(d => d.id === docId);
+    if (docIndex === -1) return;
+    
+    adminDocuments.splice(docIndex, 1);
+    
+    updateStatistics();
+    populateDocumentTable();
+    showNotification('Document deleted successfully!', 'success');
+}
+
+// Modal functions
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+    currentEditingId = null;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Quick action functions
+function bulkEdit() {
+    showNotification('Bulk edit feature coming soon!', 'info');
+}
+
+function organizeCategories() {
+    showNotification('Category management feature coming soon!', 'info');
+}
+
+function viewAnalytics() {
+    showNotification('Analytics dashboard coming soon!', 'info');
+}
+
+function exportData() {
+    // Simulate data export
+    const dataStr = JSON.stringify(adminDocuments, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'document-archive-export.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    showNotification('Document data exported successfully!', 'success');
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 1001;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    
+    notification.style.background = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+</body>
+</html>
