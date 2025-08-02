@@ -736,10 +736,11 @@ body {
 </main>
 
 <script>
-// Simple interactivity for demo
+// Document card click handling
 document.querySelectorAll('.document-card').forEach(card => {
     card.addEventListener('click', () => {
-        alert('Document viewer would open here with preserved formatting');
+        // Navigate to document viewer
+        window.location.href = 'viewer.html';
     });
 });
 
