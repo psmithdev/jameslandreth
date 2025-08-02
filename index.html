@@ -737,6 +737,7 @@ let currentFilters = {
 
 // Initialize search and filtering
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Document loaded, initializing search and filters...');
     initializeSearch();
     initializeFilters();
     applyFilters();
@@ -744,21 +745,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Search functionality
 function initializeSearch() {
+    console.log('Initializing search...');
     const searchInput = document.querySelector('.search-input');
     const searchBtn = document.querySelector('.search-btn');
     
+    if (!searchInput) {
+        console.error('Search input not found!');
+        return;
+    }
+    
+    console.log('Search input found, adding event listeners...');
+    
     searchInput.addEventListener('input', function() {
+        console.log('Search input changed:', this.value);
         currentFilters.search = this.value.toLowerCase();
-        debounce(applyFilters, 300)();
+        setTimeout(() => applyFilters(), 100); // Simplified debounce
     });
     
     searchBtn.addEventListener('click', function() {
+        console.log('Search button clicked');
         applyFilters();
     });
     
     // Enter key search
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+            console.log('Enter key pressed in search');
             applyFilters();
         }
     });
@@ -820,16 +832,20 @@ function initializeFilters() {
 
 // Apply filters and search
 function applyFilters() {
+    console.log('Applying filters with:', currentFilters);
     let filteredDocuments = [...documentData];
+    console.log('Starting with', filteredDocuments.length, 'documents');
     
     // Apply search filter
     if (currentFilters.search) {
+        console.log('Applying search filter for:', currentFilters.search);
         filteredDocuments = filteredDocuments.filter(doc => 
             doc.title.toLowerCase().includes(currentFilters.search) ||
             doc.excerpt.toLowerCase().includes(currentFilters.search) ||
             doc.category.toLowerCase().includes(currentFilters.search) ||
             doc.tags.some(tag => tag.toLowerCase().includes(currentFilters.search))
         );
+        console.log('After search filter:', filteredDocuments.length, 'documents');
     }
     
     // Apply category filter
@@ -879,14 +895,21 @@ function applyFilters() {
 
 // Update document display
 function updateDocumentDisplay(documents) {
+    console.log('Updating display with', documents.length, 'documents');
     const featuredSection = document.querySelector('.featured-grid');
     const documentsSection = document.querySelector('.documents-section');
+    
+    if (!featuredSection || !documentsSection) {
+        console.error('Could not find document sections!');
+        return;
+    }
     
     // Clear existing content
     featuredSection.innerHTML = '';
     documentsSection.innerHTML = '';
     
     if (documents.length === 0) {
+        console.log('No documents found, showing no results message');
         showNoResults();
         return;
     }
@@ -997,17 +1020,11 @@ function clearAllFilters() {
     applyFilters();
 }
 
-// Debounce function for search
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Simple delay function - removing complex debounce
+let searchTimeout;
+function delayedSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(applyFilters, 200);
 }
 </script>
 
