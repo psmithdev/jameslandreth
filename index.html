@@ -92,6 +92,24 @@ body {
     cursor: pointer;
 }
 
+.upload-link {
+    background: #10b981;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.upload-link:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
 /* Main Content */
 .main-container {
     max-width: 1400px;
@@ -471,6 +489,7 @@ body {
                 <input type="text" class="search-input" placeholder="Search documents, travels, essays...">
                 <button class="search-btn">🔍</button>
             </div>
+            <a href="upload.html" class="upload-link">📤 Upload Documents</a>
         </div>
     </div>
 </header>
