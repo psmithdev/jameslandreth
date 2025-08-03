@@ -13,22 +13,27 @@
 }
 
 body {
-    font-family: "Georgia", "Times New Roman", serif;
-    line-height: 1.6;
-    color: #2c3e50;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.7;
+    color: #1f2937;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     min-height: 100vh;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
 .site-header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    padding: 20px 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    padding: 24px 0;
     position: sticky;
     top: 0;
     z-index: 100;
+    transition: all 0.3s ease;
 }
 
 .header-container {
@@ -40,34 +45,63 @@ body {
     align-items: center;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
 .site-title {
-    font-size: 2.5rem;
-    font-weight: 300;
-    color: #2c3e50;
-    letter-spacing: 2px;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.025em;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .site-subtitle {
-    font-size: 1rem;
-    color: #7f8c8d;
-    font-style: italic;
-    margin-top: 5px;
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
 }
 
 .back-link {
-    background: #667eea;
+    background: #059669;
     color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
     text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 12px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .back-link:hover {
-    background: #5a67d8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
 }
 
 /* Main Content */
@@ -79,12 +113,12 @@ body {
 
 /* Upload Section */
 .upload-section {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 40px;
-    margin-bottom: 40px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    background: white;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 16px;
+    padding: 48px;
+    margin-bottom: 48px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .upload-header {
@@ -93,80 +127,83 @@ body {
 }
 
 .upload-header h1 {
-    font-size: 3rem;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    font-weight: 300;
+    font-size: 2.5rem;
+    color: #0f172a;
+    margin-bottom: 16px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
 .upload-header p {
-    font-size: 1.2rem;
-    color: #7f8c8d;
-    max-width: 600px;
+    font-size: 1.125rem;
+    color: #64748b;
+    max-width: 720px;
     margin: 0 auto;
-    line-height: 1.8;
+    line-height: 1.7;
+    font-weight: 400;
 }
 
 /* Upload Drop Zone */
 .upload-dropzone {
-    border: 3px dashed #667eea;
-    border-radius: 15px;
+    border: 3px dashed #3b82f6;
+    border-radius: 12px;
     padding: 60px 40px;
     text-align: center;
-    background: rgba(102, 126, 234, 0.05);
-    transition: all 0.3s ease;
+    background: rgba(59, 130, 246, 0.05);
+    transition: all 0.2s ease;
     cursor: pointer;
     position: relative;
     margin-bottom: 30px;
 }
 
 .upload-dropzone:hover {
-    border-color: #5a67d8;
-    background: rgba(102, 126, 234, 0.1);
-    transform: translateY(-2px);
+    border-color: #2563eb;
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
 }
 
 .upload-dropzone.dragover {
-    border-color: #4c51bf;
-    background: rgba(102, 126, 234, 0.15);
+    border-color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.15);
     transform: scale(1.02);
 }
 
 .upload-icon {
     font-size: 4rem;
-    color: #667eea;
+    color: #3b82f6;
     margin-bottom: 20px;
 }
 
 .upload-text {
     font-size: 1.5rem;
-    color: #2c3e50;
+    color: #0f172a;
     margin-bottom: 10px;
     font-weight: 600;
 }
 
 .upload-subtext {
-    color: #7f8c8d;
+    color: #64748b;
     margin-bottom: 20px;
     font-size: 1.1rem;
 }
 
 .upload-button {
-    background: #667eea;
+    background: #3b82f6;
     color: white;
     border: none;
-    padding: 15px 30px;
-    border-radius: 25px;
-    font-size: 1.1rem;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .upload-button:hover {
-    background: #5a67d8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .file-input {
@@ -183,15 +220,22 @@ body {
 }
 
 .format-item {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.format-item:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
 }
 
 /* Upload Progress */
@@ -249,12 +293,12 @@ body {
 
 /* Document Metadata Form */
 .metadata-section {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 40px;
-    margin-bottom: 40px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    background: white;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 16px;
+    padding: 48px;
+    margin-bottom: 48px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     display: none;
 }
 
@@ -263,10 +307,11 @@ body {
 }
 
 .metadata-header h2 {
-    font-size: 2rem;
-    color: #2c3e50;
-    margin-bottom: 10px;
-    font-weight: 300;
+    font-size: 2.25rem;
+    color: #0f172a;
+    margin-bottom: 12px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
 .form-grid {
@@ -284,23 +329,28 @@ body {
 
 .form-label {
     font-weight: 600;
-    color: #2c3e50;
-    font-size: 14px;
+    color: #374151;
+    font-size: 0.875rem;
+    margin-bottom: 8px;
 }
 
 .form-input, .form-select, .form-textarea {
-    padding: 12px 15px;
-    border: 2px solid #e9ecef;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: white;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
+    min-width: 160px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .form-textarea {
@@ -316,38 +366,41 @@ body {
 }
 
 .btn-secondary {
-    background: #e9ecef;
-    color: #6c757d;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 25px;
-    font-size: 1.1rem;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary:hover {
-    background: #dee2e6;
+    background: #e2e8f0;
+    border-color: #cbd5e1;
     transform: translateY(-1px);
 }
 
 .btn-primary {
-    background: #667eea;
+    background: #3b82f6;
     color: white;
     border: none;
-    padding: 15px 30px;
-    border-radius: 25px;
-    font-size: 1.1rem;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover {
-    background: #5a67d8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 /* Success Message */
@@ -381,21 +434,24 @@ body {
 
 /* Instructions */
 .instructions-section {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    background: white;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 16px;
+    padding: 48px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .instructions-header {
-    margin-bottom: 20px;
+    margin-bottom: 40px;
+    text-align: center;
 }
 
 .instructions-header h3 {
-    font-size: 1.5rem;
-    color: #2c3e50;
-    margin-bottom: 10px;
+    font-size: 1.875rem;
+    color: #0f172a;
+    margin-bottom: 12px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
 .instruction-list {
@@ -408,16 +464,24 @@ body {
     align-items: flex-start;
     gap: 15px;
     margin-bottom: 15px;
-    padding: 15px;
-    background: rgba(102, 126, 234, 0.05);
-    border-radius: 10px;
+    padding: 20px;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.instruction-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(59, 130, 246, 0.2);
 }
 
 .instruction-number {
-    background: #667eea;
+    background: #3b82f6;
     color: white;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -425,11 +489,13 @@ body {
     font-weight: 600;
     font-size: 14px;
     flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
 }
 
 .instruction-text {
-    color: #2c3e50;
-    line-height: 1.6;
+    color: #1f2937;
+    line-height: 1.7;
+    font-size: 0.875rem;
 }
 
 /* Responsive Design */
@@ -471,8 +537,13 @@ body {
 <header class="site-header">
     <div class="header-container">
         <div class="site-branding">
-            <h1 class="site-title">Dr. James Landreth</h1>
-            <p class="site-subtitle">Document Upload Center</p>
+            <div class="logo-container">
+                <div class="logo-icon">📤</div>
+                <div class="logo-text">
+                    <h1 class="site-title">Dr. James Landreth</h1>
+                    <p class="site-subtitle">Document Upload Center</p>
+                </div>
+            </div>
         </div>
         <a href="index.html" class="back-link">← Back to Archive</a>
     </div>
