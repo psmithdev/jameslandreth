@@ -39,8 +39,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_') ||
-    pathname.startsWith('/main/') ||
-    pathname.startsWith('/artifacts/')
+    pathname.startsWith('/main') ||
+    pathname.startsWith('/artifacts')
   ) {
     return next();
   }
