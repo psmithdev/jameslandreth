@@ -1,0 +1,194 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import { createServerClient } from '../../../lib/supabase';
+
+const { slug } = Astro.params;
+const supabase = createServerClient();
+
+const { data: doc } = await supabase
+  .from('documents')
+  .select('*')
+  .eq('slug', slug)
+  .eq('status', 'published')
+  .single();
+
+if (!doc) {
+  return Astro.redirect('/');
+}
+
+// Generate PDF URL from Supabase Storage if file_path exists
+let pdfUrl = '';
+if (doc.file_path) {
+  const { data: urlData } = supabase.storage
+    .from('documents')
+    .getPublicUrl(doc.file_path);
+  pdfUrl = urlData.publicUrl;
+}
+
+const categoryColors: Record<string, string> = {
+  'Travel': 'text-emerald-600',
+  'Travel Journal': 'text-emerald-600',
+  'Essay': 'text-violet-600',
+  'Family Newsletter': 'text-blue-600',
+  'Family': 'text-blue-600',
+  'Medical': 'text-rose-600',
+  'Photography': 'text-amber-600',
+};
+const catColor = categoryColors[doc.category] || 'text-blue-600';
+---
+
+<MainLayout title={`${doc.title} - Dr. James Landreth`}>
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Top bar -->
+    <div class="flex items-center justify-between mb-6">
+      <a href="/" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-xl transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Archive
+      </a>
+      <div class="flex items-center gap-3">
+        {pdfUrl && (
+          <a href={pdfUrl} download class="inline-flex items-center gap-2 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-xl transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download
+          </a>
+        )}
+      </div>
+    </div>
+
+    <!-- Main layout: sidebar + viewer -->
+    <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+      <!-- Document Info Sidebar -->
+      <aside class="bg-white border border-slate-200/60 rounded-2xl p-8 shadow-sm h-fit lg:sticky lg:top-28">
+        <div class="mb-6">
+          <p class={`text-xs font-semibold uppercase tracking-wider ${catColor} mb-2`}>{doc.category}</p>
+          <h1 class="text-xl font-bold text-slate-900 leading-snug tracking-tight">{doc.title}</h1>
+        </div>
+
+        <div class="flex flex-col gap-2.5 mb-5 pb-5 border-b border-slate-100">
+          {doc.date && (
+            <div class="flex justify-between text-sm">
+              <span class="font-semibold text-slate-700">Date</span>
+              <span class="text-slate-500">{doc.date}</span>
+            </div>
+          )}
+          {doc.location && (
+            <div class="flex justify-between text-sm">
+              <span class="font-semibold text-slate-700">Location</span>
+              <span class="text-slate-500">{doc.location}</span>
+            </div>
+          )}
+          {doc.pages && (
+            <div class="flex justify-between text-sm">
+              <span class="font-semibold text-slate-700">Length</span>
+              <span class="text-slate-500">{doc.pages}</span>
+            </div>
+          )}
+          <div class="flex justify-between text-sm">
+            <span class="font-semibold text-slate-700">Format</span>
+            <span class="text-slate-500">{doc.file_type}</span>
+          </div>
+        </div>
+
+        {doc.excerpt && (
+          <p class="text-sm text-slate-500 leading-relaxed mb-4">{doc.excerpt}</p>
+        )}
+
+        {doc.tags && doc.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-6">
+            {doc.tags.map((tag: string) => (
+              <span class="text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full">{tag}</span>
+            ))}
+          </div>
+        )}
+      </aside>
+
+      <!-- Document Viewer -->
+      <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm min-h-[calc(100vh-200px)]">
+        <!-- Toolbar -->
+        <div class="bg-slate-50 border-b border-slate-200/60 px-6 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button id="zoom-out" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all shadow-sm">-</button>
+            <span id="zoom-level" class="text-sm font-medium text-slate-600 min-w-[3rem] text-center">100%</span>
+            <button id="zoom-in" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all shadow-sm">+</button>
+            <button id="zoom-fit" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-500 hover:text-white hover:border-slate-500 transition-all shadow-sm ml-2">Fit</button>
+          </div>
+          <div class="text-sm text-slate-400">
+            {doc.file_type} Document
+          </div>
+        </div>
+
+        <!-- PDF container -->
+        <div id="viewer-container" class="p-4 bg-slate-100 min-h-[70vh] flex items-center justify-center">
+          {pdfUrl ? (
+            <iframe
+              id="pdf-frame"
+              src={pdfUrl}
+              class="w-full h-[80vh] border-0 rounded-lg shadow-inner"
+              title={doc.title}
+            />
+          ) : (
+            <div class="text-center py-20">
+              <div class="text-6xl mb-4">📄</div>
+              <h3 class="text-xl font-bold text-slate-700 mb-2">Document Preview</h3>
+              <p class="text-slate-500">
+                No file has been uploaded for this document yet.
+              </p>
+              <p class="text-sm text-slate-400 mt-2">
+                The document file will appear here once it's been uploaded to storage.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Zoom controls
+    let zoomLevel = 100;
+    const zoomDisplay = document.getElementById('zoom-level');
+    const frame = document.getElementById('pdf-frame') as HTMLIFrameElement | null;
+
+    function updateZoom() {
+      if (zoomDisplay) zoomDisplay.textContent = `${zoomLevel}%`;
+      if (frame) frame.style.transform = `scale(${zoomLevel / 100})`;
+      if (frame) frame.style.transformOrigin = 'top left';
+      if (frame) frame.style.width = `${10000 / zoomLevel}%`;
+      if (frame) frame.style.height = `${80 * 100 / zoomLevel}vh`;
+    }
+
+    document.getElementById('zoom-in')?.addEventListener('click', () => {
+      zoomLevel = Math.min(200, zoomLevel + 10);
+      updateZoom();
+    });
+
+    document.getElementById('zoom-out')?.addEventListener('click', () => {
+      zoomLevel = Math.max(50, zoomLevel - 10);
+      updateZoom();
+    });
+
+    document.getElementById('zoom-fit')?.addEventListener('click', () => {
+      zoomLevel = 100;
+      updateZoom();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        zoomLevel = Math.min(200, zoomLevel + 10);
+        updateZoom();
+      } else if (e.key === '-') {
+        e.preventDefault();
+        zoomLevel = Math.max(50, zoomLevel - 10);
+        updateZoom();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        zoomLevel = 100;
+        updateZoom();
+      } else if (e.key === 'Escape') {
+        window.location.href = '/';
+      }
+    });
+  </script>
+</MainLayout>

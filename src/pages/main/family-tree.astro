@@ -1,0 +1,162 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Family Tree - Littlefield, Walsh, Flick & Ostrom Heritage">
+  <style>
+    /* Tree Selector Tabs */
+    .tree-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+    .tree-tab { background: white; border: 1px solid #e2e8f0; padding: 10px 24px; border-radius: 8px; font-size: 0.9375rem; font-weight: 500; color: #475569; cursor: pointer; transition: all 0.2s ease; }
+    .tree-tab:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .tree-tab.active { background: #3b82f6; color: white; border-color: #3b82f6; font-weight: 600; }
+
+    /* Controls */
+    .ft-controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .ft-zoom-controls { display: flex; gap: 4px; align-items: center; }
+    .ft-zoom-btn { width: 36px; height: 36px; border: 1px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-size: 1.125rem; display: flex; align-items: center; justify-content: center; color: #475569; transition: all 0.2s ease; }
+    .ft-zoom-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .ft-zoom-label { font-size: 0.8125rem; color: #94a3b8; padding: 0 8px; min-width: 48px; text-align: center; }
+    .ft-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8125rem; color: #64748b; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .legend-dot.walsh { background: #8b5cf6; }
+    .legend-dot.flick { background: #f59e0b; }
+    .legend-dot.littlefield { background: #3b82f6; }
+    .legend-dot.litzel { background: #10b981; }
+    .legend-dot.ostrom { background: #ec4899; }
+    .legend-dot.spouse { background: #94a3b8; }
+
+    /* Tree Canvas */
+    .tree-viewport { background: white; border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); overflow: auto; min-height: 500px; position: relative; cursor: grab; }
+    .tree-viewport:active { cursor: grabbing; }
+    .tree-canvas { padding: 48px 32px 64px; min-width: fit-content; transform-origin: top center; transition: transform 0.2s ease; }
+
+    /* Tree Nodes */
+    .couple { display: flex; flex-direction: column; align-items: center; position: relative; }
+    .couple-row { display: flex; align-items: center; gap: 0; position: relative; }
+    .connector-h { width: 24px; height: 2px; background: #cbd5e1; flex-shrink: 0; }
+    .connector-v { width: 2px; height: 32px; background: #cbd5e1; margin: 0 auto; }
+
+    .person { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; min-width: 160px; max-width: 200px; text-align: center; position: relative; transition: all 0.2s ease; cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .person:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+    .person.walsh { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.04); }
+    .person.flick { border-color: #f59e0b; background: rgba(245, 158, 11, 0.04); }
+    .person.littlefield { border-color: #3b82f6; background: rgba(59, 130, 246, 0.04); }
+    .person.litzel { border-color: #10b981; background: rgba(16, 185, 129, 0.04); }
+    .person.ostrom { border-color: #ec4899; background: rgba(236, 72, 153, 0.04); }
+    .person.spouse { border-color: #94a3b8; background: rgba(148, 163, 184, 0.04); }
+    .person.placeholder { border-style: dashed; opacity: 0.6; }
+
+    .person-name { font-size: 0.875rem; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .person-maiden { font-size: 0.75rem; color: #64748b; font-style: italic; }
+    .person-dates { font-size: 0.6875rem; color: #94a3b8; margin-top: 2px; }
+    .person-info { font-size: 0.6875rem; color: #64748b; margin-top: 4px; line-height: 1.3; }
+
+    /* Detail Panel */
+    .ft-detail-panel { display: none; position: fixed; bottom: 24px; right: 24px; width: 320px; background: white; border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); z-index: 200; overflow: hidden; }
+    .ft-detail-panel.active { display: block; animation: ftSlideUp 0.25s ease; }
+    @keyframes ftSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .ft-detail-header { padding: 20px 20px 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; }
+    .ft-detail-header h3 { font-size: 1.125rem; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .ft-detail-close { width: 28px; height: 28px; border: none; background: #f1f5f9; border-radius: 6px; cursor: pointer; font-size: 0.875rem; color: #64748b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; }
+    .ft-detail-close:hover { background: #e2e8f0; }
+    .ft-detail-body { padding: 16px 20px 20px; }
+    .detail-row { margin-bottom: 10px; }
+    .detail-label { font-size: 0.6875rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 2px; }
+    .detail-value { font-size: 0.875rem; color: #374151; line-height: 1.5; }
+
+    @media (max-width: 768px) {
+      .person { min-width: 120px; padding: 8px 10px; }
+      .person-name { font-size: 0.75rem; }
+      .ft-detail-panel { left: 12px; right: 12px; width: auto; }
+      .ft-controls-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <!-- Welcome Banner -->
+    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-10 mb-8 text-center">
+      <h1 class="text-4xl font-bold text-slate-900 tracking-tight mb-4">Our Family Tree</h1>
+      <p class="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        Tracing the roots and branches of the Littlefield, Walsh, Flick, and Ostrom families across generations.
+        Click on any person to see their details.
+      </p>
+    </section>
+
+    <!-- Tree Selector Tabs -->
+    <div class="tree-tabs">
+      <button class="tree-tab active" id="tab-littlefield">Littlefield & Walsh-Flick</button>
+      <button class="tree-tab" id="tab-ostrom">Alice Ostrom Litzel</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="ft-controls-bar">
+      <div class="ft-zoom-controls">
+        <button class="ft-zoom-btn" id="ft-zoom-out" title="Zoom out">&#8722;</button>
+        <span class="ft-zoom-label" id="ft-zoom-label">100%</span>
+        <button class="ft-zoom-btn" id="ft-zoom-in" title="Zoom in">&#43;</button>
+        <button class="ft-zoom-btn" id="ft-zoom-reset" title="Reset" style="margin-left: 4px; font-size: 0.75rem;">Reset</button>
+      </div>
+      <div class="ft-legend" id="ft-legend"></div>
+    </div>
+
+    <!-- Tree Viewport -->
+    <div class="tree-viewport" id="treeViewport">
+      <div class="tree-canvas" id="treeCanvas"></div>
+    </div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="ft-detail-panel" id="detailPanel">
+    <div class="ft-detail-header">
+      <h3 id="detailName"></h3>
+      <button class="ft-detail-close" id="detail-close">&#10005;</button>
+    </div>
+    <div class="ft-detail-body" id="detailBody"></div>
+  </div>
+
+  <script is:inline>
+    // Family tree data and rendering (ported from legacy/family-tree.html)
+    const familyTrees={littlefield:{label:"Littlefield & Walsh-Flick",legendFamilies:["walsh","flick","littlefield","spouse"],people:{"ggf-walsh":{name:"Mr. Walsh",family:"walsh",dates:"",info:"Walsh family patriarch. Family emigrated from Ireland."},"ggm-walsh":{name:"Mrs. Walsh",family:"spouse",dates:"",info:""},"ggf-flick":{name:"Mr. Flick",family:"flick",dates:"",info:"Flick family patriarch."},"ggm-flick":{name:"Mrs. Flick",family:"spouse",dates:"",info:""},"ggf-littlefield":{name:"Mr. Littlefield",family:"littlefield",dates:"",info:"Littlefield family patriarch."},"ggm-littlefield":{name:"Mrs. Littlefield",family:"spouse",dates:"",info:""},"gf-walsh-flick":{name:"Mr. Walsh",family:"walsh",dates:"",info:"Son of the Walsh family."},"gm-walsh-flick":{name:"Miss Flick",maiden:"n\u00e9e Flick",family:"flick",dates:"",info:"Daughter of the Flick family. Married into Walsh family."},"gf-littlefield":{name:"Mr. Littlefield",family:"littlefield",dates:"",info:"Jim's paternal grandfather. Liked Buicks."},"gm-littlefield":{name:"Mrs. Littlefield",family:"spouse",dates:"",info:""},"f-jim":{name:"Mr. Littlefield",family:"littlefield",dates:"",info:"Jim's father. Liked Buicks."},"m-jim":{name:"Mrs. Littlefield",maiden:"n\u00e9e Walsh",family:"walsh",dates:"",info:"Jim's mother. Daughter of the Walsh-Flick line."},"aunt-lou":{name:"Aunt Lou",family:"walsh",dates:"",info:"Jim's aunt. Owned a Chrysler New Yorker."},"jim":{name:"Dr. James Littlefield",family:"littlefield",dates:"",info:"Retired physician. Author of jameslandreth.com. Avid traveler, photographer, and writer."},"aleda":{name:"Aleda Littlefield",family:"spouse",dates:"",info:"Jim's wife. The Ostrom/Astrom family tree traces her maternal line."},"karen-l":{name:"Karen",family:"littlefield",dates:"",info:"Daughter of Jim and Aleda. Children: Kurt, Benj. C."},"billy-l":{name:'Wm. "Billy"',family:"littlefield",dates:"",info:"Adopted son of Jim and Aleda. Married Eric."},"leanne-l":{name:"Leanne",family:"littlefield",dates:"",info:"Adopted daughter of Jim and Aleda. Son: Mark."}},structure:{greatGrandparents:[{partners:["ggf-walsh","ggm-walsh"],id:"gg-walsh"},{partners:["ggf-flick","ggm-flick"],id:"gg-flick"},{partners:["ggf-littlefield","ggm-littlefield"],id:"gg-littlefield"}],grandparents:[{partners:["gf-walsh-flick","gm-walsh-flick"],id:"g-walsh-flick"},{partners:["gf-littlefield","gm-littlefield"],id:"g-littlefield"}],parents:[{partners:["f-jim","m-jim"],id:"p-jim",siblings:["aunt-lou"]}],current:[{partners:["jim","aleda"],id:"c-jim"}],children:[{people:["karen-l","billy-l","leanne-l"]}]}},ostrom:{label:"Alice Ostrom Litzel Family Tree",legendFamilies:["ostrom","litzel","spouse"],people:{"gggf-grandroth":{name:"Israel J. Grandroth",family:"ostrom",dates:"1797 \u2013 1867",info:"Paternal great-great-grandfather on the \u00c5str\u00f6m/Ostrom side."},"gggm-eriksdaughter":{name:"Ulrika C. Eriksdaughter",family:"spouse",dates:"1802 \u2013 1865",info:""},"gggf-graden":{name:"Anders Nilson Graden",family:"ostrom",dates:"1809 \u2013 1845",info:""},"gggm-nilsdotter":{name:"Brita Marg. Nilsdotter",family:"spouse",dates:"1836 \u2013 ?",info:""},"gggf-person":{name:"Per Person",family:"ostrom",dates:"1776 \u2013 1830",info:"Sundberg line ancestor."},"gggm-johnsdotter":{name:"Maria Johnsdotter",family:"spouse",dates:"1771 \u2013 1826",info:""},"gggf-bengtsson":{name:"Nils Bengtsson",family:"ostrom",dates:"1805 \u2013 1888",info:""},"gggm-magnusdotter":{name:"Kris. Kat. Magnusdotter",family:"spouse",dates:"1805 \u2013 1881",info:""},"ggf-israelsson":{name:"Anders Israelsson",family:"ostrom",dates:"1844 \u2013 1916",info:"Son of Israel J. Grandroth."},"ggm-johansdotter":{name:"Karolina Ulrika Johansdotter",family:"spouse",dates:"1847 \u2013 1913",info:""},"ggf-sundberg":{name:"Nils Sundberg",family:"ostrom",dates:"1818 \u2013 1893",info:""},"ggm-nilsdotter2":{name:"Kris. Kat. Nilsdotter",family:"spouse",dates:"1833 \u2013 1924",info:""},"gf-ostrom":{name:"Anders Alfred \u00c5str\u00f6m/Ostrom",family:"ostrom",dates:"1868 \u2013 1930",info:"Son of Anders Israelsson and Karolina Ulrika Johansdotter. Swedish immigrant."},"gm-sundberg":{name:"Ida Amalia Sundberg",family:"ostrom",dates:"1870 \u2013 1910",info:"Daughter of Nils Sundberg."},"hilda1":{name:"Hilda",family:"ostrom",dates:"1892, d. age 2",info:"Died in infancy."},"hilda2":{name:"Hilda Evalina",family:"ostrom",dates:"1896 \u2013 1918",info:"Second daughter named Hilda."},"henry-berger":{name:"Henry Berger",family:"spouse",dates:"",info:"Husband of Hilda Evalina."},"helen":{name:"Helen",family:"ostrom",dates:"1901 \u2013 1983",info:""},"carl-schlipf":{name:"Carl G. Schlipf",family:"spouse",dates:"1906 \u2013 1966",info:"Husband of Helen."},"alice":{name:"Alice Elvira",family:"ostrom",dates:"1903 \u2013 1991",info:"Central figure of this family tree."},"edward-litzel":{name:"Edward Thomas Litzel",family:"litzel",dates:"1900 \u2013 1961",info:"Husband of Alice Elvira."},"harold-sr":{name:"Harold",family:"ostrom",dates:"1905 \u2013 1989",info:""},"ruth":{name:"Ruth",family:"spouse",dates:"",info:"Wife of Harold."},"mildred":{name:"Mildred Linea",family:"ostrom",dates:"1908, d. age 1",info:"Died in infancy."},"baby-boy":{name:"Baby Boy",family:"ostrom",dates:"d. 1918",info:"Son of Hilda Evalina. Died in infancy."},"patricia":{name:'Patricia "Patsy"',family:"ostrom",dates:"1930 \u2013 1981",info:"Daughter of Helen and Carl G. Schlipf."},"chas-ziegler":{name:"Chas. Ziegler",family:"spouse",dates:"",info:"First husband of Patricia."},"bill-cary":{name:"Bill Cary",family:"spouse",dates:"",info:"Second husband of Patricia."},"aleda":{name:"Aleda",family:"litzel",dates:"",info:"Daughter of Alice Elvira and Edward Thomas Litzel. Married James Littlefield."},"james-littlefield":{name:"James Littlefield",family:"spouse",dates:"",info:"Dr. James Littlefield. Retired physician."},"john-a":{name:"John A.",family:"litzel",dates:"",info:"Son of Alice and Edward. Twin with Harold T."},"mary-lou-engle":{name:"Mary Lou Engle",family:"spouse",dates:"",info:"Wife of John A."},"harold-t":{name:"Harold T.",family:"litzel",dates:"",info:"Son of Alice and Edward. Twin with John A."},"bunny-young":{name:'Barb. "Bunny" Young',family:"spouse",dates:"",info:"Wife of Harold T."},"heidi":{name:"Heidi",family:"ostrom",dates:"",info:"Daughter of Patricia."},"heather":{name:"Heather",family:"ostrom",dates:"",info:"Daughter of Patricia."},"kelly":{name:"Kelly",family:"ostrom",dates:"",info:"Daughter of Patricia."},"matthew":{name:"Matthew",family:"ostrom",dates:"",info:"Son of Patricia."},"karen":{name:"Karen",family:"litzel",dates:"",info:"Daughter of Aleda and James."},"billy":{name:'Wm. "Billy"',family:"litzel",dates:"",info:"Adopted son. Married Eric."},"eric":{name:"Eric",family:"spouse",dates:"",info:"Spouse of Billy."},"leanne":{name:"Leanne",family:"litzel",dates:"",info:"Adopted daughter."},"kurt-k":{name:"Kurt",family:"litzel",dates:"",info:"Son of Karen."},"benj-c":{name:"Benj. C.",family:"litzel",dates:"",info:"Son of Karen."},"mark":{name:"Mark",family:"litzel",dates:"",info:"Son of Leanne."},"kurt-j":{name:"Kurt",family:"litzel",dates:"",info:"Son of John A."},"allen":{name:"Allen",family:"litzel",dates:"",info:"Son of John A. Married Kim."},"kim":{name:"Kim",family:"spouse",dates:"",info:"Wife of Allen."},"maxwell":{name:"Maxwell",family:"litzel",dates:"",info:"Son of Allen and Kim."},"mason":{name:"Mason",family:"litzel",dates:"",info:"Son of Allen and Kim."},"rusty":{name:'Harold T. "Rusty"',family:"litzel",dates:"",info:"Son of Harold T."},"diana":{name:"Diana",family:"litzel",dates:"",info:"Daughter of Rusty."},"freddy":{name:'Chas. "Freddy"',family:"litzel",dates:"",info:"Son of Harold T."}},structure:{greatGreatGrandparents:[{partners:["gggf-grandroth","gggm-eriksdaughter"],id:"ggg-grandroth"},{partners:["gggf-graden","gggm-nilsdotter"],id:"ggg-graden"},{partners:["gggf-person","gggm-johnsdotter"],id:"ggg-person"},{partners:["gggf-bengtsson","gggm-magnusdotter"],id:"ggg-bengtsson"}],greatGrandparents:[{partners:["ggf-israelsson","ggm-johansdotter"],id:"gg-israelsson"},{partners:["ggf-sundberg","ggm-nilsdotter2"],id:"gg-sundberg"}],grandparents:[{partners:["gf-ostrom","gm-sundberg"],id:"g-ostrom"}],children_of_anders_ida:[{people:["hilda1"]},{partners:["hilda2","henry-berger"],id:"c-hilda2"},{partners:["helen","carl-schlipf"],id:"c-helen"},{partners:["alice","edward-litzel"],id:"c-alice"},{partners:["harold-sr","ruth"],id:"c-harold"},{people:["mildred"]}],grandchildren:[{people:["baby-boy"]},{partners:["patricia","chas-ziegler"],id:"gc-patricia",siblings:["bill-cary"]},{partners:["aleda","james-littlefield"],id:"gc-aleda"},{partners:["john-a","mary-lou-engle"],id:"gc-john",siblings_note:"twins"},{partners:["harold-t","bunny-young"],id:"gc-harold-t"}],greatGrandchildren:[{people:["heidi","heather","kelly","matthew"],label:"Patricia's children"},{people:["karen","billy","leanne"],label:"Aleda & James's children"},{people:["kurt-j","allen"],label:"John A.'s children"},{people:["rusty","freddy"],label:"Harold T.'s children"}],greatGreatGrandchildren:[{people:["kurt-k","benj-c"],label:"Karen's children"},{people:["mark"],label:"Leanne's children"},{people:["maxwell","mason"],label:"Allen's children"},{people:["diana"],label:"Rusty's children"}]}}};
+
+    let currentTree='littlefield';
+    let zoomLevel=1;
+    const ZOOM_STEP=0.1,ZOOM_MIN=0.4,ZOOM_MAX=1.5;
+
+    function showTree(t){currentTree=t;document.getElementById('tab-littlefield').classList.toggle('active',t==='littlefield');document.getElementById('tab-ostrom').classList.toggle('active',t==='ostrom');zoomReset();renderTree();renderLegend();closeDetail();}
+    document.getElementById('tab-littlefield').addEventListener('click',()=>showTree('littlefield'));
+    document.getElementById('tab-ostrom').addEventListener('click',()=>showTree('ostrom'));
+
+    const familyLabelsMap={walsh:"Walsh",flick:"Flick",littlefield:"Littlefield",litzel:"Litzel",ostrom:"Ostrom/\u00c5str\u00f6m",spouse:"Spouse / Married in"};
+
+    function renderLegend(){const t=familyTrees[currentTree];document.getElementById('ft-legend').innerHTML=t.legendFamilies.map(f=>`<div class="legend-item"><div class="legend-dot ${f}"></div>${familyLabelsMap[f]||f}</div>`).join('');}
+
+    function renderPerson(id,p){if(!p)return'';const pc=p.placeholder?' placeholder':'';return`<div class="person ${p.family}${pc}" onclick="showDetail('${id}')" title="Click for details"><div class="person-name">${p.name}</div>${p.maiden?`<div class="person-maiden">${p.maiden}</div>`:''}${p.dates?`<div class="person-dates">${p.dates}</div>`:''}${p.info&&!p.placeholder?`<div class="person-info">${p.info.substring(0,50)}${p.info.length>50?'...':''}</div>`:''}</div>`;}
+
+    function renderTree(){const t=familyTrees[currentTree],canvas=document.getElementById('treeCanvas'),structure=t.structure,people=t.people;const genLabels={greatGreatGrandparents:"2x Great-Grandparents",greatGrandparents:"Great-Grandparents",grandparents:"Grandparents",parents:"Parents",current:currentTree==='littlefield'?"Jim & Aleda":"Current",children:"Children",children_of_anders_ida:"Anders & Ida's Children",grandchildren:"Grandchildren",greatGrandchildren:"Great-Grandchildren",greatGreatGrandchildren:"Great-Great-Grandchildren"};let html='';Object.keys(structure).forEach((gk,gi)=>{const gen=structure[gk],label=genLabels[gk]||gk;html+=`<div style="display:flex;align-items:flex-start;margin-bottom:0"><div style="writing-mode:vertical-lr;transform:rotate(180deg);font-size:0.6875rem;color:#94a3b8;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:8px 8px 8px 0;white-space:nowrap">${label}</div><div style="display:flex;gap:48px;justify-content:center;flex:1;flex-wrap:wrap;align-items:flex-start">`;gen.forEach(g=>{if(g.partners){const p1=people[g.partners[0]],p2=people[g.partners[1]];html+=`<div class="couple"><div class="couple-row">${renderPerson(g.partners[0],p1)}<div class="connector-h"></div>${renderPerson(g.partners[1],p2)}</div>`;if(g.siblings_note)html+=`<div style="font-size:0.6875rem;color:#3b82f6;font-weight:600;margin-top:4px;text-align:center">${g.siblings_note}</div>`;if(g.siblings){html+=`<div style="display:flex;gap:12px;margin-top:8px;justify-content:center">`;g.siblings.forEach(sId=>{const s=people[sId];if(s)html+=`<div style="font-size:0.6875rem;color:#64748b;padding:4px 8px;border:1px dashed #cbd5e1;border-radius:6px;cursor:pointer;background:rgba(248,250,252,0.8)" onclick="showDetail('${sId}')">${s.name}</div>`;});html+=`</div>`;}html+=`</div>`;}else if(g.people){html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">`;if(g.label)html+=`<div style="font-size:0.6875rem;color:#94a3b8;font-weight:500;margin-bottom:4px">${g.label}</div>`;html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">`;g.people.forEach(pId=>html+=renderPerson(pId,people[pId]));html+=`</div></div>`;}});html+=`</div></div>`;if(gi<Object.keys(structure).length-1)html+=`<div class="connector-v"></div>`;});canvas.innerHTML=html;}
+
+    function showDetail(pid){const t=familyTrees[currentTree],p=t.people[pid];if(!p||p.placeholder)return;document.getElementById('detailName').textContent=p.name;let h='';if(p.maiden)h+=`<div class="detail-row"><div class="detail-label">Born</div><div class="detail-value">${p.maiden}</div></div>`;if(p.dates)h+=`<div class="detail-row"><div class="detail-label">Dates</div><div class="detail-value">${p.dates}</div></div>`;h+=`<div class="detail-row"><div class="detail-label">Family Line</div><div class="detail-value">${familyLabelsMap[p.family]||p.family}</div></div>`;if(p.info)h+=`<div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value">${p.info}</div></div>`;document.getElementById('detailBody').innerHTML=h;document.getElementById('detailPanel').classList.add('active');}
+    function closeDetail(){document.getElementById('detailPanel').classList.remove('active');}
+    document.getElementById('detail-close').addEventListener('click',closeDetail);
+
+    function applyZoom(){document.getElementById('treeCanvas').style.transform=`scale(${zoomLevel})`;document.getElementById('ft-zoom-label').textContent=Math.round(zoomLevel*100)+'%';}
+    function zoomIn(){zoomLevel=Math.min(ZOOM_MAX,zoomLevel+ZOOM_STEP);applyZoom();}
+    function zoomOut(){zoomLevel=Math.max(ZOOM_MIN,zoomLevel-ZOOM_STEP);applyZoom();}
+    function zoomReset(){zoomLevel=1;applyZoom();}
+    document.getElementById('ft-zoom-in').addEventListener('click',zoomIn);
+    document.getElementById('ft-zoom-out').addEventListener('click',zoomOut);
+    document.getElementById('ft-zoom-reset').addEventListener('click',zoomReset);
+
+    // Drag to pan
+    const viewport=document.getElementById('treeViewport');let isDragging=false,startX,startY,scrollLeft,scrollTop;
+    viewport.addEventListener('mousedown',e=>{if(e.target.closest('.person'))return;isDragging=true;startX=e.pageX-viewport.offsetLeft;startY=e.pageY-viewport.offsetTop;scrollLeft=viewport.scrollLeft;scrollTop=viewport.scrollTop;});
+    viewport.addEventListener('mousemove',e=>{if(!isDragging)return;e.preventDefault();viewport.scrollLeft=scrollLeft-(e.pageX-viewport.offsetLeft-startX);viewport.scrollTop=scrollTop-(e.pageY-viewport.offsetTop-startY);});
+    document.addEventListener('mouseup',()=>{isDragging=false;});
+
+    // Make showDetail available globally for onclick handlers
+    window.showDetail=showDetail;
+
+    // Init
+    renderTree();renderLegend();
+  </script>
+</MainLayout>

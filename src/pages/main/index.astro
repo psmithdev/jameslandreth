@@ -1,20 +1,248 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import DocumentCard from '../../components/main/DocumentCard.astro';
+import SearchBar from '../../components/main/SearchBar.astro';
+import FilterControls from '../../components/main/FilterControls.astro';
+import { createServerClient } from '../../lib/supabase';
+
+const supabase = createServerClient();
+
+// Fetch all published documents
+const { data: documents, error } = await supabase
+  .from('documents')
+  .select('*')
+  .eq('status', 'published')
+  .order('year', { ascending: false });
+
+const docs = documents || [];
+
+// Derive filter options from actual data
+const categories = [...new Set(docs.map(d => d.category))].sort();
+const years = [...new Set(docs.map(d => d.year))].sort((a, b) => b - a);
+const locations = [...new Set(docs.map(d => d.location).filter(Boolean))].sort();
+
+const featuredDocs = docs.filter(d => d.featured);
+const totalDocs = docs.length;
+
+// Stats
+const countriesCount = locations.length;
+const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
 ---
 
 <MainLayout>
-  <div class="max-w-7xl mx-auto px-6 py-16">
-    <div class="text-center">
-      <h2 class="text-4xl font-bold text-slate-900 mb-4">Document Archive</h2>
-      <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-        A collection of essays, family newsletters, travel journals, and personal narratives
-        by Dr. James Landreth.
+  <div class="max-w-6xl mx-auto px-6 py-10">
+
+    <!-- Welcome Banner -->
+    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-10 mb-10 text-center">
+      <h1 class="text-4xl font-bold text-slate-900 tracking-tight mb-4">Document Archive</h1>
+      <p class="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        Welcome to Dr. James Landreth's personal collection of travel journals, family newsletters,
+        essays, and life adventures. Each document has been carefully preserved to share these stories
+        with family, friends, and fellow travelers.
       </p>
-      <div class="mt-8 p-8 bg-white/60 backdrop-blur rounded-2xl border border-slate-200 max-w-md mx-auto">
-        <p class="text-slate-500 text-sm">
-          Document archive coming soon. This page will display searchable, filterable documents loaded from the database.
-        </p>
+    </section>
+
+    <!-- Stats -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      <div class="bg-white border border-slate-200/60 rounded-xl p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="text-3xl font-bold text-blue-500 tracking-tight">{totalDocs}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Documents</div>
       </div>
-    </div>
+      <div class="bg-white border border-slate-200/60 rounded-xl p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="text-3xl font-bold text-blue-500 tracking-tight">{countriesCount}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Locations</div>
+      </div>
+      <div class="bg-white border border-slate-200/60 rounded-xl p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="text-3xl font-bold text-blue-500 tracking-tight">{yearsSpan}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Years of Stories</div>
+      </div>
+      <div class="bg-white border border-slate-200/60 rounded-xl p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="text-3xl font-bold text-blue-500 tracking-tight">{categories.length}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Categories</div>
+      </div>
+    </section>
+
+    <!-- Search & Filters -->
+    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 mb-10">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+        <SearchBar />
+      </div>
+      <FilterControls categories={categories} years={years} locations={locations} />
+    </section>
+
+    <!-- Featured Documents -->
+    {featuredDocs.length > 0 && (
+      <section class="mb-10" id="featured-section">
+        <h2 class="text-2xl font-bold text-slate-900 tracking-tight text-center mb-6">Featured Documents</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {featuredDocs.map(doc => (
+            <DocumentCard
+              slug={doc.slug}
+              title={doc.title}
+              category={doc.category}
+              excerpt={doc.excerpt}
+              date={doc.date}
+              year={doc.year}
+              location={doc.location}
+              tags={doc.tags}
+              pages={doc.pages}
+              fileType={doc.file_type}
+              featured={true}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- All Documents -->
+    <section id="documents-section">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="documents-grid">
+        {docs.map(doc => (
+          <div class="document-item"
+            data-category={doc.category}
+            data-year={doc.year}
+            data-location={doc.location}
+            data-title={doc.title.toLowerCase()}
+            data-excerpt={doc.excerpt?.toLowerCase() || ''}
+            data-tags={doc.tags?.join(' ').toLowerCase() || ''}
+            data-featured={doc.featured ? 'true' : 'false'}
+          >
+            <DocumentCard
+              slug={doc.slug}
+              title={doc.title}
+              category={doc.category}
+              excerpt={doc.excerpt}
+              date={doc.date}
+              year={doc.year}
+              location={doc.location}
+              tags={doc.tags || []}
+              pages={doc.pages}
+              fileType={doc.file_type}
+            />
+          </div>
+        ))}
+      </div>
+      <div id="no-results" class="hidden text-center py-16">
+        <p class="text-slate-400 text-lg">No documents match your filters.</p>
+        <button id="clear-filters" class="mt-4 text-blue-500 hover:text-blue-600 font-medium text-sm">
+          Clear all filters
+        </button>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-8 mt-10 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 tracking-tight mb-2">Journey Through Time</h2>
+      <p class="text-sm text-slate-500 mb-6">Browse documents by year to follow the chronological story</p>
+      <div class="flex justify-center gap-3 flex-wrap" id="timeline-nav">
+        {years.map(y => (
+          <button class="timeline-year px-5 py-2.5 rounded-full text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-md transition-all" data-year={y}>
+            {y}
+          </button>
+        ))}
+      </div>
+    </section>
   </div>
+
+  <script>
+    // Client-side filtering
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const categorySelect = document.getElementById('filter-category') as HTMLSelectElement;
+    const yearSelect = document.getElementById('filter-year') as HTMLSelectElement;
+    const locationSelect = document.getElementById('filter-location') as HTMLSelectElement;
+    const documentsGrid = document.getElementById('documents-grid')!;
+    const noResults = document.getElementById('no-results')!;
+    const featuredSection = document.getElementById('featured-section');
+
+    function applyFilters() {
+      const search = searchInput.value.toLowerCase().trim();
+      const category = categorySelect.value;
+      const year = yearSelect.value;
+      const location = locationSelect.value;
+
+      const items = documentsGrid.querySelectorAll('.document-item') as NodeListOf<HTMLElement>;
+      let visibleCount = 0;
+
+      items.forEach(item => {
+        const matchSearch = !search ||
+          item.dataset.title!.includes(search) ||
+          item.dataset.excerpt!.includes(search) ||
+          item.dataset.tags!.includes(search);
+        const matchCategory = !category || item.dataset.category === category;
+        const matchYear = !year || item.dataset.year === year;
+        const matchLocation = !location || item.dataset.location === location;
+
+        const visible = matchSearch && matchCategory && matchYear && matchLocation;
+        item.style.display = visible ? '' : 'none';
+        if (visible) visibleCount++;
+      });
+
+      noResults.classList.toggle('hidden', visibleCount > 0);
+
+      // Hide featured when filtering
+      if (featuredSection) {
+        featuredSection.style.display = (search || category || year || location) ? 'none' : '';
+      }
+    }
+
+    searchInput.addEventListener('input', () => setTimeout(applyFilters, 100));
+    categorySelect.addEventListener('change', applyFilters);
+    yearSelect.addEventListener('change', applyFilters);
+    locationSelect.addEventListener('change', applyFilters);
+
+    // Filter tags
+    document.querySelectorAll('.filter-tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+        tag.classList.add('active');
+
+        const tagValue = (tag as HTMLElement).dataset.tag!;
+        if (tagValue === 'Recent') {
+          categorySelect.value = '';
+        } else if (['Family', 'Travel', 'Medical', 'Photography', 'Essays'].includes(tagValue)) {
+          // Map tag to closest category
+          const mapped: Record<string, string> = {
+            'Family': 'Family Newsletter',
+            'Travel': 'Travel',
+            'Medical': 'Medical',
+            'Photography': 'Photography',
+            'Essays': 'Essay',
+          };
+          // Try exact match first, then partial
+          const options = Array.from(categorySelect.options);
+          const exact = options.find(o => o.value === mapped[tagValue]);
+          if (exact) {
+            categorySelect.value = exact.value;
+          } else {
+            const partial = options.find(o => o.value.toLowerCase().includes(tagValue.toLowerCase()));
+            categorySelect.value = partial?.value || '';
+          }
+        }
+        applyFilters();
+      });
+    });
+
+    // Timeline years
+    document.querySelectorAll('.timeline-year').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const y = (btn as HTMLElement).dataset.year!;
+        yearSelect.value = y;
+        document.querySelectorAll('.timeline-year').forEach(b => b.classList.remove('bg-blue-500', 'text-white', 'border-blue-500'));
+        btn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+        applyFilters();
+      });
+    });
+
+    // Clear filters
+    document.getElementById('clear-filters')?.addEventListener('click', () => {
+      searchInput.value = '';
+      categorySelect.value = '';
+      yearSelect.value = '';
+      locationSelect.value = '';
+      document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+      document.querySelector('.filter-tag[data-tag="Recent"]')?.classList.add('active');
+      document.querySelectorAll('.timeline-year').forEach(b => b.classList.remove('bg-blue-500', 'text-white', 'border-blue-500'));
+      applyFilters();
+    });
+  </script>
 </MainLayout>
