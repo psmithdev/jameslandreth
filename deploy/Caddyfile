@@ -1,0 +1,7 @@
+jameslandreth.com {
+	reverse_proxy localhost:4321
+}
+
+artifacts.jameslandreth.com {
+	reverse_proxy localhost:4321
+}
