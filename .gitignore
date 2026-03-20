@@ -22,3 +22,17 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Superpowers plugin
+.superpowers/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Task files
+tasks.md
+tasks_short.md
+
+# Email archives
+*.eml
+parker_psmith_dev_*/

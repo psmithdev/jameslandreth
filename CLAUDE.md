@@ -4,72 +4,92 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A personal document archive website for Dr. James Landreth, a retired doctor, traveler, photographer, and writer. The site provides a browsable archive of his essays, family newsletters, travel journals, and personal narratives — originally written as Microsoft Word documents and converted to PDF.
+A personal document archive and family heirloom site for Dr. James Landreth, a retired doctor, traveler, photographer, and writer. Two domains served from a single Astro SSR app:
+
+- **jameslandreth.com** — Document archive (essays, newsletters, travel journals, personal narratives)
+- **artifacts.jameslandreth.com** — Family Treasures (heirlooms, antiques, family possessions)
 
 ## Architecture
 
-This is a static site deployed via **GitHub Pages** (branch: `gh-pages`). The main pages are:
+**Astro 6 SSR** app with Node adapter, backed by **Supabase** (Postgres + Auth + Storage). Middleware inspects the `Host` header to route between the main site and artifacts subdomain.
 
-- **`index.html`** — Main document archive with search, filtering by category, and document card previews
-- **`viewer.html`** — Individual document viewer with PDF-style rendering
-- **`upload.html`** — Document upload interface
-- **`admin.html`** — Content management system for managing documents
-- **`family-tree.html`** — Family tree page
+### Key Directories
 
-### Supporting Files
+```
+src/
+  layouts/          # MainLayout.astro, ArtifactsLayout.astro
+  lib/              # supabase.ts (client factories), auth.ts (session/role helpers)
+  middleware.ts     # Host-based routing (main vs artifacts)
+  pages/
+    main/           # Pages for jameslandreth.com
+    artifacts/      # Pages for artifacts.jameslandreth.com
+    api/auth/       # Auth callback and logout endpoints
+  styles/global.css # Tailwind CSS v4 entry point
+  components/       # Shared and page-specific components
+supabase/
+  migrations/       # SQL migration files
+legacy/             # Original static HTML files for reference
+deploy/             # Caddy + PM2 config (future)
+```
 
-- **`components/footer-signature.html`** — Reusable footer signature component with animated box effect
-- **`style.css`** — Legacy stylesheet (original design); current pages use inline `<style>` blocks
-- **`wordpress/`** — WordPress development environment with custom theme (not actively used for deployment)
+### Three User Tiers
+
+- **admin** — Full CRUD on documents and artifacts
+- **family** — Comment, claim artifacts, access private docs
+- **public** — Browse published content
 
 ## Tech Stack
 
-- **Pure HTML/CSS/JavaScript** — no build tools or frameworks
-- **Inline styles** — each HTML page contains its own `<style>` block with a unified design system
-- **GitHub Pages** — static hosting from the `gh-pages` branch
+- **Astro 6** with Node adapter (SSR mode)
+- **Tailwind CSS v4** via `@tailwindcss/vite` plugin
+- **Supabase** — Postgres, Auth, Storage
+- **TypeScript** (strict mode)
 
-## Design System
+## Development
 
-The pages share a consistent design language:
+```bash
+npm install          # Install dependencies
+npm run dev          # Start dev server (http://localhost:4321)
+npm run build        # Production build
+npm run preview      # Preview production build
+```
 
-- System font stack (`-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui`)
-- Subtle gradient backgrounds (`#f8fafc` to `#e2e8f0`)
-- Glassmorphism elements (backdrop-filter blur, semi-transparent backgrounds)
-- CSS-based document preview cards with overlay effects
-- Responsive layout
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in Supabase credentials:
+
+```
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+## Database Schema
+
+Tables: `profiles`, `documents`, `artifacts`, `comments`
+Enums: `user_role`, `document_status`, `artifact_status`, `target_type`
+
+Migrations are in `supabase/migrations/`. Apply via Supabase CLI or Dashboard.
 
 ## Content Categories
 
 Health, Fashion, Food, Shopping, Events, Fiction, Travel (especially Japan), Education, Family History, Photography, Music, Annual Adventures, Personal Essays
 
-## Development
-
-No build step required. Open HTML files directly in a browser or use a simple HTTP server:
-
-```bash
-python3 -m http.server 8000
-```
-
 ## Deployment
 
-The site is deployed on GitHub Pages from the `gh-pages` branch. Push to `gh-pages` to deploy.
+Target: VPS with Caddy (reverse proxy + HTTPS) + PM2 (process manager).
+Legacy deployment on GitHub Pages from `gh-pages` branch still active.
 
 ## Commit & Pull Request Guidelines
 
-## Commits
+### Commits
 
 - Use short, imperative subjects: Add …, Fix …, Refactor …, Update …
 - One commit per logical change.
 - Keep subject under 72 characters.
 - Add a brief body only if the reason is not obvious.
 
-Examples:
-
-- Fix mobile header sticky offset
-- Add bottom tab navigation
-- Refactor AppShell layout structure
-
-## Pull Requests
+### Pull Requests
 
 Include:
 
