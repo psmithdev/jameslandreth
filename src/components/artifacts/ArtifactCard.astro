@@ -1,0 +1,64 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  category: string;
+  family: string;
+  description: string;
+  estimatedValue: string;
+  status: string;
+  images?: string[];
+}
+
+const { slug, title, category, family, description, estimatedValue, status, images } = Astro.props;
+
+const categoryIcons: Record<string, string> = {
+  'Furniture': '🪑',
+  'China & Porcelain': '☕',
+  'Glassware & Crystal': '🥂',
+  'Paintings & Art': '🎨',
+  'Books & Documents': '📚',
+  'Tools & Equipment': '🔧',
+  'Jewelry & Accessories': '💎',
+  'Linens & Textiles': '🧵',
+  'Kitchenware': '🍴',
+  'Musical Instruments': '🎼',
+  'Miscellaneous': '📦',
+};
+
+const statusStyles: Record<string, string> = {
+  available: 'bg-green-100 text-green-700',
+  claimed: 'bg-amber-100 text-amber-700',
+  gifted: 'bg-slate-100 text-slate-600',
+};
+
+const icon = categoryIcons[category] || '📦';
+const statusClass = statusStyles[status] || 'bg-slate-100 text-slate-600';
+---
+
+<a href={`/items/${slug}`} class="group block bg-white border border-amber-200/60 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+  <!-- Image / Placeholder -->
+  <div class="h-48 bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center text-5xl border-b border-amber-100">
+    {images && images.length > 0 ? (
+      <img src={images[0]} alt={title} class="w-full h-full object-cover" />
+    ) : (
+      <span>{icon}</span>
+    )}
+  </div>
+  <div class="p-5">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs font-semibold text-amber-600">{category}</span>
+      <span class={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusClass}`}>
+        {status}
+      </span>
+    </div>
+    <h3 class="text-base font-bold text-slate-900 mb-1.5 group-hover:text-amber-700 transition-colors leading-snug">
+      {title}
+    </h3>
+    <p class="text-sm text-slate-500 line-clamp-2 mb-3">{description}</p>
+    <div class="flex items-center justify-between text-xs text-slate-400">
+      <span class="font-medium">{family} Family</span>
+      {estimatedValue && <span>{estimatedValue}</span>}
+    </div>
+  </div>
+</a>

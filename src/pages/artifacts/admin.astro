@@ -1,0 +1,199 @@
+---
+import ArtifactsLayout from '../../layouts/ArtifactsLayout.astro';
+import { isAdmin } from '../../lib/auth';
+import { createServerClient } from '../../lib/supabase';
+
+const user = (Astro.locals as any).user;
+if (!isAdmin(user)) {
+  return Astro.redirect('/login');
+}
+
+const supabase = createServerClient();
+const { data: artifacts } = await supabase
+  .from('artifacts')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+const items = artifacts || [];
+const availableCount = items.filter(i => i.status === 'available').length;
+const claimedCount = items.filter(i => i.status === 'claimed').length;
+
+const statusColors: Record<string, string> = {
+  available: 'bg-green-100 text-green-700',
+  claimed: 'bg-amber-100 text-amber-700',
+  gifted: 'bg-slate-100 text-slate-600',
+};
+---
+
+<ArtifactsLayout title="Admin - Family Treasures">
+  <div class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Artifacts Admin</h1>
+        <p class="text-slate-500 text-sm mt-1">Manage family heirlooms and treasures</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="bg-white border border-amber-200/60 rounded-xl p-5 shadow-sm">
+        <div class="text-2xl font-bold text-slate-900">{items.length}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Total</div>
+      </div>
+      <div class="bg-white border border-amber-200/60 rounded-xl p-5 shadow-sm">
+        <div class="text-2xl font-bold text-green-600">{availableCount}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Available</div>
+      </div>
+      <div class="bg-white border border-amber-200/60 rounded-xl p-5 shadow-sm">
+        <div class="text-2xl font-bold text-amber-600">{claimedCount}</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Claimed</div>
+      </div>
+    </div>
+
+    <!-- Add new item form (collapsible) -->
+    <div class="bg-white border border-amber-200/60 rounded-2xl shadow-sm mb-8 overflow-hidden">
+      <button id="toggle-add-form" class="w-full px-6 py-4 text-left font-semibold text-slate-700 hover:bg-amber-50 transition-colors flex items-center justify-between">
+        <span>+ Add New Item</span>
+        <svg class="w-5 h-5 text-slate-400 transition-transform" id="add-form-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <form id="add-form" class="hidden px-6 pb-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+            <input type="text" name="title" required class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Category *</label>
+            <select name="category" required class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm bg-white focus:outline-none focus:border-amber-500">
+              <option value="">Select</option>
+              <option>Furniture</option>
+              <option>China & Porcelain</option>
+              <option>Glassware & Crystal</option>
+              <option>Paintings & Art</option>
+              <option>Books & Documents</option>
+              <option>Tools & Equipment</option>
+              <option>Jewelry & Accessories</option>
+              <option>Linens & Textiles</option>
+              <option>Kitchenware</option>
+              <option>Musical Instruments</option>
+              <option>Miscellaneous</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Family</label>
+            <input type="text" name="family" class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500" placeholder="e.g. Walsh" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Estimated Value</label>
+            <input type="text" name="estimated_value" class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500" placeholder="e.g. $200 - $400" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+          <textarea name="description" rows="2" class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Provenance</label>
+          <textarea name="provenance" rows="2" class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500 resize-none"></textarea>
+        </div>
+        <div id="add-error" class="hidden p-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
+        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors text-sm">Add Item</button>
+      </form>
+    </div>
+
+    <!-- Items Table -->
+    <div class="bg-white border border-amber-200/60 rounded-2xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-amber-100">
+              <th class="text-left px-6 py-4 font-semibold text-slate-500 uppercase tracking-wider text-xs">Item</th>
+              <th class="text-left px-6 py-4 font-semibold text-slate-500 uppercase tracking-wider text-xs">Category</th>
+              <th class="text-left px-6 py-4 font-semibold text-slate-500 uppercase tracking-wider text-xs">Family</th>
+              <th class="text-left px-6 py-4 font-semibold text-slate-500 uppercase tracking-wider text-xs">Status</th>
+              <th class="text-right px-6 py-4 font-semibold text-slate-500 uppercase tracking-wider text-xs">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr class="border-b border-amber-50 hover:bg-amber-50/30 transition-colors">
+                <td class="px-6 py-4">
+                  <a href={`/items/${item.slug}`} class="font-semibold text-slate-800 hover:text-amber-600 transition-colors">{item.title}</a>
+                </td>
+                <td class="px-6 py-4 text-slate-600">{item.category}</td>
+                <td class="px-6 py-4 text-slate-600">{item.family}</td>
+                <td class="px-6 py-4">
+                  <span class={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[item.status] || ''}`}>{item.status}</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <button class="delete-btn text-xs font-medium text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition" data-id={item.id} data-title={item.title}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {items.length === 0 && (
+              <tr>
+                <td colspan="5" class="px-6 py-12 text-center text-slate-400">No artifacts yet.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+
+    // Toggle add form
+    const toggleBtn = document.getElementById('toggle-add-form')!;
+    const addForm = document.getElementById('add-form')!;
+    const arrow = document.getElementById('add-form-arrow')!;
+    toggleBtn.addEventListener('click', () => {
+      addForm.classList.toggle('hidden');
+      arrow.style.transform = addForm.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    });
+
+    // Add item
+    addForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(addForm as HTMLFormElement);
+      const title = fd.get('title') as string;
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+      const { error } = await supabase.from('artifacts').insert({
+        slug,
+        title,
+        category: fd.get('category'),
+        family: fd.get('family') || null,
+        description: fd.get('description') || null,
+        provenance: fd.get('provenance') || null,
+        estimated_value: fd.get('estimated_value') || null,
+        status: 'available',
+      });
+
+      if (error) {
+        const errDiv = document.getElementById('add-error')!;
+        errDiv.textContent = error.message;
+        errDiv.classList.remove('hidden');
+      } else {
+        window.location.reload();
+      }
+    });
+
+    // Delete
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const el = btn as HTMLElement;
+        if (!confirm(`Delete "${el.dataset.title}"?`)) return;
+        const { error } = await supabase.from('artifacts').delete().eq('id', el.dataset.id);
+        if (error) alert(error.message);
+        else el.closest('tr')?.remove();
+      });
+    });
+  </script>
+</ArtifactsLayout>
