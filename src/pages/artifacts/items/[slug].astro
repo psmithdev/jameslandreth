@@ -13,7 +13,7 @@ const { data: item } = await supabase
   .single();
 
 if (!item) {
-  return Astro.redirect('/');
+  return Astro.redirect('/artifacts');
 }
 
 const user = (Astro.locals as any).user;
@@ -47,7 +47,7 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
 <ArtifactsLayout title={`${item.title} - Family Treasures`}>
   <div class="max-w-5xl mx-auto px-6 py-8">
     <!-- Back -->
-    <a href="/" class="inline-flex items-center gap-2 text-sm font-semibold text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-xl transition-colors mb-6">
+    <a href="/artifacts" class="inline-flex items-center gap-2 text-sm font-semibold text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-xl transition-colors mb-6">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       Back to Gallery
     </a>
