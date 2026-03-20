@@ -4,48 +4,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a personal website/blog for Dr. James Landreth, a retired doctor who is an avid traveler, photographer, and writer. The main challenge is displaying hundreds of beautifully formatted Microsoft Word documents (converted to PDF) on his WordPress blog while maintaining their professional appearance and readability.
+A personal document archive website for Dr. James Landreth, a retired doctor, traveler, photographer, and writer. The site provides a browsable archive of his essays, family newsletters, travel journals, and personal narratives — originally written as Microsoft Word documents and converted to PDF.
 
-## Content Profile
+## Architecture
 
-- **Author**: Retired doctor with extensive travel and photography experience
-- **Content type**: Essays, family newsletters, travel journals, and personal narratives
-- **Source format**: Microsoft Word documents with professional formatting, images, and layouts
-- **Current format**: PDFs generated from Word documents
-- **Target platform**: WordPress blog integration
+This is a static site deployed via **GitHub Pages** (branch: `gh-pages`). The main pages are:
 
-## Document Characteristics
+- **`index.html`** — Main document archive with search, filtering by category, and document card previews
+- **`viewer.html`** — Individual document viewer with PDF-style rendering
+- **`upload.html`** — Document upload interface
+- **`admin.html`** — Content management system for managing documents
+- **`family-tree.html`** — Family tree page
 
-Based on sample documents:
-- **Family newsletters**: "Les Nouvelles de Famille" style annual updates with photos and detailed family stories
-- **Travel journals**: "Our Journal of the Plague Year" documenting experiences and adventures
-- **Professional formatting**: Multi-column layouts, integrated images, consistent typography
-- **Rich content**: Personal narratives, historical references, cultural observations
+### Supporting Files
+
+- **`components/footer-signature.html`** — Reusable footer signature component with animated box effect
+- **`style.css`** — Legacy stylesheet (original design); current pages use inline `<style>` blocks
+- **`wordpress/`** — WordPress development environment with custom theme (not actively used for deployment)
+
+## Tech Stack
+
+- **Pure HTML/CSS/JavaScript** — no build tools or frameworks
+- **Inline styles** — each HTML page contains its own `<style>` block with a unified design system
+- **GitHub Pages** — static hosting from the `gh-pages` branch
+
+## Design System
+
+The pages share a consistent design language:
+
+- System font stack (`-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui`)
+- Subtle gradient backgrounds (`#f8fafc` to `#e2e8f0`)
+- Glassmorphism elements (backdrop-filter blur, semi-transparent backgrounds)
+- CSS-based document preview cards with overlay effects
+- Responsive layout
 
 ## Content Categories
 
-The website covers diverse topics including:
-- Health, Fashion, Food, Shopping, Events
-- Fiction, Travel (especially Japan), Education  
-- Family History, Photography, Music
-- Annual Adventures, Personal Essays
+Health, Fashion, Food, Shopping, Events, Fiction, Travel (especially Japan), Education, Family History, Photography, Music, Annual Adventures, Personal Essays
 
-## Technical Challenge
+## Development
 
-**Primary goal**: Convert beautifully formatted Word/PDF documents into web-friendly format for WordPress while preserving:
-- Professional layout and typography
-- Image placement and formatting
-- Readability and visual appeal
-- Consistent styling across hundreds of documents
+No build step required. Open HTML files directly in a browser or use a simple HTTP server:
 
-## Current State
+```bash
+python3 -m http.server 8000
+```
 
-The repository contains basic HTML/CSS files that appear to be early development work, not reflecting the actual WordPress blog structure shown in the live site.
+## Deployment
 
-## Development Considerations
+The site is deployed on GitHub Pages from the `gh-pages` branch. Push to `gh-pages` to deploy.
 
-- **Content migration**: Need system to convert PDF/Word content to WordPress posts
-- **Formatting preservation**: Maintain visual quality of original documents
-- **Image handling**: Properly display and optimize photos from original documents
-- **Navigation**: Organize hundreds of documents by category and chronology
-- **Responsive design**: Ensure documents display well on all devices
+## Commit & Pull Request Guidelines
+
+## Commits
+
+- Use short, imperative subjects: Add …, Fix …, Refactor …, Update …
+- One commit per logical change.
+- Keep subject under 72 characters.
+- Add a brief body only if the reason is not obvious.
+
+Examples:
+
+- Fix mobile header sticky offset
+- Add bottom tab navigation
+- Refactor AppShell layout structure
+
+## Pull Requests
+
+Include:
+
+- Clear summary and rationale
+- Linked issue/task ID (if available)
+- Screenshots or short recordings for UI changes
+- Notes on environment/config updates (only if changed)
