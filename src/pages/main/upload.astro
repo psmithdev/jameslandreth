@@ -127,13 +127,6 @@ if (!isAdmin(user)) {
   </div>
 
   <script>
-    import { createClient } from '@supabase/supabase-js';
-
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL,
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-    );
-
     let selectedFile: File | null = null;
     const dropzone = document.getElementById('dropzone')!;
     const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -183,7 +176,7 @@ if (!isAdmin(user)) {
       fileInput.value = '';
     });
 
-    // Form submit
+    // Form submit — uses server-side API route
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorDiv.classList.add('hidden');
@@ -199,57 +192,28 @@ if (!isAdmin(user)) {
         return;
       }
 
+      // Attach the selected file
+      if (selectedFile) {
+        formData.set('file', selectedFile);
+      }
+
       const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Uploading...';
 
       try {
-        // Generate slug from title
-        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const res = await fetch('/api/documents/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-        // Upload file if selected
-        let filePath = '';
-        let fileType = 'PDF';
-        if (selectedFile) {
-          const ext = selectedFile.name.split('.').pop()?.toLowerCase() || '';
-          fileType = ext === 'pdf' ? 'PDF' : 'Word';
-          filePath = `${slug}.${ext}`;
+        const data = await res.json();
 
-          const { error: uploadError } = await supabase.storage
-            .from('documents')
-            .upload(filePath, selectedFile, { upsert: true });
-
-          if (uploadError) throw uploadError;
-        }
-
-        // Parse tags
-        const tagsStr = formData.get('tags') as string;
-        const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
-
-        // Insert document record
-        const { error: insertError } = await supabase
-          .from('documents')
-          .insert({
-            slug,
-            title,
-            category,
-            excerpt: formData.get('excerpt') || null,
-            date: formData.get('date') || null,
-            year: formData.get('year') ? parseInt(formData.get('year') as string) : null,
-            location: formData.get('location') || null,
-            tags,
-            pages: formData.get('pages') || null,
-            file_type: fileType,
-            file_path: filePath || null,
-            featured: (formData.get('featured') as string) === 'on',
-            status: 'published',
-          });
-
-        if (insertError) throw insertError;
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
 
         successDiv.textContent = 'Document uploaded successfully! Redirecting...';
         successDiv.classList.remove('hidden');
-        setTimeout(() => window.location.href = '/', 1500);
+        setTimeout(() => window.location.href = '/main', 1500);
       } catch (err: any) {
         errorDiv.textContent = err.message || 'Upload failed.';
         errorDiv.classList.remove('hidden');
