@@ -4,48 +4,96 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a personal website/blog for Dr. James Landreth, a retired doctor who is an avid traveler, photographer, and writer. The main challenge is displaying hundreds of beautifully formatted Microsoft Word documents (converted to PDF) on his WordPress blog while maintaining their professional appearance and readability.
+A personal document archive and family heirloom site for Dr. James Landreth, a retired doctor, traveler, photographer, and writer. Two domains served from a single Astro SSR app:
 
-## Content Profile
+- **jameslandreth.com** — Document archive (essays, newsletters, travel journals, personal narratives)
+- **artifacts.jameslandreth.com** — Family Treasures (heirlooms, antiques, family possessions)
 
-- **Author**: Retired doctor with extensive travel and photography experience
-- **Content type**: Essays, family newsletters, travel journals, and personal narratives
-- **Source format**: Microsoft Word documents with professional formatting, images, and layouts
-- **Current format**: PDFs generated from Word documents
-- **Target platform**: WordPress blog integration
+## Architecture
 
-## Document Characteristics
+**Astro 6 SSR** app with Node adapter, backed by **Supabase** (Postgres + Auth + Storage). Middleware inspects the `Host` header to route between the main site and artifacts subdomain.
 
-Based on sample documents:
-- **Family newsletters**: "Les Nouvelles de Famille" style annual updates with photos and detailed family stories
-- **Travel journals**: "Our Journal of the Plague Year" documenting experiences and adventures
-- **Professional formatting**: Multi-column layouts, integrated images, consistent typography
-- **Rich content**: Personal narratives, historical references, cultural observations
+### Key Directories
+
+```
+src/
+  layouts/          # MainLayout.astro, ArtifactsLayout.astro
+  lib/              # supabase.ts (client factories), auth.ts (session/role helpers)
+  middleware.ts     # Host-based routing (main vs artifacts)
+  pages/
+    main/           # Pages for jameslandreth.com
+    artifacts/      # Pages for artifacts.jameslandreth.com
+    api/auth/       # Auth callback and logout endpoints
+  styles/global.css # Tailwind CSS v4 entry point
+  components/       # Shared and page-specific components
+supabase/
+  migrations/       # SQL migration files
+legacy/             # Original static HTML files for reference
+deploy/             # Caddy + PM2 config (future)
+```
+
+### Three User Tiers
+
+- **admin** — Full CRUD on documents and artifacts
+- **family** — Comment, claim artifacts, access private docs
+- **public** — Browse published content
+
+## Tech Stack
+
+- **Astro 6** with Node adapter (SSR mode)
+- **Tailwind CSS v4** via `@tailwindcss/vite` plugin
+- **Supabase** — Postgres, Auth, Storage
+- **TypeScript** (strict mode)
+
+## Development
+
+```bash
+npm install          # Install dependencies
+npm run dev          # Start dev server (http://localhost:4321)
+npm run build        # Production build
+npm run preview      # Preview production build
+```
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in Supabase credentials:
+
+```
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+## Database Schema
+
+Tables: `profiles`, `documents`, `artifacts`, `comments`
+Enums: `user_role`, `document_status`, `artifact_status`, `target_type`
+
+Migrations are in `supabase/migrations/`. Apply via Supabase CLI or Dashboard.
 
 ## Content Categories
 
-The website covers diverse topics including:
-- Health, Fashion, Food, Shopping, Events
-- Fiction, Travel (especially Japan), Education  
-- Family History, Photography, Music
-- Annual Adventures, Personal Essays
+Health, Fashion, Food, Shopping, Events, Fiction, Travel (especially Japan), Education, Family History, Photography, Music, Annual Adventures, Personal Essays
 
-## Technical Challenge
+## Deployment
 
-**Primary goal**: Convert beautifully formatted Word/PDF documents into web-friendly format for WordPress while preserving:
-- Professional layout and typography
-- Image placement and formatting
-- Readability and visual appeal
-- Consistent styling across hundreds of documents
+Target: VPS with Caddy (reverse proxy + HTTPS) + PM2 (process manager).
+Legacy deployment on GitHub Pages from `gh-pages` branch still active.
 
-## Current State
+## Commit & Pull Request Guidelines
 
-The repository contains basic HTML/CSS files that appear to be early development work, not reflecting the actual WordPress blog structure shown in the live site.
+### Commits
 
-## Development Considerations
+- Use short, imperative subjects: Add …, Fix …, Refactor …, Update …
+- One commit per logical change.
+- Keep subject under 72 characters.
+- Add a brief body only if the reason is not obvious.
 
-- **Content migration**: Need system to convert PDF/Word content to WordPress posts
-- **Formatting preservation**: Maintain visual quality of original documents
-- **Image handling**: Properly display and optimize photos from original documents
-- **Navigation**: Organize hundreds of documents by category and chronology
-- **Responsive design**: Ensure documents display well on all devices
+### Pull Requests
+
+Include:
+
+- Clear summary and rationale
+- Linked issue/task ID (if available)
+- Screenshots or short recordings for UI changes
+- Notes on environment/config updates (only if changed)

@@ -1,0 +1,261 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { isAdmin } from '../../lib/auth';
+
+const user = (Astro.locals as any).user;
+
+// Admin guard
+if (!isAdmin(user)) {
+  return Astro.redirect('/login');
+}
+---
+
+<MainLayout title="Upload Documents - Dr. James Landreth">
+  <div class="max-w-4xl mx-auto px-6 py-10">
+
+    <div class="text-center mb-10">
+      <h1 class="text-3xl font-bold text-slate-900 tracking-tight mb-3">Upload Documents</h1>
+      <p class="text-slate-600 max-w-xl mx-auto">
+        Add travel journals, family newsletters, essays, and photography to the archive.
+      </p>
+    </div>
+
+    <!-- Upload Drop Zone -->
+    <div
+      id="dropzone"
+      class="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center bg-white/70 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer mb-8"
+    >
+      <div class="text-5xl mb-4">📄</div>
+      <p class="text-lg font-semibold text-slate-700 mb-1">Drag & Drop Your Document Here</p>
+      <p class="text-sm text-slate-500 mb-4">or click to browse</p>
+      <button id="browse-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors shadow-sm">
+        Choose File
+      </button>
+      <input type="file" id="file-input" class="hidden" accept=".pdf,.doc,.docx" />
+      <div class="flex justify-center gap-6 mt-6 text-xs text-slate-400">
+        <span>PDF</span>
+        <span>Word (.doc, .docx)</span>
+      </div>
+    </div>
+
+    <!-- File preview -->
+    <div id="file-preview" class="hidden mb-8 bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📎</span>
+        <div>
+          <p id="file-name" class="font-semibold text-slate-700 text-sm"></p>
+          <p id="file-size" class="text-xs text-slate-400"></p>
+        </div>
+      </div>
+      <button id="remove-file" class="text-red-400 hover:text-red-600 text-sm font-medium">Remove</button>
+    </div>
+
+    <!-- Metadata Form -->
+    <form id="upload-form" class="bg-white border border-slate-200/60 rounded-2xl p-8 shadow-sm">
+      <h2 class="text-lg font-bold text-slate-900 mb-6">Document Details</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Title *</label>
+          <input type="text" name="title" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition" placeholder="Document title" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Category *</label>
+          <select name="category" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition bg-white">
+            <option value="">Select category</option>
+            <option>Travel</option>
+            <option>Travel Journal</option>
+            <option>Essay</option>
+            <option>Family Newsletter</option>
+            <option>Family</option>
+            <option>Medical</option>
+            <option>Photography</option>
+            <option>Fiction</option>
+            <option>Education</option>
+            <option>Music</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Excerpt</label>
+        <textarea name="excerpt" rows="3" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition resize-none" placeholder="Brief description of the document"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Date</label>
+          <input type="text" name="date" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition" placeholder="e.g. March 2024" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Year</label>
+          <input type="number" name="year" min="1950" max="2030" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition" placeholder="2024" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Location</label>
+          <input type="text" name="location" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition" placeholder="e.g. Japan" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Tags</label>
+          <input type="text" name="tags" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition" placeholder="Comma-separated tags" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Pages</label>
+          <input type="text" name="pages" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/10 transition" placeholder="e.g. 12 pages" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mb-6">
+        <input type="checkbox" name="featured" id="featured" class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500" />
+        <label for="featured" class="text-sm font-medium text-slate-700">Featured document</label>
+      </div>
+
+      <!-- Status messages -->
+      <div id="upload-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
+      <div id="upload-success" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700"></div>
+
+      <div class="flex items-center gap-4">
+        <button type="submit" id="submit-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-2.5 rounded-xl transition-colors shadow-sm">
+          Upload Document
+        </button>
+        <a href="/" class="text-sm text-slate-500 hover:text-slate-700 font-medium">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+
+    const supabase = createClient(
+      import.meta.env.PUBLIC_SUPABASE_URL,
+      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+    );
+
+    let selectedFile: File | null = null;
+    const dropzone = document.getElementById('dropzone')!;
+    const fileInput = document.getElementById('file-input') as HTMLInputElement;
+    const filePreview = document.getElementById('file-preview')!;
+    const fileName = document.getElementById('file-name')!;
+    const fileSize = document.getElementById('file-size')!;
+    const form = document.getElementById('upload-form') as HTMLFormElement;
+    const errorDiv = document.getElementById('upload-error')!;
+    const successDiv = document.getElementById('upload-success')!;
+
+    function showFile(file: File) {
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+      filePreview.classList.remove('hidden');
+    }
+
+    // Browse button
+    document.getElementById('browse-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files?.[0]) showFile(fileInput.files[0]);
+    });
+
+    // Drag and drop
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-blue-400', 'bg-blue-50/50');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-blue-400', 'bg-blue-50/50');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-blue-400', 'bg-blue-50/50');
+      if (e.dataTransfer?.files[0]) showFile(e.dataTransfer.files[0]);
+    });
+
+    // Remove file
+    document.getElementById('remove-file')?.addEventListener('click', () => {
+      selectedFile = null;
+      filePreview.classList.add('hidden');
+      fileInput.value = '';
+    });
+
+    // Form submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.classList.add('hidden');
+      successDiv.classList.add('hidden');
+
+      const formData = new FormData(form);
+      const title = formData.get('title') as string;
+      const category = formData.get('category') as string;
+
+      if (!title || !category) {
+        errorDiv.textContent = 'Title and category are required.';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+
+      try {
+        // Generate slug from title
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        // Upload file if selected
+        let filePath = '';
+        let fileType = 'PDF';
+        if (selectedFile) {
+          const ext = selectedFile.name.split('.').pop()?.toLowerCase() || '';
+          fileType = ext === 'pdf' ? 'PDF' : 'Word';
+          filePath = `${slug}.${ext}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('documents')
+            .upload(filePath, selectedFile, { upsert: true });
+
+          if (uploadError) throw uploadError;
+        }
+
+        // Parse tags
+        const tagsStr = formData.get('tags') as string;
+        const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+        // Insert document record
+        const { error: insertError } = await supabase
+          .from('documents')
+          .insert({
+            slug,
+            title,
+            category,
+            excerpt: formData.get('excerpt') || null,
+            date: formData.get('date') || null,
+            year: formData.get('year') ? parseInt(formData.get('year') as string) : null,
+            location: formData.get('location') || null,
+            tags,
+            pages: formData.get('pages') || null,
+            file_type: fileType,
+            file_path: filePath || null,
+            featured: (formData.get('featured') as string) === 'on',
+            status: 'published',
+          });
+
+        if (insertError) throw insertError;
+
+        successDiv.textContent = 'Document uploaded successfully! Redirecting...';
+        successDiv.classList.remove('hidden');
+        setTimeout(() => window.location.href = '/', 1500);
+      } catch (err: any) {
+        errorDiv.textContent = err.message || 'Upload failed.';
+        errorDiv.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Upload Document';
+      }
+    });
+  </script>
+</MainLayout>

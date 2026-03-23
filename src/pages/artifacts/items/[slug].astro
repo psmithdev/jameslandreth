@@ -1,0 +1,238 @@
+---
+import ArtifactsLayout from '../../../layouts/ArtifactsLayout.astro';
+import { createServerClient } from '../../../lib/supabase';
+import { isFamily } from '../../../lib/auth';
+
+const { slug } = Astro.params;
+const supabase = createServerClient();
+
+const { data: item } = await supabase
+  .from('artifacts')
+  .select('*')
+  .eq('slug', slug)
+  .single();
+
+if (!item) {
+  return Astro.redirect('/artifacts');
+}
+
+const user = (Astro.locals as any).user;
+const canClaim = isFamily(user) && item.status === 'available';
+
+// Fetch comments for this artifact
+const { data: comments } = await supabase
+  .from('comments')
+  .select('*, profiles(display_name, email)')
+  .eq('target_type', 'artifact')
+  .eq('target_id', item.id)
+  .order('created_at', { ascending: true });
+
+const categoryIcons: Record<string, string> = {
+  'Furniture': '🪑', 'China & Porcelain': '☕', 'Glassware & Crystal': '🥂',
+  'Paintings & Art': '🎨', 'Books & Documents': '📚', 'Tools & Equipment': '🔧',
+  'Jewelry & Accessories': '💎', 'Linens & Textiles': '🧵', 'Kitchenware': '🍴',
+  'Musical Instruments': '🎼', 'Miscellaneous': '📦',
+};
+
+const statusStyles: Record<string, { bg: string; text: string }> = {
+  available: { bg: 'bg-green-100', text: 'text-green-700' },
+  claimed: { bg: 'bg-amber-100', text: 'text-amber-700' },
+  gifted: { bg: 'bg-slate-100', text: 'text-slate-600' },
+};
+
+const icon = categoryIcons[item.category] || '📦';
+const sStyle = statusStyles[item.status] || statusStyles.available;
+---
+
+<ArtifactsLayout title={`${item.title} - Family Treasures`}>
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <!-- Back -->
+    <a href="/artifacts" class="inline-flex items-center gap-2 text-sm font-semibold text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-xl transition-colors mb-6">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Back to Gallery
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+      <!-- Main content -->
+      <div>
+        <!-- Image / Placeholder -->
+        <div class="h-80 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200/60 flex items-center justify-center text-7xl mb-8">
+          {item.images && item.images.length > 0 ? (
+            <img src={item.images[0]} alt={item.title} class="w-full h-full object-cover rounded-2xl" />
+          ) : (
+            <span>{icon}</span>
+          )}
+        </div>
+
+        {/* Additional images */}
+        {item.images && item.images.length > 1 && (
+          <div class="flex gap-3 mb-8 overflow-x-auto">
+            {item.images.slice(1).map((img: string, i: number) => (
+              <img src={img} alt={`${item.title} ${i + 2}`} class="w-24 h-24 object-cover rounded-lg border border-amber-200 flex-shrink-0" />
+            ))}
+          </div>
+        )}
+
+        <!-- Description -->
+        <div class="bg-white border border-amber-200/60 rounded-2xl p-8 shadow-sm mb-8">
+          <h2 class="text-lg font-bold text-slate-900 mb-3">Description</h2>
+          <p class="text-slate-600 leading-relaxed">{item.description}</p>
+        </div>
+
+        <!-- Provenance -->
+        {item.provenance && (
+          <div class="bg-white border border-amber-200/60 rounded-2xl p-8 shadow-sm mb-8">
+            <h2 class="text-lg font-bold text-slate-900 mb-3">Provenance & History</h2>
+            <p class="text-slate-600 leading-relaxed">{item.provenance}</p>
+          </div>
+        )}
+
+        <!-- Comments -->
+        <div class="bg-white border border-amber-200/60 rounded-2xl p-8 shadow-sm">
+          <h2 class="text-lg font-bold text-slate-900 mb-4">Comments</h2>
+
+          {comments && comments.length > 0 ? (
+            <div class="space-y-4 mb-6">
+              {comments.map((c: any) => (
+                <div class="border-b border-amber-100 pb-4 last:border-0 last:pb-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm font-semibold text-slate-700">
+                      {c.profiles?.display_name || c.profiles?.email || 'Anonymous'}
+                    </span>
+                    <span class="text-xs text-slate-400">
+                      {new Date(c.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p class="text-sm text-slate-600">{c.body}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p class="text-sm text-slate-400 mb-6">No comments yet.</p>
+          )}
+
+          {isFamily(user) ? (
+            <form id="comment-form" class="flex gap-3">
+              <input
+                type="text"
+                id="comment-input"
+                class="flex-1 px-4 py-2.5 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500 focus:ring-3 focus:ring-amber-500/10 transition"
+                placeholder="Add a comment..."
+                required
+              />
+              <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm">
+                Post
+              </button>
+            </form>
+          ) : (
+            <p class="text-xs text-slate-400">Sign in as a family member to comment.</p>
+          )}
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6">
+        <div class="bg-white border border-amber-200/60 rounded-2xl p-6 shadow-sm sticky top-28">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider">{item.category}</span>
+            <span class={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${sStyle.bg} ${sStyle.text}`}>
+              {item.status}
+            </span>
+          </div>
+
+          <h1 class="text-xl font-bold text-slate-900 leading-snug tracking-tight mb-4">{item.title}</h1>
+
+          <div class="flex flex-col gap-2.5 mb-5 pb-5 border-b border-amber-100">
+            <div class="flex justify-between text-sm">
+              <span class="font-semibold text-slate-700">Family</span>
+              <span class="text-slate-500">{item.family}</span>
+            </div>
+            {item.estimated_value && (
+              <div class="flex justify-between text-sm">
+                <span class="font-semibold text-slate-700">Est. Value</span>
+                <span class="text-slate-500">{item.estimated_value}</span>
+              </div>
+            )}
+            <div class="flex justify-between text-sm">
+              <span class="font-semibold text-slate-700">Status</span>
+              <span class="text-slate-500 capitalize">{item.status}</span>
+            </div>
+          </div>
+
+          {/* Claim button */}
+          {canClaim && (
+            <button
+              id="claim-btn"
+              class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm"
+            >
+              Claim This Item
+            </button>
+          )}
+
+          {item.status === 'claimed' && (
+            <div class="text-center text-sm text-amber-600 font-medium py-2">
+              This item has been claimed
+            </div>
+          )}
+
+          {!user && (
+            <a href="/login" class="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm">
+              Sign in to claim
+            </a>
+          )}
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script define:vars={{ itemId: item.id, artifactSlug: slug }}>
+    // Claim flow
+    const claimBtn = document.getElementById('claim-btn');
+    if (claimBtn) {
+      claimBtn.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to claim this item?')) return;
+        claimBtn.textContent = 'Claiming...';
+        claimBtn.setAttribute('disabled', 'true');
+
+        const res = await fetch('/api/artifacts/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ artifactId: itemId }),
+        });
+
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to claim item.');
+          claimBtn.textContent = 'Claim This Item';
+          claimBtn.removeAttribute('disabled');
+        }
+      });
+    }
+
+    // Comment form
+    const commentForm = document.getElementById('comment-form');
+    if (commentForm) {
+      commentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('comment-input');
+        const body = input.value.trim();
+        if (!body) return;
+
+        const res = await fetch('/api/artifacts/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetType: 'artifact', targetId: itemId, body }),
+        });
+
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to post comment.');
+        }
+      });
+    }
+  </script>
+</ArtifactsLayout>
