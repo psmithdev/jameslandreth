@@ -126,7 +126,7 @@ async function classifyBatch(filenames, artifacts) {
 
   // Extract JSON from response
   const text = response.content.find((b) => b.type === 'text')?.text || '';
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  const jsonMatch = text.match(/\[[\s\S]*?\]/);
   if (!jsonMatch) {
     throw new Error(`No JSON array found in response: ${text.slice(0, 200)}`);
   }
@@ -196,7 +196,10 @@ async function main() {
         // Map response index back to original batch index
         const batchIdx = validIndices[result.index];
         const filename = batch[batchIdx];
-        if (!filename) continue;
+        if (!filename) {
+          console.warn(`  ⚠  API returned out-of-range index ${result.index}, skipping`);
+          continue;
+        }
         covered.add(batchIdx);
 
         // Validate slug exists
