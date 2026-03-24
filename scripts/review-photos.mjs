@@ -30,6 +30,12 @@ function loadEnv(filePath) {
 }
 
 const env = loadEnv(ENV_FILE);
+
+if (!env.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env');
+  process.exit(1);
+}
+
 const supabase = createClient(env.PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
@@ -196,6 +202,10 @@ async function init() {
   }
 }
 
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function badgeClass(c) {
   if (c > 0.8) return 'badge-high';
   if (c >= 0.5) return 'badge-mid';
@@ -206,7 +216,7 @@ function artifactOptions(selectedSlug) {
   let html = '<option value="">— dismiss —</option>';
   for (const a of artifacts) {
     const sel = a.slug === selectedSlug ? ' selected' : '';
-    html += '<option value="' + a.slug + '"' + sel + '>' + a.title + ' (' + a.category + ')</option>';
+    html += '<option value="' + esc(a.slug) + '"' + sel + '>' + esc(a.title) + ' (' + esc(a.category) + ')</option>';
   }
   return html;
 }
@@ -258,11 +268,11 @@ function cardHTML(p) {
   return '<div class="card">' +
     '<img src="/photos/' + encodeURIComponent(p.filename) + '" loading="lazy" />' +
     '<div class="card-body">' +
-      '<div class="card-filename">' + p.filename + ' <span class="badge ' + badgeClass(p.confidence) + '">' + Math.round(p.confidence * 100) + '%</span></div>' +
-      '<div class="card-reasoning">' + (p.reasoning || '') + '</div>' +
+      '<div class="card-filename">' + esc(p.filename) + ' <span class="badge ' + badgeClass(p.confidence) + '">' + Math.round(p.confidence * 100) + '%</span></div>' +
+      '<div class="card-reasoning">' + esc(p.reasoning || '') + '</div>' +
       '<div class="card-controls">' +
-        '<select data-filename="' + p.filename + '" onchange="updateCount()">' + artifactOptions(p.slug) + '</select>' +
-        '<input type="checkbox" data-filename="' + p.filename + '"' + checked + ' onchange="updateCount()" title="Include in mapping" />' +
+        '<select data-filename="' + esc(p.filename) + '" onchange="updateCount()">' + artifactOptions(p.slug) + '</select>' +
+        '<input type="checkbox" data-filename="' + esc(p.filename) + '"' + checked + ' onchange="updateCount()" title="Include in mapping" />' +
       '</div>' +
     '</div></div>';
 }
