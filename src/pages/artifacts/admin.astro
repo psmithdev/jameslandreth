@@ -98,6 +98,11 @@ const statusColors: Record<string, string> = {
           <label class="block text-xs font-semibold text-slate-600 mb-1">Provenance</label>
           <textarea name="provenance" rows="2" class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500 resize-none"></textarea>
         </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Images</label>
+          <input type="file" name="images" accept="image/*" multiple class="w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" />
+          <p class="text-xs text-slate-400 mt-1">JPEG, PNG, WebP, GIF — optional, can add later from item page</p>
+        </div>
         <div id="add-error" class="hidden p-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
         <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors text-sm">Add Item</button>
       </form>
@@ -158,14 +163,16 @@ const statusColors: Record<string, string> = {
       arrow.style.transform = addForm.classList.contains('hidden') ? '' : 'rotate(180deg)';
     });
 
-    // Add item
+    // Add item (two-step: insert artifact, then upload images if any)
     addForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(addForm as HTMLFormElement);
       const title = fd.get('title') as string;
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const errDiv = document.getElementById('add-error')!;
+      errDiv.classList.add('hidden');
 
-      const { error } = await supabase.from('artifacts').insert({
+      const { data, error } = await supabase.from('artifacts').insert({
         slug,
         title,
         category: fd.get('category'),
@@ -174,15 +181,39 @@ const statusColors: Record<string, string> = {
         provenance: fd.get('provenance') || null,
         estimated_value: fd.get('estimated_value') || null,
         status: 'available',
-      });
+      }).select('id').single();
 
       if (error) {
-        const errDiv = document.getElementById('add-error')!;
         errDiv.textContent = error.message;
         errDiv.classList.remove('hidden');
-      } else {
-        window.location.reload();
+        return;
       }
+
+      // Upload images if any were selected
+      const imageInput = addForm.querySelector('input[name="images"]') as HTMLInputElement;
+      if (imageInput.files && imageInput.files.length > 0) {
+        const uploadData = new FormData();
+        uploadData.append('artifactId', data.id);
+        for (const file of imageInput.files) {
+          uploadData.append('file', file);
+        }
+
+        try {
+          const res = await fetch('/api/artifacts/images', {
+            method: 'POST',
+            body: uploadData,
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Image upload failed');
+        } catch (err: any) {
+          errDiv.textContent = `Artifact created but image upload failed: ${err.message}`;
+          errDiv.classList.remove('hidden');
+          setTimeout(() => window.location.reload(), 2000);
+          return;
+        }
+      }
+
+      window.location.reload();
     });
 
     // Delete

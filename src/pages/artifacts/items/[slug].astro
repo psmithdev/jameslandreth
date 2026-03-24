@@ -1,7 +1,8 @@
 ---
 import ArtifactsLayout from '../../../layouts/ArtifactsLayout.astro';
+import ImageManager from '../../../components/artifacts/ImageManager.astro';
 import { createServerClient } from '../../../lib/supabase';
-import { isFamily } from '../../../lib/auth';
+import { isAdmin, isFamily } from '../../../lib/auth';
 
 const { slug } = Astro.params;
 const supabase = createServerClient();
@@ -71,6 +72,11 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
               <img src={img} alt={`${item.title} ${i + 2}`} class="w-24 h-24 object-cover rounded-lg border border-amber-200 flex-shrink-0" />
             ))}
           </div>
+        )}
+
+        {/* Admin image manager */}
+        {isAdmin(user) && (
+          <ImageManager artifactId={item.id} slug={item.slug} images={item.images || []} />
         )}
 
         <!-- Description -->
