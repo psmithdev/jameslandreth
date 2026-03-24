@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "upload-photos": "node scripts/upload-artifact-photos.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.0",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.0"
   }
 }
