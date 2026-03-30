@@ -7,7 +7,12 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "upload-photos": "node scripts/upload-artifact-photos.mjs",
+    "classify-photos": "node scripts/classify-photos.mjs",
+    "review-photos": "node scripts/review-photos.mjs",
+    "propose-artifacts": "node scripts/propose-artifacts.mjs",
+    "ingest": "node scripts/ingest.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.0",
@@ -15,7 +20,9 @@
     "astro": "^6.0.7"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
     "@tailwindcss/vite": "^4.2.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.0"
   }
 }

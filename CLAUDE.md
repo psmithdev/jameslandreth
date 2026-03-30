@@ -4,96 +4,118 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A personal document archive and family heirloom site for Dr. James Landreth, a retired doctor, traveler, photographer, and writer. Two domains served from a single Astro SSR app:
+A personal document archive and family heirloom site for Dr. James Landreth. Two domains served from a single Astro SSR app:
 
 - **jameslandreth.com** — Document archive (essays, newsletters, travel journals, personal narratives)
 - **artifacts.jameslandreth.com** — Family Treasures (heirlooms, antiques, family possessions)
 
-## Architecture
-
-**Astro 6 SSR** app with Node adapter, backed by **Supabase** (Postgres + Auth + Storage). Middleware inspects the `Host` header to route between the main site and artifacts subdomain.
-
-### Key Directories
-
-```
-src/
-  layouts/          # MainLayout.astro, ArtifactsLayout.astro
-  lib/              # supabase.ts (client factories), auth.ts (session/role helpers)
-  middleware.ts     # Host-based routing (main vs artifacts)
-  pages/
-    main/           # Pages for jameslandreth.com
-    artifacts/      # Pages for artifacts.jameslandreth.com
-    api/auth/       # Auth callback and logout endpoints
-  styles/global.css # Tailwind CSS v4 entry point
-  components/       # Shared and page-specific components
-supabase/
-  migrations/       # SQL migration files
-legacy/             # Original static HTML files for reference
-deploy/             # Caddy + PM2 config (future)
-```
-
-### Three User Tiers
-
-- **admin** — Full CRUD on documents and artifacts
-- **family** — Comment, claim artifacts, access private docs
-- **public** — Browse published content
-
 ## Tech Stack
 
-- **Astro 6** with Node adapter (SSR mode)
-- **Tailwind CSS v4** via `@tailwindcss/vite` plugin
-- **Supabase** — Postgres, Auth, Storage
+- **Astro 6** with Node adapter (`output: 'server'`, standalone mode)
+- **Tailwind CSS v4** via `@tailwindcss/vite` plugin (not the legacy PostCSS integration)
+- **Supabase** — Postgres + Auth + Storage
 - **TypeScript** (strict mode)
 
 ## Development
 
 ```bash
-npm install          # Install dependencies
-npm run dev          # Start dev server (http://localhost:4321)
-npm run build        # Production build
-npm run preview      # Preview production build
+npm run dev          # http://localhost:4321
+npm run build
+npm run preview
 ```
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and fill in Supabase credentials:
+Copy `.env.example` to `.env`:
 
 ```
-PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+PUBLIC_SUPABASE_URL=
+PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+ANTHROPIC_API_KEY=          # required for artifact import scripts only
+```
+
+## Architecture
+
+### Host-Based Routing
+
+`src/middleware.ts` inspects the `Host` header on every request:
+- `artifacts.*` → rewrites to `/artifacts/*` pages
+- everything else → rewrites to `/main/*` pages
+
+API routes (`/api/`), static assets (`/_`), and already-prefixed paths are passed through without rewriting. The active site is available as `locals.site` (`'main'` | `'artifacts'`).
+
+### Auth Flow
+
+Session tokens are stored in two HttpOnly cookies (`sb-access-token`, `sb-refresh-token`). The middleware reads those cookies, calls Supabase to validate, and attaches `locals.user` (a `UserProfile`) and `locals.supabase` (a user-scoped client) to every request.
+
+### Supabase Client Factories (`src/lib/supabase.ts`)
+
+Three clients with distinct purposes — use the right one:
+
+| Factory | Key | RLS | Where to use |
+|---|---|---|---|
+| `createBrowserClient()` | anon | enforced | Client-side `<script>` tags |
+| `createUserClient(token)` | anon + JWT | enforced as user | Server pages/API when you have a session |
+| `createServerClient()` | service role | **bypassed** | Admin scripts, migrations only |
+
+### Role Checks (`src/lib/auth.ts`)
+
+```ts
+isAdmin(profile)         // role === 'admin'
+isFamily(profile)        // role === 'family' || 'admin'
+isAuthenticated(profile) // profile !== null
+```
+
+### Page Structure
+
+```
+src/pages/
+  main/
+    index.astro           # jameslandreth.com home
+    docs/[slug].astro     # individual document view
+    upload.astro          # admin document upload
+    admin.astro           # admin dashboard
+    login.astro
+    family-tree.astro
+  artifacts/
+    index.astro           # artifacts.jameslandreth.com home
+    items/[slug].astro    # individual artifact view
+    admin.astro           # admin artifact dashboard
+  api/auth/               # Supabase auth callback + logout endpoints
 ```
 
 ## Database Schema
 
 Tables: `profiles`, `documents`, `artifacts`, `comments`
-Enums: `user_role`, `document_status`, `artifact_status`, `target_type`
 
-Migrations are in `supabase/migrations/`. Apply via Supabase CLI or Dashboard.
+Key points:
+- New Supabase users automatically get a `profiles` row via `handle_new_user()` trigger.
+- `documents.status` (`published`/`draft`/`archived`) gates RLS — only `published` docs are public.
+- `artifacts.status` (`available`/`claimed`/`gifted`) — all artifacts are publicly visible.
+- `comments.target_type` enum (`document` | `artifact`) links comments to either table.
+- Storage buckets required: `documents`, `thumbnails`, `artifacts`, `avatars` (create via Supabase Dashboard).
 
-## Content Categories
+Migrations: `supabase/migrations/`. Apply via Supabase CLI (`supabase db push`) or Dashboard SQL editor.
 
-Health, Fashion, Food, Shopping, Events, Fiction, Travel (especially Japan), Education, Family History, Photography, Music, Annual Adventures, Personal Essays
+## Artifact Import Scripts
+
+One-time data-import pipeline in `scripts/`. Requires `ANTHROPIC_API_KEY` and the service role key in `.env`. Drop source photos into `tmp/artifact-photos/` before running.
+
+```bash
+npm run classify-photos   # Claude vision → tmp/photo-proposals.json
+npm run review-photos     # Browser UI to accept/reject proposals
+npm run propose-artifacts # Generate artifact records from accepted proposals
+npm run upload-photos     # Upload accepted images to Supabase Storage
+```
 
 ## Deployment
 
-Target: VPS with Caddy (reverse proxy + HTTPS) + PM2 (process manager).
-Legacy deployment on GitHub Pages from `gh-pages` branch still active.
+Target: VPS with Caddy (reverse proxy + HTTPS) + PM2 (process manager). Config in `deploy/`.
+Legacy static site still on `gh-pages` branch (GitHub Pages).
 
 ## Commit & Pull Request Guidelines
 
-### Commits
-
-- Use short, imperative subjects: Add …, Fix …, Refactor …, Update …
-- One commit per logical change.
-- Keep subject under 72 characters.
-- Add a brief body only if the reason is not obvious.
-
-### Pull Requests
-
-Include:
-
-- Clear summary and rationale
-- Linked issue/task ID (if available)
-- Screenshots or short recordings for UI changes
-- Notes on environment/config updates (only if changed)
+- Short imperative subjects: `Add`, `Fix`, `Refactor`, `Update` — under 72 chars
+- One commit per logical change; brief body only if reason isn't obvious
+- PRs need summary, rationale, linked task ID (if any), and screenshots for UI changes

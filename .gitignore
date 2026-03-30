@@ -36,3 +36,7 @@ tasks_short.md
 # Email archives
 *.eml
 parker_psmith_dev_*/
+
+# Batch upload staging
+tmp/
+scripts/artifact-photo-map.json
