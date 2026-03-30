@@ -25,6 +25,7 @@ import sharp from 'sharp';
 const ROOT = resolve(import.meta.dirname, '..');
 const PHOTO_DIR = join(ROOT, 'tmp', 'artifact-photos');
 const STATE_FILE = join(ROOT, 'tmp', 'ingest-state.json');
+const VISION_CACHE_FILE = join(ROOT, 'tmp', 'vision-cache.json');
 const ENV_FILE = join(ROOT, '.env');
 const PORT = 3848;
 const BUCKET = 'artifacts';
@@ -85,6 +86,26 @@ function loadState() {
 
 function saveState(state) {
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + '\n');
+}
+
+// ── Vision cache (persists across state resets) ──────────────────────
+// Keyed by "filename::artifactsHash" so the same photo reused with a
+// different artifact DB gets re-classified automatically.
+function loadVisionCache() {
+  if (!existsSync(VISION_CACHE_FILE)) return {};
+  try { return JSON.parse(readFileSync(VISION_CACHE_FILE, 'utf-8')); } catch { return {}; }
+}
+
+function saveVisionCache(cache) {
+  writeFileSync(VISION_CACHE_FILE, JSON.stringify(cache, null, 2) + '\n');
+}
+
+function artifactsHash(artifacts) {
+  return artifacts.map((a) => a.slug).sort().join(',');
+}
+
+function cacheKey(filename, hash) {
+  return `${filename}::${hash}`;
 }
 
 // ── String helpers ───────────────────────────────────────────────────
@@ -166,12 +187,34 @@ async function runClassifyPass(files, artifacts, state) {
   const toClassify = files.filter((f) => !done.has(f));
   if (toClassify.length === 0) return;
 
-  console.log(`\nClassify pass: ${toClassify.length} photos to match against ${artifacts.length} artifacts`);
+  const cache = loadVisionCache();
+  const aHash = artifactsHash(artifacts);
 
-  for (let i = 0; i < toClassify.length; i += CLASSIFY_BATCH) {
-    const batch = toClassify.slice(i, i + CLASSIFY_BATCH);
+  // Pull from cache first — no API call needed for known photos
+  const needApi = [];
+  for (const filename of toClassify) {
+    const hit = cache[cacheKey(filename, aHash)];
+    if (hit) {
+      classified.push({ filename, ...hit });
+      console.log(`  ⚡  ${filename} → ${hit.slug || 'unmatched'} (cached)`);
+    } else {
+      needApi.push(filename);
+    }
+  }
+  state.classified = classified;
+  if (classified.length > 0) saveState(state);
+
+  if (needApi.length === 0) {
+    console.log('\nClassify pass: all photos served from cache — no API calls needed');
+    return;
+  }
+
+  console.log(`\nClassify pass: ${needApi.length} photos to classify (${toClassify.length - needApi.length} from cache)`);
+
+  for (let i = 0; i < needApi.length; i += CLASSIFY_BATCH) {
+    const batch = needApi.slice(i, i + CLASSIFY_BATCH);
     const batchNum = Math.floor(i / CLASSIFY_BATCH) + 1;
-    const total = Math.ceil(toClassify.length / CLASSIFY_BATCH);
+    const total = Math.ceil(needApi.length / CLASSIFY_BATCH);
     console.log(`  Batch ${batchNum}/${total}: ${batch.join(', ')}`);
     try {
       const { results, validIndices } = await classifyBatch(batch, artifacts);
@@ -182,23 +225,29 @@ async function runClassifyPass(files, artifacts, state) {
         if (!filename) continue;
         covered.add(batchIdx);
         const validSlug = r.slug === null || artifacts.some((a) => a.slug === r.slug);
-        classified.push({ filename, slug: validSlug ? r.slug : null, confidence: r.confidence ?? 0, reasoning: r.reasoning || '' });
+        const entry = { slug: validSlug ? r.slug : null, confidence: r.confidence ?? 0, reasoning: r.reasoning || '' };
+        classified.push({ filename, ...entry });
+        cache[cacheKey(filename, aHash)] = entry;
         console.log(`    ${r.slug ? '✓' : '·'}  ${filename} → ${r.slug || 'unmatched'} (${Math.round((r.confidence ?? 0) * 100)}%)`);
       }
       for (let j = 0; j < batch.length; j++) {
         if (!covered.has(j)) {
-          classified.push({ filename: batch[j], slug: null, confidence: 0, reasoning: 'No result from API' });
+          const entry = { slug: null, confidence: 0, reasoning: 'No result from API' };
+          classified.push({ filename: batch[j], ...entry });
+          // Don't cache failures — retry next run
         }
       }
     } catch (err) {
       console.error(`  ✗  Batch failed: ${err.message}`);
       for (const f of batch) {
         classified.push({ filename: f, slug: null, confidence: 0, reasoning: `Batch failed: ${err.message}` });
+        // Don't cache failures
       }
     }
     state.classified = classified;
     saveState(state);
-    if (i + CLASSIFY_BATCH < toClassify.length) await new Promise((r) => setTimeout(r, 1500));
+    saveVisionCache(cache);
+    if (i + CLASSIFY_BATCH < needApi.length) await new Promise((r) => setTimeout(r, 1500));
   }
 }
 
@@ -238,13 +287,21 @@ async function proposeBatch(filenames) {
   }
   if (validFiles.length === 0) return [];
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6', max_tokens: 2048,
+    model: 'claude-sonnet-4-6', max_tokens: 4096,
     messages: [{ role: 'user', content }],
   });
   const text = response.content.find((b) => b.type === 'text')?.text || '';
   const jsonMatch = text.match(/\[[\s\S]*\]/);
   if (!jsonMatch) throw new Error(`No JSON in response: ${text.slice(0, 300)}`);
-  return JSON.parse(jsonMatch[0]);
+  let raw = jsonMatch[0];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // Truncated response — trim to last complete object and close the array
+    const lastClose = raw.lastIndexOf('}');
+    if (lastClose === -1) throw new Error('No complete JSON object found in response');
+    return JSON.parse(raw.slice(0, lastClose + 1) + ']');
+  }
 }
 
 async function runProposePass(state) {
