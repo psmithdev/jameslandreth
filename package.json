@@ -10,7 +10,9 @@
     "astro": "astro",
     "upload-photos": "node scripts/upload-artifact-photos.mjs",
     "classify-photos": "node scripts/classify-photos.mjs",
-    "review-photos": "node scripts/review-photos.mjs"
+    "review-photos": "node scripts/review-photos.mjs",
+    "propose-artifacts": "node scripts/propose-artifacts.mjs",
+    "ingest": "node scripts/ingest.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.0",
