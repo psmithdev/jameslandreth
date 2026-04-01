@@ -120,6 +120,7 @@ function sanitizeName(name) {
 // ── Image helpers ────────────────────────────────────────────────────
 async function createThumbnail(filePath) {
   const buffer = await sharp(filePath)
+    .rotate()  // auto-apply EXIF orientation
     .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
     .jpeg({ quality: 80 })
     .toBuffer();
@@ -128,7 +129,7 @@ async function createThumbnail(filePath) {
 
 async function processImage(filePath) {
   const ext = extname(filePath).toLowerCase();
-  let pipeline = sharp(filePath);
+  let pipeline = sharp(filePath).rotate();  // auto-apply EXIF orientation
   if (HEIC_EXTS.has(ext)) {
     pipeline = pipeline.jpeg({ quality: JPEG_QUALITY });
   }

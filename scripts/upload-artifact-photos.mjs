@@ -53,7 +53,7 @@ const HEIC_EXTS = new Set(['.heic', '.heif']);
 
 async function processImage(filePath) {
   const ext = extname(filePath).toLowerCase();
-  let pipeline = sharp(filePath);
+  let pipeline = sharp(filePath).rotate();  // auto-apply EXIF orientation
 
   // HEIC/HEIF → JPEG
   if (HEIC_EXTS.has(ext)) {
