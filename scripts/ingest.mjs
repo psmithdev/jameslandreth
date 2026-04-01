@@ -30,7 +30,7 @@ const ENV_FILE = join(ROOT, '.env');
 const PORT = 3848;
 const BUCKET = 'artifacts';
 const CLASSIFY_BATCH = 5;
-const PROPOSE_BATCH = 20;
+const PROPOSE_BATCH = 8;
 const THUMB_WIDTH = 512;
 const MAX_WIDTH = 1600;
 const JPEG_QUALITY = 85;
@@ -40,7 +40,7 @@ const HEIC_EXTS = new Set(['.heic', '.heif']);
 const CATEGORIES = [
   'Furniture', 'China & Porcelain', 'Glassware & Crystal', 'Paintings & Art',
   'Books & Documents', 'Tools & Equipment', 'Jewelry & Accessories',
-  'Linens & Textiles', 'Kitchenware', 'Musical Instruments', 'Miscellaneous',
+  'Linens & Textiles', 'Kitchenware', 'Lighting', 'Musical Instruments', 'Miscellaneous',
 ];
 
 // ── Parse .env ──────────────────────────────────────────────────────
@@ -576,7 +576,7 @@ function buildHTML() {
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#6366f1}
   .slug-note{font-size:10px;color:#aaa;margin-top:2px}
   .photo-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f0}
-  .photo-thumb{position:relative;width:72px;height:72px;border-radius:5px;overflow:hidden;flex-shrink:0}
+  .photo-thumb{position:relative;width:110px;height:110px;border-radius:5px;overflow:hidden;flex-shrink:0}
   .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
   .photo-thumb .remove-btn{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
   .photo-strip .no-photos{font-size:12px;color:#bbb;padding:6px 0}
@@ -702,7 +702,7 @@ function proposalCardHTML(p){
   return '<div class="proposal-card" id="prop-'+esc(p.id)+'">'+
     '<div class="proposal-header">'+
       '<h3>'+esc(p.title||'Untitled')+'</h3>'+
-      '<label class="skip-toggle"><input type="checkbox" data-skip="'+esc(p.id)+'" onchange="toggleSkip('+JSON.stringify(p.id)+')"> Skip</label>'+
+      '<label class="skip-toggle"><input type="checkbox" data-skip="'+esc(p.id)+'" onchange="toggleSkip('+JSON.stringify(p.id)+')"> Not an artifact</label>'+
     '</div>'+
     '<div class="field-row">'+
       '<div class="field"><label>Title *</label><input type="text" data-prop="'+esc(p.id)+'" data-field="title" value="'+esc(p.title||'')+'" oninput="autoSlug('+JSON.stringify(p.id)+')"></div>'+
