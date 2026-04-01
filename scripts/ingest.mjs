@@ -961,6 +961,16 @@ async function main() {
     }
   });
 
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Kill the previous ingest session:`);
+      console.error(`  lsof -ti:${PORT} | xargs kill -9`);
+      console.error('Then run npm run ingest again.');
+      process.exit(1);
+    }
+    throw err;
+  });
+
   server.listen(PORT, () => {
     const browserUrl = `http://localhost:${PORT}`;
     console.log(`\nReview UI → ${browserUrl}`);
