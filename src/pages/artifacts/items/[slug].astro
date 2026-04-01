@@ -58,9 +58,9 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
       <!-- Main content -->
       <div>
         <!-- Image / Placeholder -->
-        <div class="h-80 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200/60 flex items-center justify-center text-7xl mb-8">
+        <div class="h-80 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200/60 flex items-center justify-center text-7xl mb-8 overflow-hidden">
           {item.images && item.images.length > 0 ? (
-            <img src={item.images[0]} alt={item.title} class="w-full h-full object-cover rounded-2xl" />
+            <img src={item.images[0]} alt={item.title} class="w-full h-full object-cover rounded-2xl cursor-zoom-in lightbox-trigger" data-src={item.images[0]} />
           ) : (
             <span>{icon}</span>
           )}
@@ -70,10 +70,16 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
         {item.images && item.images.length > 1 && (
           <div class="flex gap-3 mb-8 overflow-x-auto">
             {item.images.slice(1).map((img: string, i: number) => (
-              <img src={img} alt={`${item.title} ${i + 2}`} class="w-24 h-24 object-cover rounded-lg border border-amber-200 flex-shrink-0" />
+              <img src={img} alt={`${item.title} ${i + 2}`} class="w-24 h-24 object-cover rounded-lg border border-amber-200 flex-shrink-0 cursor-zoom-in lightbox-trigger" data-src={img} />
             ))}
           </div>
         )}
+
+        <!-- Lightbox -->
+        <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 p-4" role="dialog">
+          <button id="lightbox-close" class="absolute top-4 right-4 text-white/80 hover:text-white text-3xl leading-none">&times;</button>
+          <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" />
+        </div>
 
         {/* Admin image manager */}
         {isAdmin(user) && (
@@ -217,6 +223,25 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
         }
       });
     }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    document.querySelectorAll('.lightbox-trigger').forEach(function(img) {
+      img.addEventListener('click', function() {
+        lightboxImg.src = img.dataset.src || img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+      });
+    });
+    function closeLightbox() {
+      lightbox.classList.add('hidden');
+      lightbox.classList.remove('flex');
+    }
+    document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', function(e) { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
 
     // Comment form
     const commentForm = document.getElementById('comment-form');
