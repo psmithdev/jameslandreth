@@ -8,6 +8,7 @@ const supabase = createServerClient();
 const { data: artifacts } = await supabase
   .from('artifacts')
   .select('*')
+  .is('deleted_at', null)
   .order('created_at', { ascending: false });
 
 const items = artifacts || [];

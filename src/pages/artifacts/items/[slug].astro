@@ -11,6 +11,7 @@ const { data: item } = await supabase
   .from('artifacts')
   .select('*')
   .eq('slug', slug)
+  .is('deleted_at', null)
   .single();
 
 if (!item) {

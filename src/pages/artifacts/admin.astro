@@ -12,6 +12,7 @@ const supabase = createServerClient();
 const { data: artifacts } = await supabase
   .from('artifacts')
   .select('*')
+  .is('deleted_at', null)
   .order('created_at', { ascending: false });
 
 const items = artifacts || [];
@@ -222,7 +223,7 @@ const statusColors: Record<string, string> = {
       btn.addEventListener('click', async () => {
         const el = btn as HTMLElement;
         if (!confirm(`Delete "${el.dataset.title}"?`)) return;
-        const { error } = await supabase.from('artifacts').delete().eq('id', el.dataset.id);
+        const { error } = await supabase.from('artifacts').update({ deleted_at: new Date().toISOString() }).eq('id', el.dataset.id);
         if (error) alert(error.message);
         else el.closest('tr')?.remove();
       });
