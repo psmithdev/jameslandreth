@@ -253,9 +253,12 @@ async function runClassifyPass(files, artifacts, state) {
 }
 
 // ── Propose pass ─────────────────────────────────────────────────────
-function buildProposePrompt(categories) {
+function buildProposePrompt(categories, collectionNotes) {
+  const notesSection = collectionNotes
+    ? `\nThe following notes from the collector describe many of these items. Photo numbers in the notes correspond to the numeric part of filenames (e.g. "0134" matches "P1270134.JPG"). Use these notes to fill in accurate titles, estimated values, and provenance — do not invent details not supported by the notes or the photos.\n\nCOLLECTOR NOTES:\n${collectionNotes}\n`
+    : '';
   return `You are cataloging family heirlooms for an online archive. These photos may show one or more distinct objects.
-
+${notesSection}
 Tasks:
 1. Group photos that show the SAME physical object (same item from different angles, or items in a set).
 2. For each distinct object or set, draft an artifact record.
@@ -265,16 +268,17 @@ Return ONLY a JSON array. Each element:
   "title": "concise name (e.g. 'Pressed-Glass Kerosene Table Lamp')",
   "slug": "kebab-case URL slug (e.g. 'pressed-glass-kerosene-table-lamp')",
   "category": "one of: ${categories.join(', ')}",
+  "estimated_value": "value range from notes if available, e.g. '$60 - $120' — or null",
   "description": "2–3 sentences: what it is, era/style, materials, notable details",
-  "provenance": "origin clues from maker marks, labels, style — or null",
+  "provenance": "origin details from notes or visible clues — or null",
   "photos": ["filename1.jpg", "filename2.jpg"]
 }
 
 Each photo filename must appear in exactly ONE entry's photos array. Photos below are labeled by index.`;
 }
 
-async function proposeBatch(filenames) {
-  const content = [{ type: 'text', text: buildProposePrompt(CATEGORIES) }];
+async function proposeBatch(filenames, collectionNotes) {
+  const content = [{ type: 'text', text: buildProposePrompt(CATEGORIES, collectionNotes) }];
   const validFiles = [];
   for (let i = 0; i < filenames.length; i++) {
     try {
@@ -305,8 +309,54 @@ async function proposeBatch(filenames) {
   }
 }
 
+async function loadCollectionNotes() {
+  // Look for a .docx or .txt notes file in the photo directory
+  const files = readdirSync(PHOTO_DIR);
+  const docx = files.find((f) => f.toLowerCase().endsWith('.docx'));
+  const txt = files.find((f) => f.toLowerCase().endsWith('.txt') && f.toLowerCase().includes('description'));
+  if (docx) {
+    try {
+      // Extract text from docx (it's a zip with word/document.xml)
+      const { createRequire } = await import('node:module');
+      const { readFileSync: rfs } = await import('node:fs');
+      const AdmZip = (await import('adm-zip')).default;
+      // Fall back to python extraction which doesn't need adm-zip
+      throw new Error('use python');
+    } catch {
+      // Use python3 to extract — no extra npm dep needed
+      const { execSync } = await import('node:child_process');
+      try {
+        const filePath = join(PHOTO_DIR, docx).replace(/'/g, "'\\''");
+        const text = execSync(
+          `python3 -c "
+import zipfile, xml.etree.ElementTree as ET, sys
+with zipfile.ZipFile('${filePath}') as z:
+    xml = z.read('word/document.xml')
+root = ET.fromstring(xml)
+ns = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+lines = []
+for p in root.iter(f'{ns}p'):
+    line = ''.join(t.text or '' for t in p.iter(f'{ns}t'))
+    if line.strip(): lines.append(line)
+print('\\n'.join(lines))
+"`, { encoding: 'utf-8' }
+        );
+        console.log(`  📄  Loaded collector notes from ${docx}`);
+        return text.trim();
+      } catch (err) {
+        console.warn(`  ⚠  Could not read ${docx}: ${err.message}`);
+      }
+    }
+  }
+  if (txt) {
+    const text = readFileSync(join(PHOTO_DIR, txt), 'utf-8');
+    console.log(`  📄  Loaded collector notes from ${txt}`);
+    return text.trim();
+  }
+  return null;
+}
+
 async function runProposePass(state) {
-  const classifiedSlugs = new Map((state.classified || []).map((c) => [c.filename, c.slug]));
   const assignedToProposal = new Set((state.proposals || []).flatMap((p) => p.photos));
   const unmatched = (state.classified || [])
     .filter((c) => c.slug === null && !assignedToProposal.has(c.filename) && existsSync(join(PHOTO_DIR, c.filename)))
@@ -315,6 +365,8 @@ async function runProposePass(state) {
   if (unmatched.length === 0) return;
   console.log(`\nPropose pass: ${unmatched.length} unmatched photos → drafting new artifact records`);
 
+  const collectionNotes = await loadCollectionNotes();
+
   const proposals = state.proposals || [];
   let propCounter = proposals.length;
 
@@ -322,13 +374,14 @@ async function runProposePass(state) {
     const batch = unmatched.slice(i, i + PROPOSE_BATCH);
     console.log(`  Proposing ${batch.length} photos...`);
     try {
-      const results = await proposeBatch(batch);
+      const results = await proposeBatch(batch, collectionNotes);
       for (const p of results) {
         const proposal = {
           id: `prop-${propCounter++}`,
           title: p.title || 'Untitled Artifact',
           slug: p.slug || slugify(p.title || 'untitled-artifact'),
           category: CATEGORIES.includes(p.category) ? p.category : 'Miscellaneous',
+          estimated_value: p.estimated_value || '',
           description: p.description || '',
           provenance: p.provenance || '',
           photos: (p.photos || []).filter((f) => batch.includes(f)),
