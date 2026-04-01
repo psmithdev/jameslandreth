@@ -395,7 +395,8 @@ async function serveArtifacts(res) {
 }
 
 function servePhoto(res, filename) {
-  const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '');
+  // Use basename only — prevents path traversal without stripping spaces
+  const safe = basename(filename);
   if (!safe) { res.writeHead(400); res.end('Bad filename'); return; }
   const filePath = join(PHOTO_DIR, safe);
   if (!existsSync(filePath)) { res.writeHead(404); res.end('Not found'); return; }
@@ -826,7 +827,7 @@ async function submitAll(){
     const g=f=>document.querySelector('[data-prop="'+p.id+'"][data-field="'+f+'"]')?.value||'';
     const strip=document.getElementById('strip-'+p.id);
     const photos=[...strip.querySelectorAll('.photo-thumb img')]
-      .map(img=>decodeURIComponent(img.src.split('/photos/')[1]||'').replace(/[^a-zA-Z0-9._-]/g,''))
+      .map(img=>decodeURIComponent(img.src.split('/photos/')[1]||''))
       .filter(Boolean);
     const title=g('title').trim();
     const slug=g('slug').trim();
