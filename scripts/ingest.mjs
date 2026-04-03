@@ -13,7 +13,7 @@
  * Delete tmp/ingest-state.json to force fresh analysis.
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
 import { resolve, extname, basename, join } from 'node:path';
 import { createServer } from 'node:http';
 import { exec } from 'node:child_process';
@@ -421,6 +421,30 @@ async function runProposePass(state) {
   }
 }
 
+// ── Reset handler ────────────────────────────────────────────────────
+async function handleReset(res) {
+  try {
+    if (existsSync(STATE_FILE)) unlinkSync(STATE_FILE);
+    const allFiles = readdirSync(PHOTO_DIR)
+      .filter((f) => IMAGE_EXTS.has(extname(f).toLowerCase()))
+      .sort();
+    const { data: artifacts } = await supabase
+      .from('artifacts')
+      .select('slug, title, category, description, provenance');
+    const freshState = { phase: 'analyzing', classified: [], proposals: [] };
+    saveState(freshState);
+    await runClassifyPass(allFiles, artifacts || [], freshState);
+    await runProposePass(freshState);
+    freshState.phase = 'ready';
+    saveState(freshState);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+  } catch (err) {
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: err.message }));
+  }
+}
+
 // ── HTTP route handlers ──────────────────────────────────────────────
 const MIME = {
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
@@ -656,6 +680,12 @@ function buildHTML() {
   .success p{color:#666;margin-top:6px;font-size:14px}
   .errors-panel{background:#fff3f3;border:1px solid #fca5a5;border-radius:6px;padding:12px;margin-top:16px;font-size:12px}
   .errors-panel summary{cursor:pointer;font-weight:600;color:#b91c1c}
+  .header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+  .reset-btn{background:#fff;border:1px solid #ddd;color:#888;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s}
+  .reset-btn:hover{border-color:#f97316;color:#f97316}
+  .reset-btn:disabled{opacity:.5;cursor:not-allowed}
+  .merge-select{font-size:11px;padding:2px 5px;border:1px solid #ddd;border-radius:4px;color:#888;max-width:150px;cursor:pointer}
+  .merge-select:hover{border-color:#6366f1}
 </style>
 </head>
 <body>
@@ -708,9 +738,9 @@ function render(){
   const groups={};
   for(const c of matched){if(!groups[c.slug])groups[c.slug]=[];groups[c.slug].push(c);}
 
-  let html='<h1>Artifact Ingest</h1>';
   const mCount=matched.length;
   const pCount=proposals.length;
+  let html='<div class="header-row"><h1>Artifact Ingest</h1><button class="reset-btn" onclick="resetAndReanalyze()">↺ Re-analyze</button></div>';
   html+='<p class="subtitle">'+(state.classified||[]).length+' photos analyzed · '+mCount+' matched to existing · '+pCount+' new artifact'+(pCount!==1?'s':'')+' proposed</p>';
 
   if(mCount>0){
@@ -757,7 +787,13 @@ function proposalCardHTML(p){
   return '<div class="proposal-card" id="prop-'+esc(p.id)+'">'+
     '<div class="proposal-header">'+
       '<h3>'+esc(p.title||'Untitled')+'</h3>'+
-      '<label class="skip-toggle"><input type="checkbox" data-skip="'+esc(p.id)+'" onchange="toggleSkip('+JSON.stringify(p.id)+')"> Not an artifact</label>'+
+      '<div style="display:flex;gap:8px;align-items:center">'+
+        '<select class="merge-select" data-merge-from="'+esc(p.id)+'" onchange="mergeInto('+JSON.stringify(p.id)+',this.value)">'+
+          '<option value="">Merge into…</option>'+
+          state.proposals.filter(function(o){return o.id!==p.id;}).map(function(o){return '<option value="'+esc(o.id)+'">'+esc(o.title||'Untitled')+'</option>';}).join('')+
+        '</select>'+
+        '<label class="skip-toggle"><input type="checkbox" data-skip="'+esc(p.id)+'" onchange="toggleSkip('+JSON.stringify(p.id)+')"> Not an artifact</label>'+
+      '</div>'+
     '</div>'+
     '<div class="field-row">'+
       '<div class="field"><label>Title *</label><input type="text" data-prop="'+esc(p.id)+'" data-field="title" value="'+esc(p.title||'')+'" oninput="autoSlug('+JSON.stringify(p.id)+')"></div>'+
@@ -917,12 +953,60 @@ async function submitAll(){
         data.errors.map(e=>'<li>'+esc(e.filename||e.slug||'?')+': '+esc(e.reason)+'</li>').join('')+
       '</ul></details>';
     }
-    successHTML+='<p style="margin-top:16px;color:#aaa">Run <code>npm run ingest</code> again to process more photos.</p></div>';
+    successHTML+='<p style="margin-top:16px;color:#aaa">Run <code>npm run ingest -- --reset</code> to start a new batch.</p></div>';
     document.getElementById('app').innerHTML=successHTML;
     document.querySelector('.submit-bar').style.display='none';
   }catch(e){
     alert('Network error: '+e.message);
     btn.disabled=false; btn.textContent='Publish All';
+  }
+}
+
+function mergeInto(sourceId, targetId){
+  if(!targetId) return;
+  const sourceStrip=document.getElementById('strip-'+sourceId);
+  const targetStrip=document.getElementById('strip-'+targetId);
+  if(!sourceStrip||!targetStrip) return;
+  // Remove "No photos" placeholder from target
+  const noPhotos=targetStrip.querySelector('.no-photos');
+  if(noPhotos) noPhotos.remove();
+  // Move thumbs, rewire remove buttons to point at target
+  sourceStrip.querySelectorAll('.photo-thumb').forEach(function(thumb){
+    const img=thumb.querySelector('img');
+    const removeBtn=thumb.querySelector('.remove-btn');
+    if(img&&removeBtn){
+      const filename=decodeURIComponent(img.src.split('/photos/')[1]||'');
+      removeBtn.setAttribute('onclick','removePhoto('+JSON.stringify(targetId)+','+JSON.stringify(filename)+')');
+    }
+    targetStrip.appendChild(thumb);
+  });
+  sourceStrip.innerHTML='<span class="no-photos">Merged</span>';
+  // Auto-skip source card
+  const sourceCb=document.querySelector('[data-skip="'+sourceId+'"]');
+  if(sourceCb){sourceCb.checked=true;}
+  const sourceCard=document.getElementById('prop-'+sourceId);
+  if(sourceCard) sourceCard.classList.add('skipped');
+  // Reset merge dropdown
+  const mergeSelect=document.querySelector('[data-merge-from="'+sourceId+'"]');
+  if(mergeSelect) mergeSelect.value='';
+  updateSubmitBar();
+}
+
+async function resetAndReanalyze(){
+  if(!confirm('Re-run vision analysis? Current proposals will be cleared.')) return;
+  const resetBtn=document.querySelector('.reset-btn');
+  if(resetBtn){resetBtn.disabled=true;resetBtn.textContent='Re-analyzing…';}
+  document.getElementById('app').innerHTML='<div class="loading">Re-analyzing photos with Claude vision…</div>';
+  document.getElementById('submit-btn').disabled=true;
+  document.getElementById('submit-info').textContent='';
+  try{
+    const res=await fetch('/reset',{method:'POST'});
+    const data=await res.json();
+    if(!data.ok) throw new Error(data.error||'Reset failed');
+    await init();
+  }catch(e){
+    document.getElementById('app').innerHTML='<p style="color:red;padding:24px">Re-analyze failed: '+esc(e.message)+'</p>';
+    if(resetBtn){resetBtn.disabled=false;resetBtn.textContent='↺ Re-analyze';}
   }
 }
 
@@ -954,8 +1038,15 @@ async function main() {
   let state = loadState();
 
   if (state?.phase === 'submitted') {
-    console.log('Previous session already published. Delete tmp/ingest-state.json to start over.');
-    process.exit(0);
+    if (process.argv.includes('--reset')) {
+      console.log('Resetting previous session...');
+      unlinkSync(STATE_FILE);
+      state = null;
+    } else {
+      console.log('Previous session already published.');
+      console.log('Run with --reset to start over:  npm run ingest -- --reset');
+      process.exit(0);
+    }
   }
 
   if (state?.phase !== 'ready') {
@@ -1007,6 +1098,8 @@ async function main() {
         servePhoto(res, decodeURIComponent(url.pathname.slice('/photos/'.length)));
       } else if (req.method === 'POST' && url.pathname === '/submit') {
         await handleSubmit(req, res, server);
+      } else if (req.method === 'POST' && url.pathname === '/reset') {
+        await handleReset(res);
       } else {
         res.writeHead(404); res.end('Not found');
       }
