@@ -17,30 +17,31 @@ const user = (Astro.locals as any).user;
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>{title}</title>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 text-gray-800 font-sans antialiased">
-  <header class="sticky top-0 z-50 bg-white/98 backdrop-blur-xl border-b border-amber-200/50 shadow-sm">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-4 no-underline">
-        <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-xl shadow-md shadow-amber-500/25">
-          🏺
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight leading-tight">Family Treasures</h1>
-          <p class="text-sm text-amber-700 font-medium">Walsh | Flick | Littlefield | Litzel Heritage Collection</p>
-        </div>
-      </a>
-      <nav class="flex items-center gap-6">
-        <a href="/" class="text-sm font-medium text-amber-600 bg-amber-50 px-4 py-2 rounded-lg">Browse Items</a>
-        <a href="https://jameslandreth.com" class="text-sm font-medium text-slate-600 hover:text-amber-600 transition-colors" target="_blank">jameslandreth.com</a>
-        {user ? (
-          <div class="flex items-center gap-4">
-            <span class="text-sm text-slate-500">{user.display_name || user.email}</span>
-            <a href="/api/auth/logout" class="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors">Logout</a>
-          </div>
-        ) : (
-          <a href="/login" class="text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-lg transition-colors">Login</a>
-        )}
-      </nav>
+<body class="min-h-screen bg-parchment text-ink antialiased">
+
+  <!-- Top accent strip -->
+  <div class="h-[3px] bg-stamp-art"></div>
+
+  <header class="bg-parchment border-b border-rule">
+    <div class="max-w-6xl mx-auto px-6 py-5">
+      <div class="flex items-end justify-between">
+        <a href="/" class="no-underline group">
+          <p class="font-mono text-[10px] tracking-[0.18em] uppercase text-stamp-art mb-1.5">Heritage Collection</p>
+          <h1 class="font-display text-[1.75rem] text-ink leading-none group-hover:text-stamp-art transition-colors duration-200">Family Treasures</h1>
+        </a>
+        <nav class="flex items-center gap-8 pb-0.5">
+          <a href="/" class="font-mono text-[11px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp-art transition-colors">Browse Items</a>
+          <a href="https://jameslandreth.com" class="font-mono text-[11px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp-art transition-colors" target="_blank">jameslandreth.com</a>
+          {user ? (
+            <div class="flex items-center gap-6">
+              <span class="font-mono text-[10px] text-rule">{user.display_name || user.email}</span>
+              <a href="/api/auth/logout" class="font-mono text-[11px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Logout</a>
+            </div>
+          ) : (
+            <a href="/login" class="font-mono text-[10px] tracking-[0.12em] uppercase text-card bg-stamp-art hover:bg-stamp-art-hover px-4 py-2 transition-colors">Login</a>
+          )}
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -48,10 +49,14 @@ const user = (Astro.locals as any).user;
     <slot />
   </main>
 
-  <footer class="border-t border-amber-200 mt-16 bg-amber-50/50">
-    <div class="max-w-7xl mx-auto px-6 py-8 text-center text-sm text-slate-400">
-      <p>To add or update items, contact Parker or email <a href="mailto:aledaandjim@yahoo.com" class="text-amber-600 no-underline">aledaandjim@yahoo.com</a></p>
+  <footer class="border-t border-rule mt-20">
+    <div class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <p class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule">Walsh · Flick · Littlefield · Litzel Heritage Collection</p>
+      <p class="font-mono text-[10px] tracking-[0.12em] uppercase text-rule">
+        Contact <a href="mailto:aledaandjim@yahoo.com" class="text-stamp-art hover:text-stamp-art-hover transition-colors no-underline">aledaandjim@yahoo.com</a>
+      </p>
     </div>
   </footer>
+
 </body>
 </html>

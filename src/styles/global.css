@@ -1,1 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-parchment: #F4EFE4;
+  --color-parchment-dark: #EDE5D4;
+  --color-ink: #1C2340;
+  --color-ink-muted: #4A5168;
+  --color-rule: #C5B89A;
+  --color-card: #FDFAF5;
+  --color-stamp: #8B1F1F;
+  --color-stamp-hover: #6E1818;
+  --color-stamp-art: #7B4F1A;
+  --color-stamp-art-hover: #5E3A12;
+  --color-available: #2D6A4F;
+
+  --font-display: 'Libre Baskerville', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+}
+
+body {
+  background-color: var(--color-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+}
