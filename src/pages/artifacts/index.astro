@@ -19,66 +19,69 @@ const families = [...new Set(items.map(i => i.family).filter(Boolean))].sort();
 const totalItems = items.length;
 const availableItems = items.filter(i => i.status === 'available').length;
 const familyCount = families.length;
-const categoryCount = categories.length - 1; // exclude "All Items"
+const categoryCount = categories.length - 1;
 ---
 
 <ArtifactsLayout>
-  <div class="max-w-6xl mx-auto px-6 py-10">
 
-    <!-- Welcome -->
-    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-amber-200/60 p-10 mb-10 text-center">
-      <h1 class="text-4xl font-bold text-slate-900 tracking-tight mb-4">A Lifetime of Treasures</h1>
-      <p class="text-lg text-amber-700 max-w-3xl mx-auto leading-relaxed">
+  <!-- Hero -->
+  <section class="border-b border-rule">
+    <div class="max-w-6xl mx-auto px-6 py-12">
+      <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp-art mb-3">Walsh · Flick · Littlefield · Litzel</p>
+      <h2 class="font-display text-5xl text-ink mb-5 leading-tight">A Lifetime of Treasures</h2>
+      <p class="font-serif text-xl text-ink-muted max-w-2xl leading-relaxed mb-10">
         As Jim and Aleda prepare for their next chapter, they would love these cherished family
         heirlooms to find new homes with family members who will appreciate their history and beauty.
-        Browse the collection and request any items that speak to you.
       </p>
-      <p class="text-sm text-amber-500 font-medium mt-3">Preserving the heritage of the Walsh, Flick, Littlefield, and Litzel families</p>
-    </section>
 
-    <!-- Stats -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-      <div class="bg-white border border-amber-200/60 rounded-xl p-6 text-center shadow-sm">
-        <div class="text-3xl font-bold text-amber-600 tracking-tight">{totalItems}</div>
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Total Items</div>
+      <!-- Stats -->
+      <div class="flex items-stretch gap-0 flex-wrap">
+        <div class="pr-8 border-r border-rule mr-8 mb-4">
+          <div class="font-mono text-4xl text-stamp-art font-bold leading-none">{totalItems}</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Total Items</div>
+        </div>
+        <div class="pr-8 border-r border-rule mr-8 mb-4">
+          <div class="font-mono text-4xl text-available font-bold leading-none">{availableItems}</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Available</div>
+        </div>
+        <div class="pr-8 border-r border-rule mr-8 mb-4">
+          <div class="font-mono text-4xl text-ink font-bold leading-none">{familyCount}</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Families</div>
+        </div>
+        <div class="mb-4">
+          <div class="font-mono text-4xl text-ink font-bold leading-none">{categoryCount}</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
+        </div>
       </div>
-      <div class="bg-white border border-amber-200/60 rounded-xl p-6 text-center shadow-sm">
-        <div class="text-3xl font-bold text-green-600 tracking-tight">{availableItems}</div>
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Available</div>
-      </div>
-      <div class="bg-white border border-amber-200/60 rounded-xl p-6 text-center shadow-sm">
-        <div class="text-3xl font-bold text-amber-600 tracking-tight">{familyCount}</div>
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Families</div>
-      </div>
-      <div class="bg-white border border-amber-200/60 rounded-xl p-6 text-center shadow-sm">
-        <div class="text-3xl font-bold text-amber-600 tracking-tight">{categoryCount}</div>
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Categories</div>
-      </div>
-    </section>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-6 py-10">
 
     <!-- Search & Filters -->
-    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-amber-200/60 p-6 mb-10">
-      <div class="flex flex-col sm:flex-row gap-4 mb-4">
+    <section class="border border-rule p-6 mb-10 bg-card">
+      <div class="flex flex-col sm:flex-row gap-4 mb-5">
         <!-- Search -->
         <div class="relative flex-1">
           <input
             type="text"
             id="artifact-search"
-            class="w-full px-4 py-3 pr-12 border border-amber-200 rounded-xl text-sm bg-white shadow-sm focus:outline-none focus:border-amber-500 focus:ring-3 focus:ring-amber-500/10 transition"
+            class="w-full px-4 py-2.5 pr-12 border border-rule bg-card text-sm font-serif text-ink placeholder:text-rule focus:outline-none focus:border-ink-muted transition-colors"
             placeholder="Search items..."
           />
         </div>
         <!-- Family filter -->
-        <select id="filter-family" class="px-4 py-3 border border-amber-200 rounded-xl text-sm bg-white focus:outline-none focus:border-amber-500 focus:ring-3 focus:ring-amber-500/10 transition">
+        <select id="filter-family" class="px-4 py-2.5 border border-rule bg-card text-sm font-serif text-ink focus:outline-none focus:border-ink-muted transition-colors">
           <option value="">All Families</option>
           {families.map(f => <option value={f}>{f}</option>)}
         </select>
       </div>
+
       <!-- Category tags -->
       <div class="flex flex-wrap gap-2" id="category-tags">
         {categories.map(cat => (
           <button
-            class={`cat-tag px-4 py-2 rounded-full text-sm font-semibold border transition-all ${cat === 'All Items' ? 'bg-amber-500 text-white border-amber-500' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-500 hover:text-white hover:border-amber-500'}`}
+            class={`cat-tag font-mono text-[13px] tracking-[0.12em] uppercase px-3 py-1.5 border transition-all ${cat === 'All Items' ? 'bg-stamp-art text-card border-stamp-art' : 'bg-card text-ink-muted border-rule hover:border-stamp-art hover:text-stamp-art'}`}
             data-category={cat}
           >
             {cat}
@@ -89,7 +92,11 @@ const categoryCount = categories.length - 1; // exclude "All Items"
 
     <!-- Items Grid -->
     <section>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="items-grid">
+      <div class="flex items-center gap-4 mb-6">
+        <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted">Collection</span>
+        <div class="flex-1 h-px bg-rule"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="items-grid">
         {items.map(item => (
           <div
             class="artifact-item"
@@ -114,10 +121,13 @@ const categoryCount = categories.length - 1; // exclude "All Items"
         ))}
       </div>
       <div id="no-results" class="hidden text-center py-16">
-        <p class="text-slate-400 text-lg">No items match your filters.</p>
-        <button id="clear-filters" class="mt-4 text-amber-500 hover:text-amber-600 font-medium text-sm">Clear all filters</button>
+        <p class="font-serif text-ink-muted">No items match your filters.</p>
+        <button id="clear-filters" class="mt-4 font-mono text-[13px] tracking-[0.12em] uppercase text-stamp-art hover:text-stamp-art-hover transition-colors">
+          Clear all filters
+        </button>
       </div>
     </section>
+
   </div>
 
   <script>
@@ -154,11 +164,11 @@ const categoryCount = categories.length - 1; // exclude "All Items"
     document.querySelectorAll('.cat-tag').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.cat-tag').forEach(b => {
-          b.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
-          b.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
+          b.classList.remove('bg-stamp-art', 'text-card', 'border-stamp-art');
+          b.classList.add('bg-card', 'text-ink-muted', 'border-rule');
         });
-        btn.classList.remove('bg-amber-50', 'text-amber-700', 'border-amber-200');
-        btn.classList.add('bg-amber-500', 'text-white', 'border-amber-500');
+        btn.classList.remove('bg-card', 'text-ink-muted', 'border-rule');
+        btn.classList.add('bg-stamp-art', 'text-card', 'border-stamp-art');
         activeCategory = (btn as HTMLElement).dataset.category!;
         applyFilters();
       });
@@ -169,12 +179,16 @@ const categoryCount = categories.length - 1; // exclude "All Items"
       familySelect.value = '';
       activeCategory = 'All Items';
       document.querySelectorAll('.cat-tag').forEach(b => {
-        b.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
-        b.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
+        b.classList.remove('bg-stamp-art', 'text-card', 'border-stamp-art');
+        b.classList.add('bg-card', 'text-ink-muted', 'border-rule');
       });
-      document.querySelector('.cat-tag[data-category="All Items"]')?.classList.add('bg-amber-500', 'text-white', 'border-amber-500');
-      document.querySelector('.cat-tag[data-category="All Items"]')?.classList.remove('bg-amber-50', 'text-amber-700', 'border-amber-200');
+      const allBtn = document.querySelector('.cat-tag[data-category="All Items"]');
+      if (allBtn) {
+        allBtn.classList.remove('bg-card', 'text-ink-muted', 'border-rule');
+        allBtn.classList.add('bg-stamp-art', 'text-card', 'border-stamp-art');
+      }
       applyFilters();
     });
   </script>
+
 </ArtifactsLayout>

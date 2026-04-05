@@ -12,78 +12,61 @@ interface Props {
 }
 
 const { slug, title, category, family, description, provenance, estimatedValue, status, images } = Astro.props;
-
-const categoryIcons: Record<string, string> = {
-  'Furniture': '🪑',
-  'China & Porcelain': '☕',
-  'Glassware & Crystal': '🥂',
-  'Paintings & Art': '🎨',
-  'Books & Documents': '📚',
-  'Tools & Equipment': '🔧',
-  'Jewelry & Accessories': '💎',
-  'Linens & Textiles': '🧵',
-  'Kitchenware': '🍴',
-  'Lighting': '🪔',
-  'Musical Instruments': '🎼',
-  'Miscellaneous': '📦',
-};
-
-const icon = categoryIcons[category] || '📦';
 const isAvailable = status === 'available';
 ---
 
-<div class="bg-white border border-amber-200/60 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
-  <!-- Header: category + status -->
-  <div class="flex items-center justify-between px-5 pt-5">
-    <span class="text-xs font-semibold text-amber-700 border border-amber-200 bg-amber-50 px-2.5 py-0.5 rounded-full">{category}</span>
-    <span class={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${isAvailable ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+<div class="bg-card border border-rule hover:border-ink-muted transition-colors duration-200 flex flex-col overflow-hidden">
+
+  <!-- Category + status -->
+  <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-rule">
+    <span class="font-mono text-[12px] tracking-[0.12em] uppercase border border-stamp-art text-stamp-art px-2 py-0.5">
+      {category}
+    </span>
+    <span class={`font-mono text-[12px] tracking-[0.12em] uppercase px-2 py-0.5 border ${isAvailable ? 'border-available text-available' : 'border-rule text-rule'}`}>
       {status === 'available' ? 'Available' : status === 'claimed' ? 'Claimed' : 'Gifted'}
     </span>
   </div>
 
-  <!-- Photo placeholder -->
+  <!-- Photo -->
   <a href={`/artifacts/items/${slug}`} class="block">
-    <div class="h-40 bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center mx-5 mt-3 rounded-lg border border-slate-100">
+    <div class="h-44 bg-parchment-dark flex items-center justify-center mx-5 mt-4 border border-rule overflow-hidden">
       {images && images.length > 0 ? (
-        <img src={images[0]} alt={title} class="w-full h-full object-cover rounded-lg" />
+        <img src={images[0]} alt={title} class="w-full h-full object-cover" />
       ) : (
-        <>
-          <span class="text-4xl mb-1">{icon}</span>
-          <span class="text-xs text-slate-400">Photo coming soon</span>
-        </>
+        <span class="font-mono text-[13px] tracking-[0.1em] uppercase text-rule">No Photo</span>
       )}
     </div>
   </a>
 
   <!-- Content -->
   <div class="px-5 pt-4 pb-5 flex flex-col flex-1">
-    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{family} Family</p>
+    <p class="font-mono text-[12px] tracking-[0.15em] uppercase text-rule mb-1">{family} Family</p>
     <a href={`/artifacts/items/${slug}`} class="no-underline">
-      <h3 class="text-base font-bold text-slate-900 mb-2 hover:text-amber-700 transition-colors leading-snug">{title}</h3>
+      <h3 class="font-display text-xl text-ink mb-2 leading-snug hover:text-stamp-art transition-colors">{title}</h3>
     </a>
-    <p class="text-sm text-slate-500 line-clamp-3 mb-3 leading-relaxed">{description}</p>
+    <p class="font-serif text-base text-ink-muted line-clamp-3 mb-3 leading-relaxed">{description}</p>
 
     {provenance && (
-      <div class="border-l-3 border-slate-200 pl-3 mb-4" style="border-left: 3px solid #e2e8f0;">
-        <p class="text-xs text-slate-400 italic line-clamp-2 leading-relaxed">{provenance}</p>
+      <div class="border-l-2 border-rule pl-3 mb-4">
+        <p class="font-serif text-sm text-rule italic line-clamp-2 leading-relaxed">{provenance}</p>
       </div>
     )}
 
-    <!-- Footer: value + request button -->
-    <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
-      <div>
-        <span class="text-xs text-slate-400">Est.</span>
-        <span class="text-sm font-semibold text-slate-700 ml-1">{estimatedValue}</span>
+    <!-- Footer -->
+    <div class="flex items-center justify-between mt-auto pt-4 border-t border-rule">
+      <div class="font-mono text-[13px] tracking-[0.1em] uppercase text-ink-muted">
+        Est. <span class="text-ink font-semibold">{estimatedValue}</span>
       </div>
       {isAvailable ? (
-        <a href={`/artifacts/items/${slug}`} class="inline-block text-xs font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-600 px-4 py-2 rounded-lg shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all no-underline">
-          Request This Item
+        <a href={`/artifacts/items/${slug}`} class="font-mono text-[12px] tracking-[0.12em] uppercase text-card bg-stamp-art hover:bg-stamp-art-hover px-4 py-2 transition-colors no-underline">
+          Request Item
         </a>
       ) : (
-        <span class="inline-block text-xs font-semibold text-slate-400 bg-slate-100 px-4 py-2 rounded-lg">
+        <span class="font-mono text-[12px] tracking-[0.12em] uppercase text-rule border border-rule px-4 py-2">
           {status === 'claimed' ? 'Claimed' : 'Gifted'}
         </span>
       )}
     </div>
   </div>
+
 </div>
