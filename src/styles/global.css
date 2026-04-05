@@ -19,6 +19,10 @@
   --font-serif: 'IBM Plex Serif', Georgia, serif;
 }
 
+html {
+  font-size: 18px;
+}
+
 body {
   background-color: var(--color-parchment);
   color: var(--color-ink);

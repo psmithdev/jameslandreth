@@ -30,9 +30,9 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
   <!-- Hero -->
   <section class="border-b border-rule">
     <div class="max-w-6xl mx-auto px-6 py-12">
-      <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-stamp mb-3">Personal Archive · Est. 1960</p>
+      <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Personal Archive · Est. 1960</p>
       <h2 class="font-display text-5xl text-ink mb-5 leading-tight">Document Archive</h2>
-      <p class="font-serif text-lg text-ink-muted max-w-2xl leading-relaxed mb-10">
+      <p class="font-serif text-xl text-ink-muted max-w-2xl leading-relaxed mb-10">
         A curated collection of travel journals, family newsletters, essays, and life adventures —
         carefully preserved to share with family, friends, and fellow travelers.
       </p>
@@ -41,19 +41,19 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
       <div class="flex items-stretch gap-0 flex-wrap">
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-stamp font-bold leading-none">{totalDocs}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Documents</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Documents</div>
         </div>
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{countriesCount}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Locations</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Locations</div>
         </div>
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{yearsSpan}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Years of Stories</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Years of Stories</div>
         </div>
         <div class="mb-4">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{categories.length}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
         </div>
       </div>
     </div>
@@ -73,7 +73,7 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
     {featuredDocs.length > 0 && (
       <section class="mb-10" id="featured-section">
         <div class="flex items-center gap-4 mb-6">
-          <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-stamp">Featured</span>
+          <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp">Featured</span>
           <div class="flex-1 h-px bg-rule"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -99,7 +99,7 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
     <!-- All Documents -->
     <section id="documents-section">
       <div class="flex items-center gap-4 mb-6">
-        <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-muted">All Documents</span>
+        <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted">All Documents</span>
         <div class="flex-1 h-px bg-rule"></div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="documents-grid">
@@ -130,7 +130,7 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
       </div>
       <div id="no-results" class="hidden text-center py-16">
         <p class="font-serif text-ink-muted">No documents match your filters.</p>
-        <button id="clear-filters" class="mt-4 font-mono text-[10px] tracking-[0.12em] uppercase text-stamp hover:text-stamp-hover transition-colors">
+        <button id="clear-filters" class="mt-4 font-mono text-[13px] tracking-[0.12em] uppercase text-stamp hover:text-stamp-hover transition-colors">
           Clear all filters
         </button>
       </div>
@@ -139,13 +139,13 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
     <!-- Timeline -->
     <section class="border border-rule p-8 mt-12">
       <div class="flex items-center gap-4 mb-6">
-        <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-muted">Browse by Year</span>
+        <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted">Browse by Year</span>
         <div class="flex-1 h-px bg-rule"></div>
       </div>
       <div class="flex flex-wrap gap-2" id="timeline-nav">
         {years.map(y => (
           <button
-            class="timeline-year font-mono text-[10px] tracking-[0.1em] uppercase px-4 py-2 border border-rule text-ink-muted hover:border-stamp hover:text-stamp hover:bg-parchment-dark transition-all"
+            class="timeline-year font-mono text-[13px] tracking-[0.1em] uppercase px-4 py-2 border border-rule text-ink-muted hover:border-stamp hover:text-stamp hover:bg-parchment-dark transition-all"
             data-year={y}
           >
             {y}

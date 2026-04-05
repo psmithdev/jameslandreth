@@ -27,9 +27,9 @@ const categoryCount = categories.length - 1;
   <!-- Hero -->
   <section class="border-b border-rule">
     <div class="max-w-6xl mx-auto px-6 py-12">
-      <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-stamp-art mb-3">Walsh · Flick · Littlefield · Litzel</p>
+      <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp-art mb-3">Walsh · Flick · Littlefield · Litzel</p>
       <h2 class="font-display text-5xl text-ink mb-5 leading-tight">A Lifetime of Treasures</h2>
-      <p class="font-serif text-lg text-ink-muted max-w-2xl leading-relaxed mb-10">
+      <p class="font-serif text-xl text-ink-muted max-w-2xl leading-relaxed mb-10">
         As Jim and Aleda prepare for their next chapter, they would love these cherished family
         heirlooms to find new homes with family members who will appreciate their history and beauty.
       </p>
@@ -38,19 +38,19 @@ const categoryCount = categories.length - 1;
       <div class="flex items-stretch gap-0 flex-wrap">
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-stamp-art font-bold leading-none">{totalItems}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Total Items</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Total Items</div>
         </div>
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-available font-bold leading-none">{availableItems}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Available</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Available</div>
         </div>
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{familyCount}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Families</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Families</div>
         </div>
         <div class="mb-4">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{categoryCount}</div>
-          <div class="font-mono text-[10px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
+          <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
         </div>
       </div>
     </div>
@@ -81,7 +81,7 @@ const categoryCount = categories.length - 1;
       <div class="flex flex-wrap gap-2" id="category-tags">
         {categories.map(cat => (
           <button
-            class={`cat-tag font-mono text-[10px] tracking-[0.12em] uppercase px-3 py-1.5 border transition-all ${cat === 'All Items' ? 'bg-stamp-art text-card border-stamp-art' : 'bg-card text-ink-muted border-rule hover:border-stamp-art hover:text-stamp-art'}`}
+            class={`cat-tag font-mono text-[13px] tracking-[0.12em] uppercase px-3 py-1.5 border transition-all ${cat === 'All Items' ? 'bg-stamp-art text-card border-stamp-art' : 'bg-card text-ink-muted border-rule hover:border-stamp-art hover:text-stamp-art'}`}
             data-category={cat}
           >
             {cat}
@@ -93,7 +93,7 @@ const categoryCount = categories.length - 1;
     <!-- Items Grid -->
     <section>
       <div class="flex items-center gap-4 mb-6">
-        <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-muted">Collection</span>
+        <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted">Collection</span>
         <div class="flex-1 h-px bg-rule"></div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="items-grid">
@@ -122,7 +122,7 @@ const categoryCount = categories.length - 1;
       </div>
       <div id="no-results" class="hidden text-center py-16">
         <p class="font-serif text-ink-muted">No items match your filters.</p>
-        <button id="clear-filters" class="mt-4 font-mono text-[10px] tracking-[0.12em] uppercase text-stamp-art hover:text-stamp-art-hover transition-colors">
+        <button id="clear-filters" class="mt-4 font-mono text-[13px] tracking-[0.12em] uppercase text-stamp-art hover:text-stamp-art-hover transition-colors">
           Clear all filters
         </button>
       </div>
