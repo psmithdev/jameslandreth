@@ -15,9 +15,11 @@
     "ingest": "node scripts/ingest.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "^10.0.0",
+    "@astrojs/cloudflare": "^13.1.7",
+    "@cloudflare/vite-plugin": "^1.28.0",
     "@supabase/supabase-js": "^2.49.0",
-    "astro": "^6.0.7"
+    "astro": "^6.0.7",
+    "wrangler": "^4.73.0"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
