@@ -11,7 +11,7 @@ A personal document archive and family heirloom site for Dr. James Landreth. Two
 
 ## Tech Stack
 
-- **Astro 6** with Node adapter (`output: 'server'`, standalone mode)
+- **Astro 6** with Cloudflare adapter (`output: 'server'`, Cloudflare Pages Workers)
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (not the legacy PostCSS integration)
 - **Supabase** — Postgres + Auth + Storage
 - **TypeScript** (strict mode)
@@ -111,7 +111,7 @@ npm run upload-photos     # Upload accepted images to Supabase Storage
 
 ## Deployment
 
-Target: VPS with Caddy (reverse proxy + HTTPS) + PM2 (process manager). Config in `deploy/`.
+Target: Cloudflare Pages Workers. Config in `deploy/README.md` and `wrangler.toml`.
 Legacy static site still on `gh-pages` branch (GitHub Pages).
 
 ## Commit & Pull Request Guidelines
