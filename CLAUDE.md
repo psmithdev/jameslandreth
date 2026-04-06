@@ -11,7 +11,7 @@ A personal document archive and family heirloom site for Dr. James Landreth. Two
 
 ## Tech Stack
 
-- **Astro 6** with Node adapter (`output: 'server'`, standalone mode)
+- **Astro 6** with Cloudflare adapter (`output: 'server'`, Cloudflare Pages Workers)
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (not the legacy PostCSS integration)
 - **Supabase** — Postgres + Auth + Storage
 - **TypeScript** (strict mode)
@@ -111,7 +111,7 @@ npm run upload-photos     # Upload accepted images to Supabase Storage
 
 ## Deployment
 
-Target: VPS with Caddy (reverse proxy + HTTPS) + PM2 (process manager). Config in `deploy/`.
+Target: Cloudflare Pages Workers. Config in `deploy/README.md` and `wrangler.toml`.
 Legacy static site still on `gh-pages` branch (GitHub Pages).
 
 ## Commit & Pull Request Guidelines
@@ -119,3 +119,9 @@ Legacy static site still on `gh-pages` branch (GitHub Pages).
 - Short imperative subjects: `Add`, `Fix`, `Refactor`, `Update` — under 72 chars
 - One commit per logical change; brief body only if reason isn't obvious
 - PRs need summary, rationale, linked task ID (if any), and screenshots for UI changes
+
+## Known Issues
+
+### Wrangler version pin (revisit when fixed upstream)
+
+`wrangler` is pinned to `^4.73.0` and `@cloudflare/vite-plugin` to `^1.28.0` in `package.json` `devDependencies`. Wrangler 4.80.0 introduced a regression (`require_dist is not a function`) that crashes `astro build`. Once Cloudflare releases a fix, remove the explicit pins and let `@astrojs/cloudflare` manage the wrangler version transitively.
