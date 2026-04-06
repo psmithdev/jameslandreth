@@ -15,7 +15,7 @@
     "ingest": "node scripts/ingest.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.7",
+    "@astrojs/cloudflare": "^12.6.13",
     "@supabase/supabase-js": "^2.49.0",
     "astro": "^6.0.7"
   },
