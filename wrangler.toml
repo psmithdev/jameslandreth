@@ -2,3 +2,7 @@ name = "jameslandreth"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
+
+[vars]
+PUBLIC_SUPABASE_URL = "https://rymoeaycmozlbrcvuhkl.supabase.co"
+PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_GwnALtg0jJEOayVsxuf_yw_KxSjOAxl"
