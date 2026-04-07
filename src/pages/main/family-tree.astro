@@ -4,88 +4,308 @@ import MainLayout from '../../layouts/MainLayout.astro';
 
 <MainLayout title="Family Tree - Littlefield, Walsh, Flick & Ostrom Heritage">
   <style is:global>
+    /* Archival family color tokens (reused for borders + accents) */
+    :root {
+      --ft-walsh: #6E1818;
+      --ft-flick: #B8860B;
+      --ft-littlefield: #1C2340;
+      --ft-litzel: #2D6A4F;
+      --ft-ostrom: #7B4F1A;
+      --ft-spouse: #8A8270;
+    }
+
     /* Tree Selector Tabs */
-    .tree-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
-    .tree-tab { background: white; border: 1px solid #e2e8f0; padding: 10px 24px; border-radius: 8px; font-size: 0.9375rem; font-weight: 500; color: #475569; cursor: pointer; transition: all 0.2s ease; }
-    .tree-tab:hover { border-color: #cbd5e1; background: #f8fafc; }
-    .tree-tab.active { background: #3b82f6; color: white; border-color: #3b82f6; font-weight: 600; }
+    .tree-tabs { display: flex; gap: 0; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 1px solid var(--color-rule); padding-bottom: 0; }
+    .tree-tab {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 14px 28px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: -1px;
+    }
+    .tree-tab:hover { color: var(--color-stamp); }
+    .tree-tab.active {
+      color: var(--color-stamp);
+      border-bottom-color: var(--color-stamp);
+      font-weight: 600;
+    }
 
     /* Controls */
-    .ft-controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .ft-zoom-controls { display: flex; gap: 4px; align-items: center; }
-    .ft-zoom-btn { width: 36px; height: 36px; border: 1px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-size: 1.125rem; display: flex; align-items: center; justify-content: center; color: #475569; transition: all 0.2s ease; }
-    .ft-zoom-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .ft-zoom-label { font-size: 0.8125rem; color: #94a3b8; padding: 0 8px; min-width: 48px; text-align: center; }
-    .ft-legend { display: flex; gap: 16px; flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8125rem; color: #64748b; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .legend-dot.walsh { background: #8b5cf6; }
-    .legend-dot.flick { background: #f59e0b; }
-    .legend-dot.littlefield { background: #3b82f6; }
-    .legend-dot.litzel { background: #10b981; }
-    .legend-dot.ostrom { background: #ec4899; }
-    .legend-dot.spouse { background: #94a3b8; }
+    .ft-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--color-card);
+      border: 1px solid var(--color-rule);
+    }
+    .ft-zoom-controls { display: flex; gap: 0; align-items: center; }
+    .ft-zoom-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--color-rule);
+      background: var(--color-parchment);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-ink);
+      transition: all 0.2s ease;
+      margin-left: -1px;
+    }
+    .ft-zoom-btn:first-child { margin-left: 0; }
+    .ft-zoom-btn:hover { background: var(--color-parchment-dark); border-color: var(--color-stamp); color: var(--color-stamp); z-index: 1; }
+    .ft-zoom-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--color-ink-muted);
+      padding: 0 14px;
+      min-width: 56px;
+      text-align: center;
+    }
+    #ft-zoom-reset { margin-left: 8px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 12px; width: auto; }
+
+    .ft-legend { display: flex; gap: 18px; flex-wrap: wrap; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+    }
+    .legend-dot { width: 10px; height: 10px; border: 1px solid var(--color-ink); }
+    .legend-dot.walsh { background: var(--ft-walsh); border-color: var(--ft-walsh); }
+    .legend-dot.flick { background: var(--ft-flick); border-color: var(--ft-flick); }
+    .legend-dot.littlefield { background: var(--ft-littlefield); border-color: var(--ft-littlefield); }
+    .legend-dot.litzel { background: var(--ft-litzel); border-color: var(--ft-litzel); }
+    .legend-dot.ostrom { background: var(--ft-ostrom); border-color: var(--ft-ostrom); }
+    .legend-dot.spouse { background: var(--ft-spouse); border-color: var(--ft-spouse); }
 
     /* Tree Canvas */
-    .tree-viewport { background: white; border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); overflow: auto; min-height: 500px; position: relative; cursor: grab; }
+    .tree-viewport {
+      background: var(--color-card);
+      border: 1px solid var(--color-rule);
+      overflow: auto;
+      min-height: 500px;
+      position: relative;
+      cursor: grab;
+    }
     .tree-viewport:active { cursor: grabbing; }
     .tree-canvas { padding: 48px 32px 64px; min-width: fit-content; transform-origin: top center; transition: transform 0.2s ease; }
 
     /* Tree Nodes */
     .couple { display: flex; flex-direction: column; align-items: center; position: relative; }
     .couple-row { display: flex; align-items: center; gap: 0; position: relative; }
-    .connector-h { width: 24px; height: 2px; background: #cbd5e1; flex-shrink: 0; }
-    .connector-v { width: 2px; height: 32px; background: #cbd5e1; margin: 0 auto; }
+    .connector-h { width: 28px; height: 1px; background: var(--color-rule); flex-shrink: 0; }
+    .connector-v { width: 1px; height: 32px; background: var(--color-rule); margin: 0 auto; }
 
-    .person { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; min-width: 160px; max-width: 200px; text-align: center; position: relative; transition: all 0.2s ease; cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
-    .person:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-    .person.walsh { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.04); }
-    .person.flick { border-color: #f59e0b; background: rgba(245, 158, 11, 0.04); }
-    .person.littlefield { border-color: #3b82f6; background: rgba(59, 130, 246, 0.04); }
-    .person.litzel { border-color: #10b981; background: rgba(16, 185, 129, 0.04); }
-    .person.ostrom { border-color: #ec4899; background: rgba(236, 72, 153, 0.04); }
-    .person.spouse { border-color: #94a3b8; background: rgba(148, 163, 184, 0.04); }
-    .person.placeholder { border-style: dashed; opacity: 0.6; }
+    .person {
+      background: var(--color-parchment);
+      border: 1px solid var(--color-rule);
+      border-top: 3px solid var(--color-rule);
+      padding: 14px 18px;
+      min-width: 168px;
+      max-width: 208px;
+      text-align: center;
+      position: relative;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .person:hover {
+      background: var(--color-card);
+      border-color: var(--color-stamp);
+      transform: translateY(-1px);
+    }
+    .person.walsh { border-top-color: var(--ft-walsh); }
+    .person.flick { border-top-color: var(--ft-flick); }
+    .person.littlefield { border-top-color: var(--ft-littlefield); }
+    .person.litzel { border-top-color: var(--ft-litzel); }
+    .person.ostrom { border-top-color: var(--ft-ostrom); }
+    .person.spouse { border-top-color: var(--ft-spouse); }
+    .person.placeholder { border-style: dashed; opacity: 0.55; }
 
-    .person-name { font-size: 0.875rem; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .person-maiden { font-size: 0.75rem; color: #64748b; font-style: italic; }
-    .person-dates { font-size: 0.6875rem; color: #94a3b8; margin-top: 2px; }
-    .person-info { font-size: 0.6875rem; color: #64748b; margin-top: 4px; line-height: 1.3; }
+    .person-name {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1.3;
+    }
+    .person-maiden {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 12px;
+      color: var(--color-ink-muted);
+      margin-top: 2px;
+    }
+    .person-dates {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--color-ink-muted);
+      margin-top: 4px;
+    }
+    .person-info {
+      font-family: var(--font-serif);
+      font-size: 12px;
+      color: var(--color-ink-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .gen-label {
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-stamp);
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 8px 12px 8px 0;
+      white-space: nowrap;
+    }
+
+    .sibling-chip {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+      padding: 6px 10px;
+      border: 1px dashed var(--color-rule);
+      cursor: pointer;
+      background: var(--color-parchment);
+      transition: all 0.2s ease;
+    }
+    .sibling-chip:hover { border-color: var(--color-stamp); color: var(--color-stamp); }
+
+    .twins-note {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-stamp);
+      font-weight: 600;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .group-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
 
     /* Detail Panel */
-    .ft-detail-panel { display: none; position: fixed; bottom: 24px; right: 24px; width: 320px; background: white; border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); z-index: 200; overflow: hidden; }
+    .ft-detail-panel {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 340px;
+      background: var(--color-card);
+      border: 1px solid var(--color-rule);
+      border-top: 3px solid var(--color-stamp);
+      z-index: 200;
+      overflow: hidden;
+    }
     .ft-detail-panel.active { display: block; animation: ftSlideUp 0.25s ease; }
     @keyframes ftSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    .ft-detail-header { padding: 20px 20px 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; }
-    .ft-detail-header h3 { font-size: 1.125rem; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .ft-detail-close { width: 28px; height: 28px; border: none; background: #f1f5f9; border-radius: 6px; cursor: pointer; font-size: 0.875rem; color: #64748b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; }
-    .ft-detail-close:hover { background: #e2e8f0; }
-    .ft-detail-body { padding: 16px 20px 20px; }
-    .detail-row { margin-bottom: 10px; }
-    .detail-label { font-size: 0.6875rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 2px; }
-    .detail-value { font-size: 0.875rem; color: #374151; line-height: 1.5; }
+    .ft-detail-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--color-rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .ft-detail-header h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1.3;
+    }
+    .ft-detail-close {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--color-rule);
+      background: var(--color-parchment);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-ink-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .ft-detail-close:hover { background: var(--color-stamp); color: var(--color-card); border-color: var(--color-stamp); }
+    .ft-detail-body { padding: 18px 22px 22px; }
+    .detail-row { margin-bottom: 12px; }
+    .detail-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-stamp);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .detail-value {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      color: var(--color-ink);
+      line-height: 1.55;
+    }
 
     @media (max-width: 768px) {
-      .person { min-width: 120px; padding: 8px 10px; }
-      .person-name { font-size: 0.75rem; }
+      .person { min-width: 130px; padding: 10px 12px; }
+      .person-name { font-size: 13px; }
       .ft-detail-panel { left: 12px; right: 12px; width: auto; }
       .ft-controls-bar { flex-direction: column; align-items: flex-start; }
     }
   </style>
 
-  <div class="max-w-7xl mx-auto px-6 py-10">
-    <!-- Welcome Banner -->
-    <section class="bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-10 mb-8 text-center">
-      <h1 class="text-4xl font-bold text-slate-900 tracking-tight mb-4">Our Family Tree</h1>
-      <p class="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-        Tracing the roots and branches of the Littlefield, Walsh, Flick, and Ostrom families across generations.
-        Click on any person to see their details.
+  <!-- Hero -->
+  <section class="border-b border-rule">
+    <div class="max-w-6xl mx-auto px-6 py-12">
+      <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Genealogical Record</p>
+      <h2 class="font-display text-5xl text-ink mb-5 leading-tight">Family Tree</h2>
+      <p class="font-serif text-xl text-ink-muted max-w-2xl leading-relaxed">
+        Tracing the roots and branches of the Littlefield, Walsh, Flick, and Ostrom families
+        across generations. Click on any person to see their details.
       </p>
-    </section>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-6 py-10">
 
     <!-- Tree Selector Tabs -->
     <div class="tree-tabs">
-      <button class="tree-tab active" id="tab-littlefield">Littlefield & Walsh-Flick</button>
+      <button class="tree-tab active" id="tab-littlefield">Littlefield &amp; Walsh-Flick</button>
       <button class="tree-tab" id="tab-ostrom">Alice Ostrom Litzel</button>
     </div>
 
@@ -95,9 +315,15 @@ import MainLayout from '../../layouts/MainLayout.astro';
         <button class="ft-zoom-btn" id="ft-zoom-out" title="Zoom out">&#8722;</button>
         <span class="ft-zoom-label" id="ft-zoom-label">100%</span>
         <button class="ft-zoom-btn" id="ft-zoom-in" title="Zoom in">&#43;</button>
-        <button class="ft-zoom-btn" id="ft-zoom-reset" title="Reset" style="margin-left: 4px; font-size: 0.75rem;">Reset</button>
+        <button class="ft-zoom-btn" id="ft-zoom-reset" title="Reset">Reset</button>
       </div>
       <div class="ft-legend" id="ft-legend"></div>
+    </div>
+
+    <!-- Section header rule -->
+    <div class="flex items-center gap-4 mb-4">
+      <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted">Lineage</span>
+      <div class="flex-1 h-px bg-rule"></div>
     </div>
 
     <!-- Tree Viewport -->
@@ -133,7 +359,7 @@ import MainLayout from '../../layouts/MainLayout.astro';
 
     function renderPerson(id,p){if(!p)return'';const pc=p.placeholder?' placeholder':'';return`<div class="person ${p.family}${pc}" onclick="showDetail('${id}')" title="Click for details"><div class="person-name">${p.name}</div>${p.maiden?`<div class="person-maiden">${p.maiden}</div>`:''}${p.dates?`<div class="person-dates">${p.dates}</div>`:''}${p.info&&!p.placeholder?`<div class="person-info">${p.info.substring(0,50)}${p.info.length>50?'...':''}</div>`:''}</div>`;}
 
-    function renderTree(){const t=familyTrees[currentTree],canvas=document.getElementById('treeCanvas'),structure=t.structure,people=t.people;const genLabels={greatGreatGrandparents:"2x Great-Grandparents",greatGrandparents:"Great-Grandparents",grandparents:"Grandparents",parents:"Parents",current:currentTree==='littlefield'?"Jim & Aleda":"Current",children:"Children",children_of_anders_ida:"Anders & Ida's Children",grandchildren:"Grandchildren",greatGrandchildren:"Great-Grandchildren",greatGreatGrandchildren:"Great-Great-Grandchildren"};let html='';Object.keys(structure).forEach((gk,gi)=>{const gen=structure[gk],label=genLabels[gk]||gk;html+=`<div style="display:flex;align-items:flex-start;margin-bottom:0"><div style="writing-mode:vertical-lr;transform:rotate(180deg);font-size:0.6875rem;color:#94a3b8;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:8px 8px 8px 0;white-space:nowrap">${label}</div><div style="display:flex;gap:48px;justify-content:center;flex:1;flex-wrap:wrap;align-items:flex-start">`;gen.forEach(g=>{if(g.partners){const p1=people[g.partners[0]],p2=people[g.partners[1]];html+=`<div class="couple"><div class="couple-row">${renderPerson(g.partners[0],p1)}<div class="connector-h"></div>${renderPerson(g.partners[1],p2)}</div>`;if(g.siblings_note)html+=`<div style="font-size:0.6875rem;color:#3b82f6;font-weight:600;margin-top:4px;text-align:center">${g.siblings_note}</div>`;if(g.siblings){html+=`<div style="display:flex;gap:12px;margin-top:8px;justify-content:center">`;g.siblings.forEach(sId=>{const s=people[sId];if(s)html+=`<div style="font-size:0.6875rem;color:#64748b;padding:4px 8px;border:1px dashed #cbd5e1;border-radius:6px;cursor:pointer;background:rgba(248,250,252,0.8)" onclick="showDetail('${sId}')">${s.name}</div>`;});html+=`</div>`;}html+=`</div>`;}else if(g.people){html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">`;if(g.label)html+=`<div style="font-size:0.6875rem;color:#94a3b8;font-weight:500;margin-bottom:4px">${g.label}</div>`;html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">`;g.people.forEach(pId=>html+=renderPerson(pId,people[pId]));html+=`</div></div>`;}});html+=`</div></div>`;if(gi<Object.keys(structure).length-1)html+=`<div class="connector-v"></div>`;});canvas.innerHTML=html;}
+    function renderTree(){const t=familyTrees[currentTree],canvas=document.getElementById('treeCanvas'),structure=t.structure,people=t.people;const genLabels={greatGreatGrandparents:"2x Great-Grandparents",greatGrandparents:"Great-Grandparents",grandparents:"Grandparents",parents:"Parents",current:currentTree==='littlefield'?"Jim & Aleda":"Current",children:"Children",children_of_anders_ida:"Anders & Ida's Children",grandchildren:"Grandchildren",greatGrandchildren:"Great-Grandchildren",greatGreatGrandchildren:"Great-Great-Grandchildren"};let html='';Object.keys(structure).forEach((gk,gi)=>{const gen=structure[gk],label=genLabels[gk]||gk;html+=`<div style="display:flex;align-items:flex-start;margin-bottom:0"><div class="gen-label">${label}</div><div style="display:flex;gap:48px;justify-content:center;flex:1;flex-wrap:wrap;align-items:flex-start">`;gen.forEach(g=>{if(g.partners){const p1=people[g.partners[0]],p2=people[g.partners[1]];html+=`<div class="couple"><div class="couple-row">${renderPerson(g.partners[0],p1)}<div class="connector-h"></div>${renderPerson(g.partners[1],p2)}</div>`;if(g.siblings_note)html+=`<div class="twins-note">${g.siblings_note}</div>`;if(g.siblings){html+=`<div style="display:flex;gap:12px;margin-top:8px;justify-content:center">`;g.siblings.forEach(sId=>{const s=people[sId];if(s)html+=`<div class="sibling-chip" onclick="showDetail('${sId}')">${s.name}</div>`;});html+=`</div>`;}html+=`</div>`;}else if(g.people){html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">`;if(g.label)html+=`<div class="group-label">${g.label}</div>`;html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">`;g.people.forEach(pId=>html+=renderPerson(pId,people[pId]));html+=`</div></div>`;}});html+=`</div></div>`;if(gi<Object.keys(structure).length-1)html+=`<div class="connector-v"></div>`;});canvas.innerHTML=html;}
 
     function showDetail(pid){const t=familyTrees[currentTree],p=t.people[pid];if(!p||p.placeholder)return;document.getElementById('detailName').textContent=p.name;let h='';if(p.maiden)h+=`<div class="detail-row"><div class="detail-label">Born</div><div class="detail-value">${p.maiden}</div></div>`;if(p.dates)h+=`<div class="detail-row"><div class="detail-label">Dates</div><div class="detail-value">${p.dates}</div></div>`;h+=`<div class="detail-row"><div class="detail-label">Family Line</div><div class="detail-value">${familyLabelsMap[p.family]||p.family}</div></div>`;if(p.info)h+=`<div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value">${p.info}</div></div>`;document.getElementById('detailBody').innerHTML=h;document.getElementById('detailPanel').classList.add('active');}
     function closeDetail(){document.getElementById('detailPanel').classList.remove('active');}
