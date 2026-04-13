@@ -324,6 +324,7 @@ const categoryCount = categories.length - 1;
 
       // Photo
       const photoEl = col.querySelector('.cat-photo');
+      if (!photoEl) return;
       if (item.images && item.images.length > 0) {
         if (photoEl.tagName === 'IMG') {
           photoEl.src = item.images[0];
