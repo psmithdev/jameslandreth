@@ -19,9 +19,13 @@ if (error) {
   return Astro.redirect('/');
 }
 
-const items = (allArtifacts || []).filter(
-  item => item.category.toLowerCase().replace(/\s+/g, '-') === slug
-);
+const items = (allArtifacts || []).filter(item => {
+  const itemSlug = item.category.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-{2,}/g, '-');
+  return itemSlug === slug;
+});
 
 // Reconstruct display name from first match (preserves original casing)
 const categoryName = items[0]?.category ?? slug;
