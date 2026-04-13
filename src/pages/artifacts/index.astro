@@ -16,6 +16,21 @@ const items = artifacts || [];
 const categories = ['All Items', ...new Set(items.map(i => i.category))].sort();
 const families = [...new Set(items.map(i => i.family).filter(Boolean))].sort();
 
+function categorySlug(cat: string) {
+  return cat.toLowerCase().replace(/\s+/g, '-');
+}
+
+const categoryGroups = (() => {
+  const map = new Map<string, typeof items>();
+  for (const item of items) {
+    if (!map.has(item.category)) map.set(item.category, []);
+    map.get(item.category)!.push(item);
+  }
+  return [...map.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, catItems]) => ({ name, slug: categorySlug(name), items: catItems }));
+})();
+
 const totalItems = items.length;
 const availableItems = items.filter(i => i.status === 'available').length;
 const familyCount = families.length;
@@ -57,6 +72,97 @@ const categoryCount = categories.length - 1;
   </section>
 
   <div class="max-w-6xl mx-auto px-6 py-10">
+
+    <!-- Browse by Category -->
+<section class="mb-10">
+  <div class="flex items-center gap-4 mb-6">
+    <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted">Browse by Category</span>
+    <div class="flex-1 h-px bg-rule"></div>
+  </div>
+
+  <div
+    class="flex gap-4 overflow-x-auto pb-2"
+    style="scroll-snap-type: x mandatory;"
+    id="category-columns"
+  >
+    {categoryGroups.map(group => (
+      <div
+        class="flex-none w-[calc(25%-12px)] min-w-[200px] border border-rule flex flex-col"
+        style="scroll-snap-align: start;"
+        data-cat={group.slug}
+      >
+        <!-- Header -->
+        <div class="bg-stamp-art px-4 py-2 flex items-center justify-between">
+          <span class="font-mono text-[12px] tracking-[0.15em] uppercase text-card">
+            {group.name}
+          </span>
+          <span class="font-mono text-[11px] text-card/70">{group.items.length}</span>
+        </div>
+
+        <!-- Slider body -->
+        <div class="flex-1 flex flex-col p-4 gap-3 bg-card">
+          <!-- Photo -->
+          <div class="relative aspect-[4/3] bg-parchment-dark border border-rule overflow-hidden">
+            {group.items[0]?.images?.[0] ? (
+              <img
+                class="cat-photo w-full h-full object-cover"
+                src={group.items[0].images[0]}
+                alt={group.items[0].title}
+              />
+            ) : (
+              <div class="cat-photo w-full h-full flex items-center justify-center">
+                <span class="font-mono text-[11px] tracking-[0.1em] uppercase text-rule">No Photo</span>
+              </div>
+            )}
+
+            <!-- Arrows -->
+            <button
+              class="cat-prev absolute left-0 inset-y-0 w-8 flex items-center justify-center bg-ink/10 hover:bg-ink/20 transition-colors text-card font-bold text-lg disabled:opacity-20"
+              data-cat={group.slug}
+              aria-label="Previous item"
+            >
+              ‹
+            </button>
+            <button
+              class="cat-next absolute right-0 inset-y-0 w-8 flex items-center justify-center bg-ink/10 hover:bg-ink/20 transition-colors text-card font-bold text-lg disabled:opacity-20"
+              data-cat={group.slug}
+              aria-label="Next item"
+            >
+              ›
+            </button>
+          </div>
+
+          <!-- Item info -->
+          <div>
+            <p class="cat-title font-display text-base text-ink leading-snug mb-1 line-clamp-2">
+              {group.items[0]?.title ?? ''}
+            </p>
+            <span class={`cat-status font-mono text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 border ${
+              group.items[0]?.status === 'available'
+                ? 'border-available text-available'
+                : 'border-rule text-rule'
+            }`}>
+              {group.items[0]?.status ?? ''}
+            </span>
+          </div>
+
+          <!-- Counter -->
+          <p class="cat-counter font-mono text-[11px] tracking-[0.1em] text-rule">
+            1 / {group.items.length}
+          </p>
+        </div>
+
+        <!-- View All footer -->
+        <a
+          href={`/artifacts/category/${group.slug}`}
+          class="block text-center font-mono text-[12px] tracking-[0.15em] uppercase text-stamp-art hover:text-card hover:bg-stamp-art transition-colors py-2.5 border-t border-rule bg-card"
+        >
+          View All →
+        </a>
+      </div>
+    ))}
+  </div>
+</section>
 
     <!-- Search & Filters -->
     <section class="border border-rule p-6 mb-10 bg-card">
@@ -130,23 +236,24 @@ const categoryCount = categories.length - 1;
 
   </div>
 
-  <script>
-    const searchInput = document.getElementById('artifact-search') as HTMLInputElement;
-    const familySelect = document.getElementById('filter-family') as HTMLSelectElement;
-    const grid = document.getElementById('items-grid')!;
-    const noResults = document.getElementById('no-results')!;
+  <script define:vars={{ categoryGroups }}>
+    // ── Existing filter logic ────────────────────────────────────────
+    const searchInput = document.getElementById('artifact-search');
+    const familySelect = document.getElementById('filter-family');
+    const grid = document.getElementById('items-grid');
+    const noResults = document.getElementById('no-results');
     let activeCategory = 'All Items';
 
     function applyFilters() {
       const search = searchInput.value.toLowerCase().trim();
       const family = familySelect.value;
-      const items = grid.querySelectorAll('.artifact-item') as NodeListOf<HTMLElement>;
+      const items = grid.querySelectorAll('.artifact-item');
       let count = 0;
 
       items.forEach(item => {
         const matchSearch = !search ||
-          item.dataset.title!.includes(search) ||
-          item.dataset.description!.includes(search);
+          item.dataset.title.includes(search) ||
+          item.dataset.description.includes(search);
         const matchCategory = activeCategory === 'All Items' || item.dataset.category === activeCategory;
         const matchFamily = !family || item.dataset.family === family;
 
@@ -169,7 +276,7 @@ const categoryCount = categories.length - 1;
         });
         btn.classList.remove('bg-card', 'text-ink-muted', 'border-rule');
         btn.classList.add('bg-stamp-art', 'text-card', 'border-stamp-art');
-        activeCategory = (btn as HTMLElement).dataset.category!;
+        activeCategory = btn.dataset.category;
         applyFilters();
       });
     });
@@ -188,6 +295,78 @@ const categoryCount = categories.length - 1;
         allBtn.classList.add('bg-stamp-art', 'text-card', 'border-stamp-art');
       }
       applyFilters();
+    });
+
+    // ── Category column sliders ──────────────────────────────────────
+    // categoryGroups is injected by define:vars — shape:
+    // Array<{ name: string; slug: string; items: Array<{ title, status, images, slug }> }>
+
+    const indices = {}; // slug → current index
+    categoryGroups.forEach(g => { indices[g.slug] = 0; });
+
+    function renderColumn(slug) {
+      const group = categoryGroups.find(g => g.slug === slug);
+      if (!group) return;
+      const idx = indices[slug];
+      const item = group.items[idx];
+      const col = document.querySelector(`[data-cat="${slug}"].flex-none`);
+      if (!col) return;
+
+      // Photo
+      const photoEl = col.querySelector('.cat-photo');
+      if (item.images && item.images.length > 0) {
+        if (photoEl.tagName === 'IMG') {
+          photoEl.src = item.images[0];
+          photoEl.alt = item.title;
+        } else {
+          const img = document.createElement('img');
+          img.className = 'cat-photo w-full h-full object-cover';
+          img.src = item.images[0];
+          img.alt = item.title;
+          photoEl.replaceWith(img);
+        }
+      } else {
+        if (photoEl.tagName === 'IMG') {
+          const div = document.createElement('div');
+          div.className = 'cat-photo w-full h-full flex items-center justify-center';
+          div.innerHTML = '<span class="font-mono text-[11px] tracking-[0.1em] uppercase text-rule">No Photo</span>';
+          photoEl.replaceWith(div);
+        }
+      }
+
+      // Title
+      col.querySelector('.cat-title').textContent = item.title;
+
+      // Status
+      const statusEl = col.querySelector('.cat-status');
+      statusEl.textContent = item.status;
+      const isAvail = item.status === 'available';
+      statusEl.className = `cat-status font-mono text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 border ${
+        isAvail ? 'border-available text-available' : 'border-rule text-rule'
+      }`;
+
+      // Counter
+      col.querySelector('.cat-counter').textContent = `${idx + 1} / ${group.items.length}`;
+    }
+
+    document.querySelectorAll('.cat-prev').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const slug = btn.dataset.cat;
+        const group = categoryGroups.find(g => g.slug === slug);
+        if (!group) return;
+        indices[slug] = (indices[slug] - 1 + group.items.length) % group.items.length;
+        renderColumn(slug);
+      });
+    });
+
+    document.querySelectorAll('.cat-next').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const slug = btn.dataset.cat;
+        const group = categoryGroups.find(g => g.slug === slug);
+        if (!group) return;
+        indices[slug] = (indices[slug] + 1) % group.items.length;
+        renderColumn(slug);
+      });
     });
   </script>
 
