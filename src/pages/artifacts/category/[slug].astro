@@ -4,13 +4,20 @@ import ArtifactCard from '../../../components/artifacts/ArtifactCard.astro';
 import { createServerClient } from '../../../lib/supabase';
 
 const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/');
+
 const supabase = createServerClient();
 
-const { data: allArtifacts } = await supabase
+const { data: allArtifacts, error } = await supabase
   .from('artifacts')
-  .select('*')
+  .select('slug, title, category, family, description, provenance, estimated_value, status, images')
   .is('deleted_at', null)
   .order('created_at', { ascending: false });
+
+if (error) {
+  console.error('[category page] Supabase fetch failed:', error.message);
+  return Astro.redirect('/');
+}
 
 const items = (allArtifacts || []).filter(
   item => item.category.toLowerCase().replace(/\s+/g, '-') === slug
