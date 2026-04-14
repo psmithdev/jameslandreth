@@ -31,11 +31,15 @@ const categoryGroups = (() => {
   }
   return [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([name, catItems]) => ({
-      name,
-      slug: categorySlug(name),
-      items: catItems.map(({ title, status, images, slug }) => ({ title, status, images, slug })),
-    }));
+    .map(([name, catItems]) => {
+      const startIdx = Math.max(0, catItems.findIndex(i => i.images?.[0]));
+      return {
+        name,
+        slug: categorySlug(name),
+        items: catItems.map(({ title, status, images, slug }) => ({ title, status, images, slug })),
+        startIdx,
+      };
+    });
 })();
 
 const totalItems = items.length;
@@ -111,15 +115,20 @@ const categoryCount = categories.length - 1;
             <div class="flex-1 flex flex-col p-4 gap-3 bg-card">
               <!-- Photo -->
               <div class="relative aspect-[4/3] bg-parchment-dark border border-rule overflow-hidden">
-                {group.items[0]?.images?.[0] ? (
+                {group.items[group.startIdx]?.images?.[0] ? (
                   <img
                     class="cat-photo w-full h-full object-cover"
-                    src={group.items[0].images[0]}
-                    alt={group.items[0].title}
+                    src={group.items[group.startIdx].images[0]}
+                    alt={group.items[group.startIdx].title}
                   />
                 ) : (
-                  <div class="cat-photo w-full h-full flex items-center justify-center">
-                    <span class="font-mono text-[11px] tracking-[0.1em] uppercase text-rule">No Photo</span>
+                  <div
+                    class="cat-photo w-full h-full flex items-center justify-center"
+                    style="border-top: 4px solid var(--color-stamp-art);"
+                  >
+                    <span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted text-center px-4 leading-relaxed">
+                      {group.name}
+                    </span>
                   </div>
                 )}
 
@@ -143,20 +152,20 @@ const categoryCount = categories.length - 1;
               <!-- Item info -->
               <div>
                 <p class="cat-title font-display text-base text-ink leading-snug mb-1 line-clamp-2">
-                  {group.items[0]?.title ?? ''}
+                  {group.items[group.startIdx]?.title ?? ''}
                 </p>
                 <span class={`cat-status font-mono text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 border ${
-                  group.items[0]?.status === 'available'
+                  group.items[group.startIdx]?.status === 'available'
                     ? 'border-available text-available'
                     : 'border-rule text-rule'
                 }`}>
-                  {group.items[0]?.status ?? ''}
+                  {group.items[group.startIdx]?.status ?? ''}
                 </span>
               </div>
 
               <!-- Counter -->
               <p class="cat-counter font-mono text-[11px] tracking-[0.1em] text-rule">
-                1 / {group.items.length}
+                {group.startIdx + 1} / {group.items.length}
               </p>
             </div>
 
