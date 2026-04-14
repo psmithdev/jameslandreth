@@ -321,7 +321,7 @@ const iconMap: Record<string, string> = {
 
   </div>
 
-  <script define:vars={{ categoryGroups }}>
+  <script define:vars={{ categoryGroups, iconMap }}>
     // ── Existing filter logic ────────────────────────────────────────
     const searchInput = document.getElementById('artifact-search');
     const familySelect = document.getElementById('filter-family');
@@ -388,8 +388,9 @@ const iconMap: Record<string, string> = {
     });
 
     // ── Category column sliders ──────────────────────────────────────
-    // categoryGroups is injected by define:vars — shape:
-    // Array<{ name: string; slug: string; startIdx: number; items: Array<{ title, status, images, slug }> }>
+    // Injected by define:vars:
+    // categoryGroups: Array<{ name: string; slug: string; startIdx: number; items: Array<{ title, status, images, slug }> }>
+    // iconMap: Record<string, string> — slug → SVG/HTML string for no-photo placeholder
 
     const indices = {}; // slug → current index
     categoryGroups.forEach(g => { indices[g.slug] = g.startIdx ?? 0; });
@@ -420,11 +421,7 @@ const iconMap: Record<string, string> = {
         if (photoEl.tagName === 'IMG') {
           const div = document.createElement('div');
           div.className = 'cat-photo w-full h-full flex items-center justify-center';
-          div.style.borderTop = '4px solid var(--color-stamp-art)';
-          const span = document.createElement('span');
-          span.className = 'font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted text-center px-4 leading-relaxed';
-          span.textContent = group.name;
-          div.appendChild(span);
+          div.innerHTML = iconMap[group.slug] ?? iconMap['miscellaneous'];
           photoEl.replaceWith(div);
         }
       }
