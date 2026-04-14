@@ -32,7 +32,7 @@ const categoryGroups = (() => {
   return [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, catItems]) => {
-      const startIdx = Math.max(0, catItems.findIndex(i => i.images?.[0]));
+      const startIdx = Math.max(0, catItems.findIndex(i => i.images?.[0]?.trim()));
       return {
         name,
         slug: categorySlug(name),
@@ -321,7 +321,7 @@ const categoryCount = categories.length - 1;
 
     // ── Category column sliders ──────────────────────────────────────
     // categoryGroups is injected by define:vars — shape:
-    // Array<{ name: string; slug: string; items: Array<{ title, status, images, slug }> }>
+    // Array<{ name: string; slug: string; startIdx: number; items: Array<{ title, status, images, slug }> }>
 
     const indices = {}; // slug → current index
     categoryGroups.forEach(g => { indices[g.slug] = 0; });
