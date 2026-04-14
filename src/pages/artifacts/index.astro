@@ -353,7 +353,10 @@ const categoryCount = categories.length - 1;
           const div = document.createElement('div');
           div.className = 'cat-photo w-full h-full flex items-center justify-center';
           div.style.borderTop = '4px solid var(--color-stamp-art)';
-          div.innerHTML = `<span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted text-center px-4 leading-relaxed">${group.name}</span>`;
+          const span = document.createElement('span');
+          span.className = 'font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted text-center px-4 leading-relaxed';
+          span.textContent = group.name;
+          div.appendChild(span);
           photoEl.replaceWith(div);
         }
       }
