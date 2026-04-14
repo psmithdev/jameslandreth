@@ -324,7 +324,7 @@ const categoryCount = categories.length - 1;
     // Array<{ name: string; slug: string; startIdx: number; items: Array<{ title, status, images, slug }> }>
 
     const indices = {}; // slug → current index
-    categoryGroups.forEach(g => { indices[g.slug] = 0; });
+    categoryGroups.forEach(g => { indices[g.slug] = g.startIdx ?? 0; });
 
     function renderColumn(slug) {
       const group = categoryGroups.find(g => g.slug === slug);
@@ -352,7 +352,8 @@ const categoryCount = categories.length - 1;
         if (photoEl.tagName === 'IMG') {
           const div = document.createElement('div');
           div.className = 'cat-photo w-full h-full flex items-center justify-center';
-          div.innerHTML = '<span class="font-mono text-[11px] tracking-[0.1em] uppercase text-rule">No Photo</span>';
+          div.style.borderTop = '4px solid var(--color-stamp-art)';
+          div.innerHTML = `<span class="font-mono text-[13px] tracking-[0.2em] uppercase text-ink-muted text-center px-4 leading-relaxed">${group.name}</span>`;
           photoEl.replaceWith(div);
         }
       }
