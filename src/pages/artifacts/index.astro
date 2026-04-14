@@ -31,17 +31,94 @@ const categoryGroups = (() => {
   }
   return [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([name, catItems]) => ({
-      name,
-      slug: categorySlug(name),
-      items: catItems.map(({ title, status, images, slug }) => ({ title, status, images, slug })),
-    }));
+    .map(([name, catItems]) => {
+      const startIdx = Math.max(0, catItems.findIndex(i => i.images?.[0]?.trim()));
+      return {
+        name,
+        slug: categorySlug(name),
+        items: catItems.map(({ title, status, images, slug }) => ({ title, status, images, slug })),
+        startIdx,
+      };
+    });
 })();
 
 const totalItems = items.length;
 const availableItems = items.filter(i => i.status === 'available').length;
 const familyCount = families.length;
 const categoryCount = categories.length - 1;
+
+const svg = (inner: string) =>
+  `<svg width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="#C5B89A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+
+const iconMap: Record<string, string> = {
+  'books-documents': svg(
+    `<rect x="10" y="8" width="20" height="32" rx="1" fill="#EDE5D4"/>` +
+    `<rect x="10" y="8" width="20" height="32" rx="1"/>` +
+    `<rect x="18" y="8" width="20" height="32" rx="1" fill="#EDE5D4"/>` +
+    `<rect x="18" y="8" width="20" height="32" rx="1"/>` +
+    `<line x1="22" y1="16" x2="34" y2="16"/>` +
+    `<line x1="22" y1="21" x2="34" y2="21"/>` +
+    `<line x1="22" y1="26" x2="30" y2="26"/>`
+  ),
+  'china-porcelain': svg(
+    `<ellipse cx="24" cy="34" rx="14" ry="3"/>` +
+    `<path d="M12 18 Q12 34 24 34 Q36 34 36 18 Z"/>` +
+    `<ellipse cx="24" cy="18" rx="12" ry="3"/>` +
+    `<path d="M18 10 Q18 6 24 6 Q30 6 30 10"/>` +
+    `<line x1="18" y1="10" x2="30" y2="10"/>`
+  ),
+  'furniture': svg(
+    `<rect x="8" y="18" width="32" height="12" rx="2"/>` +
+    `<rect x="12" y="12" width="24" height="8" rx="2"/>` +
+    `<line x1="12" y1="30" x2="12" y2="39"/>` +
+    `<line x1="36" y1="30" x2="36" y2="39"/>` +
+    `<line x1="8" y1="24" x2="8" y2="30"/>` +
+    `<line x1="40" y1="24" x2="40" y2="30"/>`
+  ),
+  'glassware-crystal': svg(
+    `<path d="M17 8 L14 22 Q14 32 24 32 Q34 32 34 22 L31 8 Z"/>` +
+    `<line x1="24" y1="32" x2="24" y2="40"/>` +
+    `<line x1="17" y1="40" x2="31" y2="40"/>` +
+    `<line x1="15" y1="20" x2="33" y2="20"/>`
+  ),
+  'lighting': svg(
+    `<path d="M18 28 Q14 22 14 18 A10 10 0 0 1 34 18 Q34 22 30 28 Z"/>` +
+    `<line x1="18" y1="28" x2="30" y2="28"/>` +
+    `<line x1="19" y1="32" x2="29" y2="32"/>` +
+    `<line x1="21" y1="36" x2="27" y2="36"/>` +
+    `<line x1="24" y1="8" x2="24" y2="5"/>` +
+    `<line x1="10" y1="18" x2="7" y2="18"/>` +
+    `<line x1="38" y1="18" x2="41" y2="18"/>` +
+    `<line x1="13" y1="11" x2="11" y2="9"/>` +
+    `<line x1="35" y1="11" x2="37" y2="9"/>`
+  ),
+  'linens-textiles':
+    `<svg width="44" height="44" viewBox="0 0 54 46" fill="none" stroke="#C5B89A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">` +
+    `<path d="M8 36 Q8 42 27 42 Q46 42 46 36 L46 32 Q46 28 27 28 Q8 28 8 32 Z"/>` +
+    `<rect x="10" y="18" width="13" height="12" rx="3"/>` +
+    `<rect x="25" y="18" width="13" height="12" rx="3"/>` +
+    `<path d="M8 22 Q8 18 10 18"/>` +
+    `<path d="M46 22 Q46 18 44 18"/>` +
+    `<line x1="8" y1="22" x2="8" y2="32"/>` +
+    `<line x1="46" y1="22" x2="46" y2="32"/>` +
+    `<line x1="10" y1="18" x2="25" y2="18"/>` +
+    `<line x1="38" y1="18" x2="44" y2="18"/>` +
+    `</svg>`,
+  'miscellaneous': svg(
+    `<path d="M6 18 L6 38 Q6 40 8 40 L40 40 Q42 40 42 38 L42 18 Q42 16 40 16 L26 16 L22 12 L8 12 Q6 12 6 14 L6 18 Z"/>` +
+    `<line x1="6" y1="18" x2="42" y2="18"/>`
+  ),
+  'musical-instruments':
+    `<span style="font-size:44px;color:#C5B89A;font-family:serif;line-height:1;">𝄞</span>`,
+  'paintings-art': svg(
+    `<rect x="8" y="8" width="32" height="26" rx="1"/>` +
+    `<path d="M8 26 L17 18 L25 24 L32 16 L40 26"/>` +
+    `<circle cx="16" cy="16" r="3"/>` +
+    `<line x1="16" y1="36" x2="16" y2="40"/>` +
+    `<line x1="32" y1="36" x2="32" y2="40"/>` +
+    `<line x1="12" y1="40" x2="36" y2="40"/>`
+  ),
+};
 ---
 
 <ArtifactsLayout>
@@ -111,15 +188,15 @@ const categoryCount = categories.length - 1;
             <div class="flex-1 flex flex-col p-4 gap-3 bg-card">
               <!-- Photo -->
               <div class="relative aspect-[4/3] bg-parchment-dark border border-rule overflow-hidden">
-                {group.items[0]?.images?.[0] ? (
+                {group.items[group.startIdx]?.images?.[0] ? (
                   <img
                     class="cat-photo w-full h-full object-cover"
-                    src={group.items[0].images[0]}
-                    alt={group.items[0].title}
+                    src={group.items[group.startIdx].images[0]}
+                    alt={group.items[group.startIdx].title}
                   />
                 ) : (
                   <div class="cat-photo w-full h-full flex items-center justify-center">
-                    <span class="font-mono text-[11px] tracking-[0.1em] uppercase text-rule">No Photo</span>
+                    <Fragment set:html={iconMap[group.slug] ?? iconMap['miscellaneous']} />
                   </div>
                 )}
 
@@ -143,20 +220,20 @@ const categoryCount = categories.length - 1;
               <!-- Item info -->
               <div>
                 <p class="cat-title font-display text-base text-ink leading-snug mb-1 line-clamp-2">
-                  {group.items[0]?.title ?? ''}
+                  {group.items[group.startIdx]?.title ?? ''}
                 </p>
                 <span class={`cat-status font-mono text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 border ${
-                  group.items[0]?.status === 'available'
+                  group.items[group.startIdx]?.status === 'available'
                     ? 'border-available text-available'
                     : 'border-rule text-rule'
                 }`}>
-                  {group.items[0]?.status ?? ''}
+                  {group.items[group.startIdx]?.status ?? ''}
                 </span>
               </div>
 
               <!-- Counter -->
               <p class="cat-counter font-mono text-[11px] tracking-[0.1em] text-rule">
-                1 / {group.items.length}
+                {group.startIdx + 1} / {group.items.length}
               </p>
             </div>
 
@@ -244,7 +321,7 @@ const categoryCount = categories.length - 1;
 
   </div>
 
-  <script define:vars={{ categoryGroups }}>
+  <script define:vars={{ categoryGroups, iconMap }}>
     // ── Existing filter logic ────────────────────────────────────────
     const searchInput = document.getElementById('artifact-search');
     const familySelect = document.getElementById('filter-family');
@@ -311,11 +388,12 @@ const categoryCount = categories.length - 1;
     });
 
     // ── Category column sliders ──────────────────────────────────────
-    // categoryGroups is injected by define:vars — shape:
-    // Array<{ name: string; slug: string; items: Array<{ title, status, images, slug }> }>
+    // Injected by define:vars:
+    // categoryGroups: Array<{ name: string; slug: string; startIdx: number; items: Array<{ title, status, images, slug }> }>
+    // iconMap: Record<string, string> — slug → SVG/HTML string for no-photo placeholder
 
     const indices = {}; // slug → current index
-    categoryGroups.forEach(g => { indices[g.slug] = 0; });
+    categoryGroups.forEach(g => { indices[g.slug] = g.startIdx ?? 0; });
 
     function renderColumn(slug) {
       const group = categoryGroups.find(g => g.slug === slug);
@@ -343,7 +421,7 @@ const categoryCount = categories.length - 1;
         if (photoEl.tagName === 'IMG') {
           const div = document.createElement('div');
           div.className = 'cat-photo w-full h-full flex items-center justify-center';
-          div.innerHTML = '<span class="font-mono text-[11px] tracking-[0.1em] uppercase text-rule">No Photo</span>';
+          div.innerHTML = iconMap[group.slug] ?? iconMap['miscellaneous'];
           photoEl.replaceWith(div);
         }
       }
