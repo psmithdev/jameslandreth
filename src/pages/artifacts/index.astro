@@ -266,6 +266,12 @@ const iconMap: Record<string, string> = {
           <option value="">All Families</option>
           {families.map(f => <option value={f}>{f}</option>)}
         </select>
+        <!-- Sort -->
+        <select id="sort-items" class="px-4 py-2.5 border border-rule bg-card text-sm font-serif text-ink focus:outline-none focus:border-ink-muted transition-colors">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="title">Title A-Z</option>
+        </select>
       </div>
 
       <!-- Category tags -->
@@ -296,6 +302,7 @@ const iconMap: Record<string, string> = {
             data-title={item.title.toLowerCase()}
             data-description={item.description?.toLowerCase() || ''}
             data-status={item.status}
+            data-created={item.created_at}
           >
             <ArtifactCard
               slug={item.slug}
@@ -325,10 +332,11 @@ const iconMap: Record<string, string> = {
     // ── Existing filter logic ────────────────────────────────────────
     const searchInput = document.getElementById('artifact-search');
     const familySelect = document.getElementById('filter-family');
+    const sortSelect = document.getElementById('sort-items');
     const grid = document.getElementById('items-grid');
     const noResults = document.getElementById('no-results');
 
-    if (!searchInput || !familySelect || !grid || !noResults) {
+    if (!searchInput || !familySelect || !sortSelect || !grid || !noResults) {
       console.error('[artifacts] Missing required DOM elements — skipping filter/slider init');
     } else {
 
@@ -355,8 +363,27 @@ const iconMap: Record<string, string> = {
       noResults.classList.toggle('hidden', count > 0);
     }
 
+    function applySort() {
+      const mode = sortSelect.value;
+      const itemEls = Array.from(grid.querySelectorAll('.artifact-item'));
+      itemEls.sort((a, b) => {
+        if (mode === 'title') {
+          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        }
+
+        const aTime = Date.parse(a.dataset.created || '') || 0;
+        const bTime = Date.parse(b.dataset.created || '') || 0;
+        return mode === 'oldest' ? aTime - bTime : bTime - aTime;
+      });
+      itemEls.forEach(item => grid.appendChild(item));
+    }
+
     searchInput.addEventListener('input', () => setTimeout(applyFilters, 100));
     familySelect.addEventListener('change', applyFilters);
+    sortSelect.addEventListener('change', () => {
+      applySort();
+      applyFilters();
+    });
 
     document.querySelectorAll('.cat-tag').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -374,6 +401,7 @@ const iconMap: Record<string, string> = {
     document.getElementById('clear-filters')?.addEventListener('click', () => {
       searchInput.value = '';
       familySelect.value = '';
+      sortSelect.value = 'newest';
       activeCategory = 'All Items';
       document.querySelectorAll('.cat-tag').forEach(b => {
         b.classList.remove('bg-stamp-art', 'text-card', 'border-stamp-art');
@@ -384,6 +412,7 @@ const iconMap: Record<string, string> = {
         allBtn.classList.remove('bg-card', 'text-ink-muted', 'border-rule');
         allBtn.classList.add('bg-stamp-art', 'text-card', 'border-stamp-art');
       }
+      applySort();
       applyFilters();
     });
 
