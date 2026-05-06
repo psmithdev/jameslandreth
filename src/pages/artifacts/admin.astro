@@ -5,7 +5,7 @@ import { createServerClient } from '../../lib/supabase';
 
 const user = (Astro.locals as any).user;
 if (!isAdmin(user)) {
-  return Astro.redirect('/login');
+  return Astro.redirect('/login?redirect=/admin');
 }
 
 const supabase = createServerClient();
