@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "upload-photos": "node scripts/upload-artifact-photos.mjs",
+    "upload-essays": "node scripts/upload-essays.mjs",
     "classify-photos": "node scripts/classify-photos.mjs",
     "review-photos": "node scripts/review-photos.mjs",
     "propose-artifacts": "node scripts/propose-artifacts.mjs",
