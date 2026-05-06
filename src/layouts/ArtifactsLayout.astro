@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { isAdmin } from '../lib/auth';
 
 interface Props {
   title?: string;
@@ -7,6 +8,7 @@ interface Props {
 
 const { title = 'Family Treasures' } = Astro.props;
 const user = (Astro.locals as any).user;
+const canManageArtifacts = isAdmin(user);
 ---
 
 <!DOCTYPE html>
@@ -34,6 +36,9 @@ const user = (Astro.locals as any).user;
           <a href="https://jameslandreth.com" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp-art transition-colors" target="_blank">jameslandreth.com</a>
           {user ? (
             <div class="flex items-center gap-6">
+              {canManageArtifacts && (
+                <a href="/admin" class="font-mono text-[13px] tracking-[0.12em] uppercase text-stamp border border-stamp px-3 py-1.5 hover:bg-stamp hover:text-card transition-colors">Upload</a>
+              )}
               <span class="font-mono text-[13px] text-rule">{user.display_name || user.email}</span>
               <a href="/api/auth/logout" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Logout</a>
             </div>
