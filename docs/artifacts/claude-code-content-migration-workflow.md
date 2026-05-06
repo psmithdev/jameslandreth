@@ -24,23 +24,24 @@ Before Jim can upload:
 
 1. Go to `https://artifacts.jameslandreth.com/admin`.
 2. Sign in if prompted.
-3. Click `+ Add New Item`.
-4. Fill in the required fields:
+3. If Jim starts on the public items page, click `Admin` in the top navigation.
+4. Click `+ Add New Item`.
+5. Fill in the required fields:
 
    - `Title`
    - `Category`
 
-5. Fill in optional fields when known:
+6. Fill in optional fields when known:
 
    - `Family`
    - `Estimated Value`
    - `Description`
    - `Provenance`
 
-6. Add 1 to 3 clear photos.
-7. Click `Add Item`.
-8. Open the new item from the admin list.
-9. Confirm the title, category, description, and photos look right on the public item page.
+7. Add 1 to 3 clear photos.
+8. Click `Add Item`.
+9. Open the new item from the admin list.
+10. Confirm the title, category, description, and photos look right on the public item page.
 
 New uploads are created with status `available`.
 
