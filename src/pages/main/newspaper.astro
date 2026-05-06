@@ -1,0 +1,761 @@
+---
+import '../../styles/global.css';
+
+type Decade = { tag: string; line: string };
+const decades: Decade[] = [
+  { tag: "The '60s", line: 'Ah, alma mater. Love and marriage.' },
+  { tag: "The '70s", line: 'Edjumacation. “Jamaica — mon.”' },
+  { tag: "The '80s", line: 'Children. How do you say Puyallup? And a move to the Midwest.' },
+  { tag: "The '90s", line: 'Job changes; their parents pass.' },
+  { tag: "The '00s", line: 'Love endures — Sept. 11, kids graduate and get married.' },
+  { tag: "The '10s", line: 'Recession, computers and smartphones, a grandson.' },
+  { tag: "The '20s", line: 'Diamond Legends; hips and knees.' },
+];
+
+const pets = ['Susie', 'Buffer', 'Ashes', 'Freddy', 'Smokey', 'Otis', 'Milo'];
+
+const rules = [
+  {
+    quote: 'What is the question?',
+    by: 'Aaron Bechtel',
+    year: '1971',
+    role: 'Philosopher; Jim’s Physiology mentor',
+    gloss: 'Issues and science are often messy. First, identify the most important question to be answered.',
+  },
+  {
+    quote: 'Answer the question.',
+    by: 'Tom Rudd',
+    year: '1978',
+    role: 'Fisherman; Jim’s Nuclear Medicine mentor',
+    gloss: 'First, answer the important question. Leave the rest for later.',
+  },
+  {
+    quote: 'Measure twice, cut once.',
+    by: 'Jim Walsh',
+    year: '1960',
+    role: 'Jim’s uncle',
+    gloss: 'Before you provide the answer, be sure of your process and technique — your measurements and rationale.',
+  },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap"
+  />
+  <title>The Old Codgers’ Chronicle — June 11, 2026</title>
+</head>
+
+<body class="npr-body">
+  <a href="/" class="npr-return">&larr; Return to the Archive</a>
+
+  <main class="npr-frame">
+    <div class="npr-paper">
+
+      <!-- MASTHEAD -->
+      <header class="npr-mast">
+        <div class="npr-mast-left">
+          <p class="npr-meta">Vol. LX &middot; No. 1</p>
+          <p class="npr-meta">Established 1966</p>
+        </div>
+        <div class="npr-mast-center">
+          <h1 class="npr-title">The Old Codgers&rsquo; Chronicle</h1>
+          <p class="npr-tagline">&mdash; All the news that&rsquo;s fit to retell &mdash;</p>
+        </div>
+        <div class="npr-mast-right">
+          <p class="npr-meta">Price: Free</p>
+          <p class="npr-meta">Single Copy</p>
+        </div>
+      </header>
+
+      <div class="npr-mast-rule">
+        <span></span>
+        <p class="npr-dateline">Saint Louis &middot; Thursday, June 11, 2026 &middot; Diamond Edition</p>
+        <span></span>
+      </div>
+
+      <!-- COLOR NAV STRIP -->
+      <nav class="npr-nav" aria-label="Sections">
+        <span class="npr-nav-burger" aria-hidden="true">&#9776;</span>
+        <a href="#front">Front</a>
+        <a href="#decades">Decades</a>
+        <a href="#pets">Pets</a>
+        <a href="#rules">Rules</a>
+        <a href="#travel">Travel</a>
+        <a href="#weather">Weather</a>
+        <a href="#obits">Obituaries</a>
+        <span class="npr-nav-search" aria-hidden="true">&#9906;</span>
+      </nav>
+
+      <!-- THREE-COLUMN GRID -->
+      <section class="npr-grid">
+
+        <!-- LEFT SIDEBAR — PETS -->
+        <aside class="npr-col npr-side" id="pets">
+          <h2 class="npr-side-title">Cats &amp; Dogs<br/><em class="npr-side-sub">Beloved &amp; Underfoot</em></h2>
+
+          <p class="npr-side-body">
+            <span class="npr-dropcap-small">A</span>cross sixty years, the household has rarely been
+            without four feet on the floor. Names below are listed in approximate chronological order,
+            with apologies to any feline overlooked.
+          </p>
+
+          <div class="npr-photo npr-photo-small" aria-label="Photo placeholder">
+            <span>photo</span>
+          </div>
+          <p class="npr-caption">Meowsers, current resident, in repose.</p>
+
+          <h3 class="npr-side-h3">The Cats</h3>
+          <ul class="npr-pet-list">
+            {pets.map((p) => <li>{p}</li>)}
+            <li><strong>Meowsers</strong> &nbsp;<em>(incumbent)</em></li>
+          </ul>
+
+          <h3 class="npr-side-h3">The Dog</h3>
+          <p class="npr-side-body">
+            <strong>Clifford</strong> &mdash; &ldquo;the big red dog,&rdquo; though shorter than
+            advertised. A patient companion through several Midwestern winters.
+          </p>
+
+          <div class="npr-ornament" aria-hidden="true">&#10086;</div>
+        </aside>
+
+        <!-- CENTER COLUMN — LEAD STORY -->
+        <article class="npr-col npr-main" id="front">
+          <p class="npr-kicker">Exclusive &middot; Diamond Anniversary</p>
+
+          <div class="npr-headline-box">
+            <h2 class="npr-headline">
+              Local Pair Celebrates<br/>Six Decades of Marriage
+            </h2>
+          </div>
+
+          <p class="npr-deck">Friends and relatives stunned!</p>
+
+          <p class="npr-pullquote">
+            &ldquo;And the world wonders.&rdquo;
+            <span>&mdash; Tom Quinn</span>
+          </p>
+
+          <p class="npr-lead">
+            <span class="npr-dropcap">F</span>rom the &rsquo;60s to the present, the adventures of
+            <strong>Jim &amp; Aleda</strong> &mdash; through war and peace, trips to the moon and now to
+            the loo, COVID, recession, cats and dogs, a long migration from the East Coast to the West
+            Coast and at last to Middle Earth. Together, the pair have visited
+            <strong>46 countries</strong> and <strong>all fifty States</strong>.
+          </p>
+
+          <div class="npr-photo npr-photo-hero" aria-label="Hero photo placeholder">
+            <span>photograph &middot; to follow</span>
+          </div>
+          <p class="npr-caption">
+            <strong>Above:</strong> The Landreths, sometime between the marrying and the moving.
+          </p>
+
+          <div class="npr-section-rule">
+            <span>By the Decade</span>
+          </div>
+
+          <div id="decades" class="npr-decades">
+            {decades.map((d) => (
+              <div class="npr-decade">
+                <h3 class="npr-decade-tag">{d.tag}</h3>
+                <p class="npr-decade-line">{d.line}</p>
+              </div>
+            ))}
+          </div>
+
+          <p class="npr-jump">Continued on page two &rarr;</p>
+        </article>
+
+        <!-- RIGHT SIDEBAR — RULES + PHONE -->
+        <aside class="npr-col npr-side" id="rules">
+          <h2 class="npr-side-title">Jim&rsquo;s Rules<br/><em class="npr-side-sub">to Remember</em></h2>
+
+          <div class="npr-rule-box">
+            {rules.map((r) => (
+              <div class="npr-rule">
+                <p class="npr-rule-quote">&ldquo;{r.quote}&rdquo;</p>
+                <p class="npr-rule-attrib">
+                  &mdash; {r.by}, <span class="npr-rule-year">{r.year}</span><br/>
+                  <em>{r.role}</em>
+                </p>
+                <p class="npr-rule-gloss">{r.gloss}</p>
+              </div>
+            ))}
+          </div>
+
+          <div class="npr-ornament" aria-hidden="true">&sect;</div>
+
+          <h3 class="npr-side-h3" id="travel">Travel Desk</h3>
+          <p class="npr-side-body">
+            <strong>46 countries</strong> &middot; <strong>50 states</strong>. Files held at the
+            Frontenac bureau. Subscribers may inquire by post or rotary.
+          </p>
+
+          <!-- ROTARY PHONE -->
+          <div class="npr-phone-block" aria-hidden="true">
+            <svg viewBox="0 0 120 110" class="npr-phone" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="60" cy="78" rx="44" ry="14" />
+              <path d="M22 38 Q60 12 98 38 L88 56 Q60 42 32 56 Z" fill="currentColor" stroke="none" opacity="0.92" />
+              <line x1="22" y1="38" x2="32" y2="56" />
+              <line x1="98" y1="38" x2="88" y2="56" />
+              <circle cx="60" cy="78" r="14" />
+              <circle cx="60" cy="78" r="3" fill="currentColor" stroke="none" />
+              <path d="M60 64 Q88 60 92 30 Q92 18 80 14" />
+              <line x1="46" y1="80" x2="40" y2="76" />
+              <line x1="74" y1="80" x2="80" y2="76" />
+            </svg>
+            <p class="npr-phone-num">DIamond&nbsp;6&middot;1966</p>
+            <p class="npr-phone-num small">STate&nbsp;1&middot;1964</p>
+          </div>
+
+          <div class="npr-classified">
+            <h3 class="npr-side-h3" id="weather">Weather</h3>
+            <p class="npr-side-body">
+              <strong>Saint Louis:</strong> Warm and sentimental, with intermittent dancing through
+              the evening.
+            </p>
+            <h3 class="npr-side-h3" id="obits" style="margin-top:1rem">Obituaries</h3>
+            <p class="npr-side-body">
+              See pets, above. Otherwise none reported.
+            </p>
+          </div>
+        </aside>
+
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="npr-footer">
+        <div class="npr-foot-rule"></div>
+        <div class="npr-foot-row">
+          <p class="npr-meta">Issued from Saint Louis, MO</p>
+          <p class="npr-meta">&copy; The Old Codgers&rsquo; Chronicle &middot; MMXXVI</p>
+          <p class="npr-meta">&ldquo;A diamond is forever&rdquo;</p>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --npr-newsprint: #F1ECDF;
+    --npr-newsprint-shade: #E8E2D2;
+    --npr-ink: #1B2A1F;
+    --npr-ink-soft: #2D3B30;
+    --npr-coral: #D67D52;
+    --npr-coral-dark: #B5613B;
+    --npr-rule: #1B2A1F;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Body — outer dark frame */
+  body.npr-body {
+    background-color: var(--npr-ink);
+    color: var(--npr-ink);
+    font-family: 'Old Standard TT', 'Libre Baskerville', Georgia, serif;
+    font-size: 16px;
+    min-height: 100vh;
+    padding: 28px 24px 56px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .npr-return {
+    display: inline-block;
+    color: var(--npr-newsprint);
+    font-family: 'Special Elite', 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin-bottom: 16px;
+    opacity: 0.78;
+    transition: opacity 200ms ease;
+  }
+  .npr-return:hover { opacity: 1; }
+
+  .npr-frame {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* The paper itself */
+  .npr-paper {
+    background-color: var(--npr-newsprint);
+    color: var(--npr-ink);
+    border: 1px solid var(--npr-ink);
+    box-shadow: 0 0 0 6px var(--npr-ink), 0 28px 80px rgba(0,0,0,0.45);
+    padding: 40px 44px 36px;
+    position: relative;
+    background-image:
+      radial-gradient(rgba(27,42,31,0.05) 1px, transparent 1px);
+    background-size: 3px 3px;
+    background-position: 0 0;
+  }
+
+  /* MASTHEAD */
+  .npr-mast {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: end;
+    gap: 16px;
+    padding-bottom: 8px;
+  }
+  .npr-mast-left  { text-align: left; }
+  .npr-mast-right { text-align: right; }
+  .npr-mast-center { text-align: center; }
+  .npr-meta {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 13px;
+    margin: 2px 0;
+    color: var(--npr-ink);
+  }
+  .npr-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 6vw, 4.25rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .npr-tagline {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    margin: 8px 0 0;
+    letter-spacing: 0.04em;
+  }
+
+  .npr-mast-rule {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    margin: 4px 0 12px;
+  }
+  .npr-mast-rule span {
+    border-top: 1px solid var(--npr-ink);
+    border-bottom: 1px solid var(--npr-ink);
+    height: 4px;
+    display: block;
+  }
+  .npr-dateline {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* COLOR NAV */
+  .npr-nav {
+    background-color: var(--npr-coral);
+    color: var(--npr-newsprint);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 10px 18px;
+    margin: 0 -4px 28px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 2px 0 var(--npr-coral-dark);
+  }
+  .npr-nav a {
+    color: var(--npr-newsprint);
+    text-decoration: none;
+    padding: 0 10px;
+    transition: color 180ms ease;
+  }
+  .npr-nav a:hover { color: var(--npr-ink); }
+  .npr-nav-burger,
+  .npr-nav-search {
+    font-size: 18px;
+    opacity: 0.9;
+  }
+
+  /* THREE-COLUMN GRID */
+  .npr-grid {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr 1fr;
+    gap: 0;
+    align-items: start;
+  }
+  .npr-col {
+    padding: 0 22px;
+  }
+  .npr-col + .npr-col {
+    border-left: 2px dotted var(--npr-ink);
+  }
+
+  @media (max-width: 880px) {
+    .npr-paper { padding: 28px 22px 28px; }
+    .npr-grid { grid-template-columns: 1fr; }
+    .npr-col + .npr-col {
+      border-left: 0;
+      border-top: 2px dotted var(--npr-ink);
+      padding-top: 28px;
+      margin-top: 28px;
+    }
+    .npr-col { padding: 0 4px; }
+  }
+
+  /* CENTER STORY */
+  .npr-kicker {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--npr-coral-dark);
+    margin: 0 0 10px;
+    text-align: center;
+  }
+  .npr-headline-box {
+    border: 2px solid var(--npr-ink);
+    padding: 18px 18px 16px;
+    margin-bottom: 14px;
+    background-color: rgba(255,255,255,0.25);
+  }
+  .npr-headline {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+    line-height: 1.04;
+    margin: 0;
+    text-align: center;
+    color: var(--npr-ink);
+  }
+  .npr-deck {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 18px;
+    margin: 0 0 14px;
+    text-align: center;
+  }
+  .npr-pullquote {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.3;
+    text-align: center;
+    border-top: 1px solid var(--npr-ink);
+    border-bottom: 1px solid var(--npr-ink);
+    padding: 12px 0;
+    margin: 14px 0 18px;
+  }
+  .npr-pullquote span {
+    display: block;
+    font-style: normal;
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .npr-lead {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 16.5px;
+    line-height: 1.6;
+    text-align: justify;
+    hyphens: auto;
+    margin: 0 0 20px;
+  }
+  .npr-dropcap {
+    float: left;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 4.4rem;
+    line-height: 0.85;
+    padding: 4px 10px 0 0;
+    color: var(--npr-ink);
+  }
+  .npr-dropcap-small {
+    float: left;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 2.3rem;
+    line-height: 0.85;
+    padding: 2px 6px 0 0;
+  }
+
+  .npr-photo {
+    background-color: var(--npr-newsprint-shade);
+    border: 1px solid var(--npr-ink);
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        transparent 0 6px,
+        rgba(27,42,31,0.05) 6px 7px
+      );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--npr-ink-soft);
+    font-family: 'Special Elite', 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .npr-photo-hero {
+    aspect-ratio: 16 / 10;
+    margin: 8px 0 6px;
+  }
+  .npr-photo-small {
+    aspect-ratio: 4 / 3;
+    margin: 12px 0 6px;
+  }
+  .npr-caption {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+    margin: 4px 0 18px;
+    color: var(--npr-ink-soft);
+  }
+
+  .npr-section-rule {
+    margin: 26px 0 18px;
+    text-align: center;
+    position: relative;
+  }
+  .npr-section-rule::before,
+  .npr-section-rule::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    background: var(--npr-ink);
+  }
+  .npr-section-rule::before { left: 0; }
+  .npr-section-rule::after { right: 0; }
+  .npr-section-rule span {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 13px;
+    background: var(--npr-newsprint);
+    padding: 0 14px;
+    color: var(--npr-ink);
+  }
+
+  .npr-decades {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 22px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 600px) {
+    .npr-decades { grid-template-columns: 1fr; }
+  }
+  .npr-decade {
+    border-top: 1px solid var(--npr-ink);
+    padding-top: 8px;
+  }
+  .npr-decade-tag {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 18px;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .npr-decade-line {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.45;
+    margin: 0;
+    font-style: italic;
+  }
+
+  .npr-jump {
+    font-family: 'Special Elite', 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-align: right;
+    margin: 8px 0 0;
+    color: var(--npr-coral-dark);
+  }
+
+  /* SIDEBARS */
+  .npr-side-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 1.05;
+    text-align: center;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .npr-side-sub {
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .npr-side-h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+    border-top: 1px solid var(--npr-ink);
+    border-bottom: 1px solid var(--npr-ink);
+    padding: 6px 0;
+    margin: 18px 0 12px;
+  }
+  .npr-side-body {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 14.5px;
+    line-height: 1.55;
+    text-align: justify;
+    hyphens: auto;
+    margin: 0 0 12px;
+  }
+
+  .npr-pet-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px;
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 15px;
+    text-align: center;
+    column-count: 1;
+  }
+  .npr-pet-list li {
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--npr-ink);
+  }
+  .npr-pet-list li:last-child { border-bottom: 0; }
+
+  .npr-rule-box {
+    border: 1px solid var(--npr-ink);
+    padding: 14px 14px 8px;
+    background-color: rgba(255,255,255,0.25);
+  }
+  .npr-rule {
+    border-bottom: 1px dotted var(--npr-ink);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  .npr-rule:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+  .npr-rule-quote {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.25;
+    margin: 0 0 6px;
+    text-align: center;
+  }
+  .npr-rule-attrib {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 13px;
+    text-align: center;
+    margin: 0 0 6px;
+  }
+  .npr-rule-year {
+    font-family: 'Special Elite', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  .npr-rule-gloss {
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    text-align: justify;
+    hyphens: auto;
+    margin: 0;
+    color: var(--npr-ink-soft);
+  }
+
+  .npr-ornament {
+    text-align: center;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    margin: 16px 0;
+    color: var(--npr-coral-dark);
+  }
+
+  /* PHONE BLOCK */
+  .npr-phone-block {
+    text-align: center;
+    margin: 14px 0 6px;
+    color: var(--npr-ink);
+  }
+  .npr-phone {
+    width: 96px;
+    height: auto;
+    color: var(--npr-ink);
+  }
+  .npr-phone-num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    margin: 4px 0 2px;
+  }
+  .npr-phone-num.small {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--npr-ink-soft);
+  }
+
+  .npr-classified {
+    margin-top: 18px;
+  }
+
+  /* FOOTER */
+  .npr-footer {
+    margin-top: 32px;
+  }
+  .npr-foot-rule {
+    height: 6px;
+    border-top: 1px solid var(--npr-ink);
+    border-bottom: 4px solid var(--npr-ink);
+    margin-bottom: 10px;
+  }
+  .npr-foot-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: 'Old Standard TT', Georgia, serif;
+    font-style: italic;
+    font-size: 12.5px;
+    color: var(--npr-ink-soft);
+  }
+  .npr-foot-row p { margin: 0; }
+</style>
