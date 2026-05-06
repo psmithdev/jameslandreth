@@ -6,3 +6,5 @@ pages_build_output_dir = "./dist"
 [vars]
 PUBLIC_SUPABASE_URL = "https://rymoeaycmozlbrcvuhkl.supabase.co"
 PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_GwnALtg0jJEOayVsxuf_yw_KxSjOAxl"
+CLAIM_FROM_EMAIL = "Family Treasures <claims@grace.psmith.dev>"
+CLAIM_NOTIFICATION_EMAIL = "aledaandjim@yahoo.com,smooth.bowl3011@psmith.dev"

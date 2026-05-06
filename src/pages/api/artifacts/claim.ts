@@ -24,29 +24,81 @@ async function sendClaimNotification({
   claimantEmail,
   itemUrl,
 }: {
-  artifact: { title: string; slug: string; category: string | null; family: string | null; estimated_value: string | null };
+  artifact: { title: string; slug: string; category: string | null; family: string | null; estimated_value: string | null; images: string[] | null };
   claimantName: string;
   claimantEmail: string;
   itemUrl: string;
 }) {
   const apiKey = import.meta.env.RESEND_API_KEY;
-  const to = import.meta.env.CLAIM_NOTIFICATION_EMAIL || 'aledaandjim@yahoo.com';
+  const toRaw = import.meta.env.CLAIM_NOTIFICATION_EMAIL || 'aledaandjim@yahoo.com';
+  const to = toRaw
+    .split(',')
+    .map((s: string) => s.trim())
+    .filter(Boolean);
   const from = import.meta.env.CLAIM_FROM_EMAIL || 'Family Treasures <claims@jameslandreth.com>';
 
   if (!apiKey) {
     throw new Error('Missing RESEND_API_KEY');
   }
 
-  const lines = [
+  const detailRows: Array<[string, string]> = [];
+  if (artifact.category) detailRows.push(['Category', artifact.category]);
+  if (artifact.family) detailRows.push(['Family', artifact.family]);
+  if (artifact.estimated_value) detailRows.push(['Estimated value', artifact.estimated_value]);
+
+  const textLines = [
     `Name: ${claimantName}`,
     `Email: ${claimantEmail}`,
     '',
     `Artifact: ${artifact.title}`,
-    `Category: ${artifact.category || 'Not set'}`,
-    `Family: ${artifact.family || 'Not set'}`,
-    `Estimated value: ${artifact.estimated_value || 'Not set'}`,
+    ...detailRows.map(([k, v]) => `${k}: ${v}`),
     `Link: ${itemUrl}`,
   ];
+
+  const photoUrl = artifact.images && artifact.images.length > 0 ? artifact.images[0] : null;
+  const escape = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  const photoBlock = photoUrl
+    ? `<tr><td style="padding:0 32px 24px;"><img src="${escape(photoUrl)}" alt="${escape(artifact.title)}" width="280" style="border-radius:12px;display:block;max-width:100%;height:auto;margin:0 auto;" /></td></tr>`
+    : '';
+
+  const detailsHtml = detailRows
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:4px 0;color:#6b6359;font-size:14px;width:140px;">${escape(k)}</td><td style="padding:4px 0;color:#2a2622;font-size:14px;">${escape(v)}</td></tr>`,
+    )
+    .join('');
+
+  const html = `<!doctype html>
+<html><body style="margin:0;padding:24px 12px;background:#f4ede0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2a2622;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="560" style="max-width:560px;margin:0 auto;background:#faf6ee;border-radius:16px;overflow:hidden;">
+    <tr><td style="padding:32px 32px 0;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9a8d7a;margin-bottom:8px;">Family Treasures</div>
+      <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;margin:0 0 8px;color:#2a2622;">${escape(artifact.title)}</h1>
+      <div style="font-size:14px;color:#6b6359;margin-bottom:24px;">has been claimed.</div>
+    </td></tr>
+    ${photoBlock}
+    <tr><td style="padding:0 32px 24px;">
+      <div style="background:#fff;border-radius:12px;padding:20px;">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#9a8d7a;margin-bottom:8px;">Claimed by</div>
+        <div style="font-size:16px;color:#2a2622;margin-bottom:4px;">${escape(claimantName)}</div>
+        <a href="mailto:${escape(claimantEmail)}" style="font-size:14px;color:#5b8c5a;text-decoration:none;">${escape(claimantEmail)}</a>
+      </div>
+    </td></tr>
+    ${
+      detailsHtml
+        ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${detailsHtml}</table></td></tr>`
+        : ''
+    }
+    <tr><td style="padding:0 32px 32px;" align="center">
+      <a href="${escape(itemUrl)}" style="display:inline-block;background:#5b8c5a;color:#fff;text-decoration:none;font-size:15px;padding:12px 28px;border-radius:999px;font-weight:600;">View item</a>
+    </td></tr>
+    <tr><td style="padding:0 32px 24px;border-top:1px solid #ebe2d2;">
+      <div style="font-size:11px;color:#9a8d7a;margin-top:16px;text-align:center;">You're receiving this because you administer the Family Treasures site.</div>
+    </td></tr>
+  </table>
+</body></html>`;
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -59,7 +111,8 @@ async function sendClaimNotification({
       to,
       reply_to: claimantEmail,
       subject: `Artifact claimed: ${artifact.title}`,
-      text: lines.join('\n'),
+      text: textLines.join('\n'),
+      html,
     }),
   });
 
@@ -83,7 +136,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 
   const { data: artifact, error: fetchError } = await supabase
     .from('artifacts')
-    .select('id, slug, title, category, family, estimated_value, status')
+    .select('id, slug, title, category, family, estimated_value, status, images')
     .eq('id', artifactId)
     .single();
 
