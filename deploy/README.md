@@ -16,6 +16,9 @@ Set in Cloudflare Pages dashboard → Settings → Environment variables:
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (Secret)
+- `RESEND_API_KEY` (Secret, required for artifact claim notifications)
+- `CLAIM_NOTIFICATION_EMAIL` (defaults to `aledaandjim@yahoo.com`)
+- `CLAIM_FROM_EMAIL` (verified Resend sender, e.g. `Family Treasures <claims@jameslandreth.com>`)
 
 ## Custom Domains
 

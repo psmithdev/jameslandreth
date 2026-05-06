@@ -19,7 +19,7 @@ if (!item) {
 }
 
 const user = (Astro.locals as any).user;
-const canClaim = isFamily(user) && item.status === 'available';
+const canClaim = item.status === 'available';
 
 // Fetch comments for this artifact
 const { data: comments } = await supabase
@@ -174,24 +174,44 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
 
           {/* Claim button */}
           {canClaim && (
-            <button
-              id="claim-btn"
-              class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm"
-            >
-              Claim This Item
-            </button>
+            <form id="claim-form" class="space-y-3">
+              <div>
+                <label for="claim-name" class="block text-xs font-semibold text-slate-600 mb-1">Your name</label>
+                <input
+                  id="claim-name"
+                  name="name"
+                  type="text"
+                  autocomplete="name"
+                  required
+                  class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label for="claim-email" class="block text-xs font-semibold text-slate-600 mb-1">Your email</label>
+                <input
+                  id="claim-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  class="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <div id="claim-message" class="hidden rounded-lg border px-3 py-2 text-sm"></div>
+              <button
+                id="claim-btn"
+                type="submit"
+                class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm"
+              >
+                Claim This Item
+              </button>
+            </form>
           )}
 
           {item.status === 'claimed' && (
             <div class="text-center text-sm text-amber-600 font-medium py-2">
               This item has been claimed
             </div>
-          )}
-
-          {!user && (
-            <a href="/login" class="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm">
-              Sign in to claim
-            </a>
           )}
         </div>
       </aside>
@@ -200,24 +220,41 @@ const sStyle = statusStyles[item.status] || statusStyles.available;
 
   <script define:vars={{ itemId: item.id, artifactSlug: slug }}>
     // Claim flow
+    const claimForm = document.getElementById('claim-form');
     const claimBtn = document.getElementById('claim-btn');
-    if (claimBtn) {
-      claimBtn.addEventListener('click', async () => {
-        if (!confirm('Are you sure you want to claim this item?')) return;
+    const claimMessage = document.getElementById('claim-message');
+    function showClaimMessage(text, type) {
+      if (!claimMessage) return;
+      claimMessage.textContent = text;
+      claimMessage.className = type === 'success'
+        ? 'rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700'
+        : 'rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700';
+    }
+
+    if (claimForm && claimBtn) {
+      claimForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const fd = new FormData(form);
         claimBtn.textContent = 'Claiming...';
         claimBtn.setAttribute('disabled', 'true');
 
         const res = await fetch('/api/artifacts/claim', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ artifactId: itemId }),
+          body: JSON.stringify({
+            artifactId: itemId,
+            name: String(fd.get('name') || ''),
+            email: String(fd.get('email') || ''),
+          }),
         });
 
         if (res.ok) {
-          window.location.reload();
+          showClaimMessage('Claim submitted. Aleda has been notified.', 'success');
+          setTimeout(() => window.location.reload(), 1200);
         } else {
           const data = await res.json();
-          alert(data.error || 'Failed to claim item.');
+          showClaimMessage(data.error || 'Failed to claim item.', 'error');
           claimBtn.textContent = 'Claim This Item';
           claimBtn.removeAttribute('disabled');
         }
