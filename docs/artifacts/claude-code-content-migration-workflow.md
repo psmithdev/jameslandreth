@@ -19,6 +19,7 @@ Before Jim can upload:
 - Jim's row in `profiles` must have `role` set to `admin`.
 - Jim should sign in at `https://artifacts.jameslandreth.com/login`.
 - After signing in, Jim should be able to open `https://artifacts.jameslandreth.com/admin`.
+- In local development, use `http://artifacts.localhost:4321/admin` for the artifact admin. `http://localhost:4321/admin` is the document admin.
 
 ### Upload One Artifact
 
@@ -66,6 +67,7 @@ New uploads are created with status `available`.
 ### Troubleshooting
 
 - If `/admin` sends Jim to login, sign in at `https://artifacts.jameslandreth.com/login`.
+- If local development shows the document admin instead of artifact upload fields, use `http://artifacts.localhost:4321/admin`.
 - If login succeeds but `/admin` still redirects, Parker should confirm Jim's `profiles.role` is `admin`.
 - If an upload fails, try fewer photos first.
 - If a duplicate-title upload fails, use a more specific title so the generated slug is unique.
