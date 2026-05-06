@@ -16,7 +16,7 @@ const { data: documents, error } = await supabase
 const docs = documents || [];
 
 const categories = [...new Set(docs.map(d => d.category))].sort();
-const years = [...new Set(docs.map(d => d.year))].sort((a, b) => b - a);
+const years = [...new Set(docs.map(d => d.year).filter((year): year is number => typeof year === 'number'))].sort((a, b) => b - a);
 const locations = [...new Set(docs.map(d => d.location).filter(Boolean))].sort();
 
 const featuredDocs = docs.filter(d => d.featured);
