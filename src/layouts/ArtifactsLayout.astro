@@ -37,7 +37,7 @@ const canManageArtifacts = isAdmin(user);
           {user ? (
             <div class="flex items-center gap-6">
               {canManageArtifacts && (
-                <a href="/admin" class="font-mono text-[14px] tracking-[0.12em] uppercase text-stamp-art hover:text-stamp-art-hover transition-colors">Admin</a>
+                <a href="/admin" class="font-mono text-[13px] tracking-[0.12em] uppercase text-stamp border border-stamp px-3 py-1.5 hover:bg-stamp hover:text-card transition-colors">Upload</a>
               )}
               <span class="font-mono text-[13px] text-rule">{user.display_name || user.email}</span>
               <a href="/api/auth/logout" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Logout</a>
