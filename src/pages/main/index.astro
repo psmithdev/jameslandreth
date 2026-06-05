@@ -4,6 +4,7 @@ import DocumentCard from '../../components/main/DocumentCard.astro';
 import SearchBar from '../../components/main/SearchBar.astro';
 import FilterControls from '../../components/main/FilterControls.astro';
 import { createServerClient } from '../../lib/supabase';
+import retrospectiveSlides from '../../data/retrospectiveSlides.json';
 
 const supabase = createServerClient();
 
@@ -23,21 +24,145 @@ const featuredDocs = docs.filter(d => d.featured);
 const totalDocs = docs.length;
 const countriesCount = locations.length;
 const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
+const firstSlide = retrospectiveSlides[0];
+const slideCount = retrospectiveSlides.length;
+const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length > 0).slice(0, 8);
 ---
 
 <MainLayout>
 
-  <!-- Hero -->
-  <section class="border-b border-rule">
-    <div class="max-w-6xl mx-auto px-6 py-12">
+  <!-- Anniversary Showcase -->
+  <section class="border-b border-rule bg-card">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-14">
+      <div class="mb-10 max-w-5xl">
+        <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Diamond Anniversary · June 11, 2026</p>
+        <h2 class="font-display text-4xl sm:text-5xl text-ink mb-5 leading-tight">Aleda &amp; Jim: Sixty Years Together</h2>
+        <p class="font-serif text-xl text-ink-muted leading-relaxed">
+          A homepage preview for the anniversary newspaper, the wedding portrait, and the full
+          retrospective slideshow from the early years before Saint Louis.
+        </p>
+      </div>
+
+      <div class="grid gap-5 lg:grid-cols-3">
+        <article class="border border-rule bg-parchment p-6">
+          <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Newspaper</p>
+          <h3 class="font-display text-3xl text-ink leading-tight mb-4">The Old Codgers&rsquo; Chronicle</h3>
+          <p class="font-serif text-ink-muted leading-relaxed mb-6">
+            A Diamond Edition front page with the anniversary headline, newspaper tone, and a path
+            into the full commemorative page.
+          </p>
+          <button
+            id="open-newspaper-modal"
+            type="button"
+            class="border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
+          >
+            Preview Newspaper
+          </button>
+        </article>
+
+        <figure class="border border-rule bg-parchment p-3">
+          <img
+            src="/images/jim-aleda-wedding.png"
+            alt="Jim and Aleda on their wedding day"
+            class="h-[430px] w-full object-cover object-[50%_42%]"
+            loading="eager"
+          />
+          <figcaption class="border-t border-rule pt-3 mt-3 text-center font-serif text-sm italic leading-relaxed text-ink-muted">
+            Jim and Aleda on their wedding day.
+          </figcaption>
+        </figure>
+
+        <article class="border border-rule bg-parchment p-6">
+          <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Slideshow</p>
+          <h3 class="font-display text-3xl text-ink leading-tight mb-4">Retrospective 60</h3>
+          <p class="font-serif text-ink-muted leading-relaxed mb-6">
+            A web preview of the PowerPoint retrospective, with {slideCount} slides and
+            selected original notes preserved beside the family photographs.
+          </p>
+          <a
+            href="#anniversary-slideshow"
+            class="inline-flex border border-rule px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+          >
+            Browse Slides
+          </a>
+          <a
+            href="/presentations/retrospective-60.pptx"
+            class="mt-3 inline-flex border border-rule px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+            download
+          >
+            Download Deck
+          </a>
+        </article>
+      </div>
+
+      <section id="anniversary-slideshow" class="mt-8 border border-rule bg-parchment p-4 sm:p-6">
+        <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-2">Presentation Preview</p>
+            <h3 id="slide-title" class="font-display text-2xl sm:text-3xl text-ink leading-tight">{firstSlide.title}</h3>
+            <p id="slide-subtitle" class="hidden font-serif text-ink-muted leading-relaxed mt-2 max-w-2xl"></p>
+          </div>
+          <p id="slide-count" class="font-mono text-[13px] tracking-[0.14em] uppercase text-stamp">Slide 1 of {slideCount}</p>
+        </div>
+
+        <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
+          <div class="border border-rule bg-card p-4">
+            <div id="slide-stage" class="h-full w-full">
+              <div class="aspect-video flex h-full items-center justify-center border border-dashed border-rule bg-parchment-dark p-6 text-center">
+                <div>
+                  <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-3">Retrospective 60</p>
+                  <p class="font-display text-4xl text-ink leading-tight">{firstSlide.title}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col justify-between gap-4">
+            <div class="grid grid-cols-4 gap-2 lg:grid-cols-2">
+              {thumbnailSlides.map((slide) => (
+                <button
+                  type="button"
+                  class="slide-thumb aspect-video border border-rule bg-card p-1 transition-colors hover:border-stamp"
+                  data-slide-index={slide.number - 1}
+                  aria-label={`Show slide ${slide.number}`}
+                >
+                  <img src={slide.images[0]} alt="" class="h-full w-full object-cover" loading="lazy" />
+                </button>
+              ))}
+            </div>
+            <div class="flex gap-2">
+              <button
+                id="slide-prev"
+                type="button"
+                class="flex-1 border border-rule px-4 py-3 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+              >
+                Previous
+              </button>
+              <button
+                id="slide-next"
+                type="button"
+                class="flex-1 border border-stamp bg-stamp px-4 py-3 font-mono text-[12px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-6 py-10">
+
+    <!-- Archive Header -->
+    <section class="mb-10 border-b border-rule pb-10">
       <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Personal Archive · Est. 1960</p>
-      <h2 class="font-display text-5xl text-ink mb-5 leading-tight">Document Archive</h2>
-      <p class="font-serif text-xl text-ink-muted max-w-2xl leading-relaxed mb-10">
+      <h2 class="font-display text-4xl sm:text-5xl text-ink mb-5 leading-tight">Document Archive</h2>
+      <p class="font-serif text-xl text-ink-muted max-w-2xl leading-relaxed mb-8">
         A curated collection of travel journals, family newsletters, essays, and life adventures —
         carefully preserved to share with family, friends, and fellow travelers.
       </p>
 
-      <!-- Stats -->
       <div class="flex items-stretch gap-0 flex-wrap">
         <div class="pr-8 border-r border-rule mr-8 mb-4">
           <div class="font-mono text-4xl text-stamp font-bold leading-none">{totalDocs}</div>
@@ -56,10 +181,7 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
           <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <div class="max-w-6xl mx-auto px-6 py-10">
+    </section>
 
     <!-- Search & Filters -->
     <section class="border border-rule p-6 mb-10 bg-card">
@@ -156,7 +278,315 @@ const yearsSpan = years.length > 0 ? years[0] - years[years.length - 1] + 1 : 0;
 
   </div>
 
+  <div
+    id="newspaper-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/80 px-4 py-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="newspaper-modal-title"
+  >
+    <div class="absolute inset-0" data-newspaper-close></div>
+    <div class="relative max-h-[92vh] w-full max-w-5xl overflow-auto border border-rule bg-[#F1ECDF] p-5 shadow-2xl sm:p-8">
+      <button
+        type="button"
+        data-newspaper-close
+        class="absolute right-4 top-4 border border-rule bg-parchment px-3 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+      >
+        Close
+      </button>
+      <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div>
+          <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Saint Louis · Thursday, June 11, 2026</p>
+          <h2 id="newspaper-modal-title" class="font-display text-4xl sm:text-5xl text-ink leading-tight mb-4">The Old Codgers&rsquo; Chronicle</h2>
+          <div class="border-y border-ink py-5">
+            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-3">Diamond Edition</p>
+            <h3 class="font-display text-3xl sm:text-4xl text-ink leading-tight mb-4">Local Pair Celebrates Six Decades of Marriage</h3>
+            <p class="font-serif text-lg leading-relaxed text-ink-muted">
+              Friends and relatives report a long run of teaching, travel, family stories, cats,
+              dogs, and a marriage that began at Eisenhower Chapel in 1966.
+            </p>
+          </div>
+          <div class="mt-6 grid gap-4 sm:grid-cols-3">
+            <div class="border-t border-rule pt-3">
+              <p class="font-mono text-[12px] tracking-[0.14em] uppercase text-stamp">Feature</p>
+              <p class="font-serif text-ink-muted">Wedding day and early years</p>
+            </div>
+            <div class="border-t border-rule pt-3">
+              <p class="font-mono text-[12px] tracking-[0.14em] uppercase text-stamp">Inside</p>
+              <p class="font-serif text-ink-muted">Decades, travel, pets, and rules</p>
+            </div>
+            <div class="border-t border-rule pt-3">
+              <p class="font-mono text-[12px] tracking-[0.14em] uppercase text-stamp">Edition</p>
+              <p class="font-serif text-ink-muted">Anniversary front page</p>
+            </div>
+          </div>
+          <a
+            href="/newspaper"
+            class="mt-8 inline-flex border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
+          >
+            Read Full Newspaper
+          </a>
+        </div>
+        <figure class="border border-rule bg-parchment p-3">
+          <img
+            src="/images/jim-aleda-wedding.png"
+            alt="Jim and Aleda on their wedding day"
+            class="max-h-[620px] w-full object-cover object-[50%_42%]"
+            loading="lazy"
+          />
+          <figcaption class="border-t border-rule pt-3 mt-3 text-center font-serif text-sm italic leading-relaxed text-ink-muted">
+            The photograph anchoring the Diamond Edition preview.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="slide-lightbox"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/90 px-4 py-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="slide-lightbox-title"
+  >
+    <div class="absolute inset-0" data-lightbox-close></div>
+    <div class="relative flex max-h-[92vh] w-full max-w-6xl flex-col border border-rule bg-card p-4 shadow-2xl sm:p-5">
+      <div class="mb-4 flex items-start justify-between gap-4 border-b border-rule pb-3">
+        <div>
+          <p id="slide-lightbox-count" class="font-mono text-[12px] tracking-[0.16em] uppercase text-stamp"></p>
+          <h2 id="slide-lightbox-title" class="font-display text-2xl text-ink leading-tight"></h2>
+        </div>
+        <button
+          type="button"
+          data-lightbox-close
+          class="border border-rule bg-parchment px-3 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+        >
+          Close
+        </button>
+      </div>
+      <div class="grid min-h-0 flex-1 gap-3 sm:grid-cols-[44px_minmax(0,1fr)_44px] sm:items-center">
+        <button
+          id="slide-lightbox-prev"
+          type="button"
+          class="order-2 border border-rule bg-parchment px-3 py-3 font-mono text-[18px] leading-none text-ink transition-colors hover:border-stamp hover:text-stamp sm:order-none"
+          aria-label="Previous slide image"
+        >
+          &lt;
+        </button>
+        <div class="order-1 min-h-0 border border-rule bg-parchment-dark p-2 sm:order-none">
+          <img
+            id="slide-lightbox-image"
+            src=""
+            alt=""
+            class="max-h-[68vh] w-full object-contain"
+          />
+        </div>
+        <button
+          id="slide-lightbox-next"
+          type="button"
+          class="order-3 border border-rule bg-parchment px-3 py-3 font-mono text-[18px] leading-none text-ink transition-colors hover:border-stamp hover:text-stamp"
+          aria-label="Next slide image"
+        >
+          &gt;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" id="retrospective-slides-data" set:html={JSON.stringify(retrospectiveSlides)}></script>
+
   <script>
+    type RetrospectiveSlide = {
+      number: number;
+      title: string;
+      subtitle: string;
+      images: string[];
+      imageCount: number;
+      notes?: string[];
+    };
+
+    const modal = document.getElementById('newspaper-modal')!;
+    const openModal = document.getElementById('open-newspaper-modal');
+    const closeModalButtons = document.querySelectorAll('[data-newspaper-close]');
+    const slideLightbox = document.getElementById('slide-lightbox')!;
+    const slideLightboxTitle = document.getElementById('slide-lightbox-title')!;
+    const slideLightboxCount = document.getElementById('slide-lightbox-count')!;
+    const slideLightboxImage = document.getElementById('slide-lightbox-image') as HTMLImageElement;
+    const slideLightboxPrev = document.getElementById('slide-lightbox-prev') as HTMLButtonElement;
+    const slideLightboxNext = document.getElementById('slide-lightbox-next') as HTMLButtonElement;
+    const closeLightboxButtons = document.querySelectorAll('[data-lightbox-close]');
+    const slidesDataEl = document.getElementById('retrospective-slides-data')!;
+    const retrospectiveSlides = JSON.parse(slidesDataEl.textContent || '[]') as RetrospectiveSlide[];
+    const slideStage = document.getElementById('slide-stage')!;
+    const slideTitle = document.getElementById('slide-title')!;
+    const slideSubtitle = document.getElementById('slide-subtitle')!;
+    const slideCount = document.getElementById('slide-count')!;
+    let activeSlideIndex = 0;
+    let activeLightboxImageIndex = 0;
+
+    function escapeHtml(value: string) {
+      return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function showNewspaperModal() {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideNewspaperModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    function renderImageGrid(slide: RetrospectiveSlide) {
+      const notes = slide.notes || [];
+      const notesMarkup = notes.length > 0
+        ? `
+          <aside class="border border-rule bg-parchment p-4">
+            <p class="font-mono text-[11px] tracking-[0.16em] uppercase text-rule mb-3">Slide Notes</p>
+            <ul class="space-y-2 font-serif text-sm leading-relaxed text-ink-muted">
+              ${notes.map((note) => `<li>${escapeHtml(note)}</li>`).join('')}
+            </ul>
+          </aside>
+        `
+        : '';
+
+      if (slide.images.length === 0) {
+        return `
+          <div class="aspect-video flex h-full items-center justify-center border border-dashed border-rule bg-parchment-dark p-6 text-center">
+            <div>
+              <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-3">Retrospective 60</p>
+              <p class="font-display text-4xl text-ink leading-tight">${escapeHtml(slide.title)}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      const visibleImages = slide.images.slice(0, 6);
+      const gridClass = visibleImages.length === 1
+        ? 'grid-cols-1'
+        : visibleImages.length === 2
+          ? 'grid-cols-2'
+          : 'grid-cols-2 sm:grid-cols-3';
+
+      const imageGrid = `
+        <div class="aspect-video grid ${gridClass} gap-3">
+          ${visibleImages.map((src, index) => `
+            <button
+              type="button"
+              class="min-h-0 border border-rule bg-parchment-dark p-1 transition-colors hover:border-stamp focus:outline-none focus:ring-2 focus:ring-stamp ${visibleImages.length === 3 && index === 0 ? 'sm:row-span-2' : ''}"
+              data-lightbox-image-index="${index}"
+              aria-label="Open image ${index + 1} from slide ${slide.number}"
+            >
+              <img src="${src}" alt="" class="h-full w-full ${visibleImages.length === 1 ? 'object-contain' : 'object-cover'}" loading="lazy" />
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      if (notes.length === 0) return imageGrid;
+
+      return `
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          ${imageGrid}
+          ${notesMarkup}
+        </div>
+      `;
+    }
+
+    function renderSlide(index: number) {
+      if (retrospectiveSlides.length === 0) return;
+      activeSlideIndex = (index + retrospectiveSlides.length) % retrospectiveSlides.length;
+      const slide = retrospectiveSlides[activeSlideIndex];
+      slideTitle.textContent = slide.title;
+      if (slide.notes && slide.notes.length > 0) {
+        slideSubtitle.textContent = 'Original slide wording preserved below.';
+        slideSubtitle.classList.remove('hidden');
+      } else {
+        slideSubtitle.textContent = '';
+        slideSubtitle.classList.add('hidden');
+      }
+      slideCount.textContent = `Slide ${slide.number} of ${retrospectiveSlides.length}`;
+      slideStage.innerHTML = renderImageGrid(slide);
+
+      document.querySelectorAll('.slide-thumb').forEach((thumb) => {
+        const isActive = Number((thumb as HTMLElement).dataset.slideIndex) === activeSlideIndex;
+        thumb.classList.toggle('border-stamp', isActive);
+        thumb.classList.toggle('border-rule', !isActive);
+      });
+    }
+
+    function updateLightboxImage() {
+      const slide = retrospectiveSlides[activeSlideIndex];
+      const visibleImages = slide.images.slice(0, 6);
+      const imageCount = visibleImages.length;
+      if (imageCount === 0) return;
+
+      activeLightboxImageIndex = (activeLightboxImageIndex + imageCount) % imageCount;
+      slideLightboxTitle.textContent = slide.title;
+      slideLightboxCount.textContent = `Slide ${slide.number} · Image ${activeLightboxImageIndex + 1} of ${imageCount}`;
+      slideLightboxImage.src = visibleImages[activeLightboxImageIndex];
+      slideLightboxImage.alt = `${slide.title}, image ${activeLightboxImageIndex + 1}`;
+      const hasMultipleImages = imageCount > 1;
+      slideLightboxPrev.disabled = !hasMultipleImages;
+      slideLightboxNext.disabled = !hasMultipleImages;
+      slideLightboxPrev.classList.toggle('opacity-40', !hasMultipleImages);
+      slideLightboxNext.classList.toggle('opacity-40', !hasMultipleImages);
+    }
+
+    function showSlideLightbox(imageIndex: number) {
+      activeLightboxImageIndex = imageIndex;
+      updateLightboxImage();
+      slideLightbox.classList.remove('hidden');
+      slideLightbox.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      slideLightboxImage.focus();
+    }
+
+    function hideSlideLightbox() {
+      slideLightbox.classList.add('hidden');
+      slideLightbox.classList.remove('flex');
+      slideLightboxImage.removeAttribute('src');
+      document.body.style.overflow = '';
+    }
+
+    function showAdjacentLightboxImage(direction: number) {
+      activeLightboxImageIndex += direction;
+      updateLightboxImage();
+    }
+
+    openModal?.addEventListener('click', showNewspaperModal);
+    closeModalButtons.forEach((button) => button.addEventListener('click', hideNewspaperModal));
+    closeLightboxButtons.forEach((button) => button.addEventListener('click', hideSlideLightbox));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.classList.contains('hidden')) hideNewspaperModal();
+      if (slideLightbox.classList.contains('hidden')) return;
+      if (event.key === 'Escape') hideSlideLightbox();
+      if (event.key === 'ArrowLeft') showAdjacentLightboxImage(-1);
+      if (event.key === 'ArrowRight') showAdjacentLightboxImage(1);
+    });
+
+    document.getElementById('slide-prev')?.addEventListener('click', () => renderSlide(activeSlideIndex - 1));
+    document.getElementById('slide-next')?.addEventListener('click', () => renderSlide(activeSlideIndex + 1));
+    slideLightboxPrev.addEventListener('click', () => showAdjacentLightboxImage(-1));
+    slideLightboxNext.addEventListener('click', () => showAdjacentLightboxImage(1));
+    slideStage.addEventListener('click', (event) => {
+      const trigger = (event.target as HTMLElement).closest('[data-lightbox-image-index]') as HTMLElement | null;
+      if (!trigger) return;
+      showSlideLightbox(Number(trigger.dataset.lightboxImageIndex || '0'));
+    });
+    document.querySelectorAll('.slide-thumb').forEach((thumb) => {
+      thumb.addEventListener('click', () => renderSlide(Number((thumb as HTMLElement).dataset.slideIndex || '0')));
+    });
+    renderSlide(0);
+
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
     const categorySelect = document.getElementById('filter-category') as HTMLSelectElement;
     const yearSelect = document.getElementById('filter-year') as HTMLSelectElement;
