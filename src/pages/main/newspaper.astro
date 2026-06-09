@@ -108,8 +108,13 @@ const rules = [
             with apologies to any feline overlooked.
           </p>
 
-          <div class="npr-photo npr-photo-small" aria-label="Photo placeholder">
-            <span>photo</span>
+          <div class="npr-photo npr-photo-small">
+            <img
+              class="npr-photo-image"
+              src="/images/newspaper/meowsers-repose.jpg"
+              alt="Meowsers resting on the back of a couch by a window"
+              loading="lazy"
+            />
           </div>
           <p class="npr-caption">Meowsers, current resident, in repose.</p>
 
@@ -153,8 +158,12 @@ const rules = [
             <strong>46 countries</strong> and <strong>all fifty States</strong>.
           </p>
 
-          <div class="npr-photo npr-photo-hero" aria-label="Hero photo placeholder">
-            <span>photograph &middot; to follow</span>
+          <div class="npr-photo npr-photo-hero">
+            <img
+              class="npr-photo-image"
+              src="/images/newspaper/jim-aleda-canada-mountain.jpg"
+              alt="Jim and Aleda Landreth standing together on a mountain overlook in Canada"
+            />
           </div>
           <p class="npr-caption">
             <strong>Above:</strong> The Landreths, sometime between the marrying and the moving.
@@ -504,15 +513,10 @@ const rules = [
   .npr-photo {
     background-color: var(--npr-newsprint-shade);
     border: 1px solid var(--npr-ink);
-    background-image:
-      repeating-linear-gradient(
-        45deg,
-        transparent 0 6px,
-        rgba(27,42,31,0.05) 6px 7px
-      );
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
     color: var(--npr-ink-soft);
     font-family: 'Special Elite', 'IBM Plex Mono', monospace;
     font-size: 12px;
@@ -526,6 +530,13 @@ const rules = [
   .npr-photo-small {
     aspect-ratio: 4 / 3;
     margin: 12px 0 6px;
+  }
+  .npr-photo-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: sepia(0.22) saturate(0.82) contrast(0.98);
   }
   .npr-caption {
     font-family: 'Old Standard TT', Georgia, serif;
