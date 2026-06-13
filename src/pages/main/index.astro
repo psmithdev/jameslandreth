@@ -163,20 +163,20 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         carefully preserved to share with family, friends, and fellow travelers.
       </p>
 
-      <div class="flex items-stretch gap-0 flex-wrap">
-        <div class="pr-8 border-r border-rule mr-8 mb-4">
+      <div class="grid grid-cols-2 gap-x-6 gap-y-6 lg:flex lg:items-stretch lg:gap-0">
+        <div class="lg:pr-8 lg:mr-8 lg:border-r lg:border-rule">
           <div class="font-mono text-4xl text-stamp font-bold leading-none">{totalDocs}</div>
           <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Documents</div>
         </div>
-        <div class="pr-8 border-r border-rule mr-8 mb-4">
+        <div class="lg:pr-8 lg:mr-8 lg:border-r lg:border-rule">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{countriesCount}</div>
           <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Locations</div>
         </div>
-        <div class="pr-8 border-r border-rule mr-8 mb-4">
+        <div class="lg:pr-8 lg:mr-8 lg:border-r lg:border-rule">
           <div class="font-mono text-4xl text-ink font-bold leading-none">{yearsSpan}</div>
           <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Years of Stories</div>
         </div>
-        <div class="mb-4">
+        <div>
           <div class="font-mono text-4xl text-ink font-bold leading-none">{categories.length}</div>
           <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
         </div>
