@@ -64,4 +64,11 @@ const { categories, years, locations } = Astro.props;
     color: var(--color-card);
     border-color: var(--color-stamp);
   }
+
+  /* Larger tap targets on touch-sized screens */
+  @media (max-width: 640px) {
+    .filter-tag {
+      padding: 12px 16px;
+    }
+  }
 </style>
