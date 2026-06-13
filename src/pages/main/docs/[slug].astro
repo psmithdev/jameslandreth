@@ -20,12 +20,20 @@ const fileType = (doc.file_type || '').toString();
 const isHtml = /html/i.test(fileType);
 const isPdf = /pdf/i.test(fileType);
 const hasFile = Boolean(doc.file_path);
+const downloadPath = doc.source_file_path || doc.file_path;
+const downloadType = doc.source_file_type || doc.file_type;
 
 // Public URL for download / iframe embedding.
 let fileUrl = '';
 if (hasFile) {
   const { data: urlData } = supabase.storage.from('documents').getPublicUrl(doc.file_path);
   fileUrl = urlData.publicUrl;
+}
+
+let downloadUrl = fileUrl;
+if (downloadPath) {
+  const { data: downloadUrlData } = supabase.storage.from('documents').getPublicUrl(downloadPath);
+  downloadUrl = downloadUrlData.publicUrl;
 }
 
 // Supabase serves stored HTML as text/plain, so an <iframe src> shows raw
@@ -66,7 +74,7 @@ if (isHtml && hasFile) {
       </a>
       {hasFile && (
         <a
-          href={fileUrl}
+          href={downloadUrl}
           download
           class="inline-flex items-center gap-2 border border-rule px-4 py-2 font-mono text-[13px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
         >
@@ -162,12 +170,12 @@ if (isHtml && hasFile) {
                   This {doc.file_type} document can&rsquo;t be previewed in the browser. Download it to read the original.
                 </p>
                 <a
-                  href={fileUrl}
+                  href={downloadUrl}
                   download
                   class="inline-flex items-center gap-2 border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                  Download {doc.file_type}
+                  Download {downloadType}
                 </a>
               </div>
             </div>

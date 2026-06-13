@@ -30,10 +30,12 @@ export const POST: APIRoute = async ({ locals, request }) => {
   // Upload file if provided
   let filePath = '';
   let fileType = 'PDF';
+  let fileSize: number | null = null;
   if (file && file.size > 0) {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
     fileType = ext === 'pdf' ? 'PDF' : 'Word';
     filePath = `${slug}.${ext}`;
+    fileSize = file.size;
 
     const arrayBuffer = await file.arrayBuffer();
     const { error: uploadError } = await supabase.storage
@@ -70,6 +72,10 @@ export const POST: APIRoute = async ({ locals, request }) => {
       pages: formData.get('pages') || null,
       file_type: fileType,
       file_path: filePath || null,
+      source_file_path: filePath || null,
+      source_file_type: filePath ? fileType : null,
+      source_file_size: fileSize,
+      source_modified_at: filePath ? new Date().toISOString() : null,
       featured: formData.get('featured') === 'on',
       status: 'published',
       created_by: user.id,
