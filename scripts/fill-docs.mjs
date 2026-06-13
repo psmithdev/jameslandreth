@@ -34,6 +34,9 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const manifest = [
   { slug: 'all-s-quiet-on-the-mid-western-front', file: 'All_s quiet on the mid-western front christmas letter 22.docx' },
   { slug: 'ties-talk', file: 'If Ties Could Talk pt6.docx' },
+  // Revised versions of essays already published (replace content in place).
+  { slug: 'ether', file: 'Ether - revised.docx' },
+  { slug: 'songs-in-my-life', file: 'Songs in my life expanded.docx' },
 ];
 
 function loadEnv(filePath) {
