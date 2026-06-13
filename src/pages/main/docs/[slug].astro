@@ -20,6 +20,10 @@ const fileType = (doc.file_type || '').toString();
 const isHtml = /html/i.test(fileType);
 const isPdf = /pdf/i.test(fileType);
 const hasFile = Boolean(doc.file_path);
+const isSlideshow = /slideshow/i.test(fileType);
+// For slideshows, file_path is a JSON manifest — only offer a download when a
+// real source file (e.g. the generated PDF) exists.
+const hasDownload = isSlideshow ? Boolean(doc.source_file_path) : hasFile;
 const downloadPath = doc.source_file_path || doc.file_path;
 const downloadType = doc.source_file_type || doc.file_type;
 
@@ -62,7 +66,6 @@ if (isHtml && hasFile) {
 
 // Slideshows store a JSON manifest (list of slide image URLs) at file_path.
 // We fetch it server-side and render a themed image gallery.
-const isSlideshow = /slideshow/i.test(fileType);
 let slides: string[] = [];
 if (isSlideshow && hasFile) {
   const { data: blob } = await supabase.storage.from('documents').download(doc.file_path);
@@ -88,7 +91,7 @@ if (isSlideshow && hasFile) {
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         Back to Archive
       </a>
-      {hasFile && (
+      {hasDownload && (
         <a
           href={downloadUrl}
           download

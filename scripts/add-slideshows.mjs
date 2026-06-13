@@ -123,54 +123,68 @@ const targets = decks.filter((d) => !ONLY || d.slug === ONLY);
 console.log(`${DRY_RUN ? 'Dry run:' : 'Processing'} ${targets.length} slideshow(s)\n`);
 
 for (const deck of targets) {
-  const deckPath = join(DECK_DIR, deck.file);
-  if (!existsSync(deckPath)) throw new Error(`Deck not found: ${deckPath}`);
+  try {
+    const deckPath = join(DECK_DIR, deck.file);
+    if (!existsSync(deckPath)) throw new Error(`Deck not found: ${deckPath}`);
 
-  process.stdout.write(`- ${deck.slug}: converting… `);
-  const pdfPath = toPdf(deckPath, deck.slug);
-  const files = toSlides(pdfPath, deck.slug);
-  console.log(`${files.length} slides`);
+    process.stdout.write(`- ${deck.slug}: converting… `);
+    const pdfPath = toPdf(deckPath, deck.slug);
+    const files = toSlides(pdfPath, deck.slug);
+    console.log(`${files.length} slides`);
 
-  if (DRY_RUN) continue;
+    if (DRY_RUN) continue;
 
-  const urls = [];
-  for (let i = 0; i < files.length; i++) {
-    const storagePath = `slideshows/${deck.slug}/slide-${String(i + 1).padStart(3, '0')}.jpg`;
-    await upload(storagePath, readFileSync(files[i]), 'image/jpeg');
-    urls.push(publicUrl(storagePath));
+    const urls = [];
+    for (let i = 0; i < files.length; i++) {
+      const storagePath = `slideshows/${deck.slug}/slide-${String(i + 1).padStart(3, '0')}.jpg`;
+      await upload(storagePath, readFileSync(files[i]), 'image/jpeg');
+      urls.push(publicUrl(storagePath));
+    }
+
+    const manifestPath = `slideshows/${deck.slug}/slides.json`;
+    await upload(manifestPath, new Blob([JSON.stringify({ slides: urls })], { type: 'application/json' }), 'application/json');
+
+    // The original .pptx is often >50MB (Supabase global limit), so offer the
+    // generated PDF as the downloadable source. Skip gracefully if it too is
+    // oversized — the slide gallery is the document either way.
+    const pdfBytes = readFileSync(pdfPath);
+    let sourcePath = `originals/${deck.slug}.pdf`;
+    let sourceType = 'PDF';
+    let sourceSize = pdfBytes.length;
+    try {
+      await upload(sourcePath, pdfBytes, 'application/pdf');
+    } catch (err) {
+      console.log(`    (no download source — ${err.message})`);
+      sourcePath = null;
+      sourceType = null;
+      sourceSize = null;
+    }
+
+    const { error } = await supabase.from('documents').upsert({
+      slug: deck.slug,
+      title: deck.title,
+      category: deck.category,
+      excerpt: deck.excerpt || null,
+      date: deck.date || null,
+      year: deck.year ?? null,
+      location: deck.location || null,
+      tags: deck.tags || [],
+      pages: `${files.length} slides`,
+      file_type: 'Slideshow',
+      file_path: manifestPath,
+      source_file_path: sourcePath,
+      source_file_type: sourceType,
+      source_file_size: sourceSize,
+      source_modified_at: statSync(pdfPath).mtime.toISOString(),
+      content_hash: createHash('sha256').update(pdfBytes).digest('hex'),
+      status: 'published',
+      featured: false,
+    }, { onConflict: 'slug' });
+    if (error) throw new Error(`Upsert failed for ${deck.slug}: ${error.message}`);
+    console.log(`    uploaded ${urls.length} slides + row ✓${sourcePath ? ' (+ PDF download)' : ''}`);
+  } catch (err) {
+    console.error(`! ${deck.slug} failed: ${err.message}`);
   }
-
-  const manifestPath = `slideshows/${deck.slug}/slides.json`;
-  await upload(manifestPath, new Blob([JSON.stringify({ slides: urls })], { type: 'application/json' }), 'application/json');
-
-  const ext = extname(deckPath).toLowerCase();
-  const sourcePath = `originals/${deck.slug}${ext}`;
-  const deckBytes = readFileSync(deckPath);
-  const stats = statSync(deckPath);
-  await upload(sourcePath, deckBytes, 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
-
-  const { error } = await supabase.from('documents').upsert({
-    slug: deck.slug,
-    title: deck.title,
-    category: deck.category,
-    excerpt: deck.excerpt || null,
-    date: deck.date || null,
-    year: deck.year ?? null,
-    location: deck.location || null,
-    tags: deck.tags || [],
-    pages: `${files.length} slides`,
-    file_type: 'Slideshow',
-    file_path: manifestPath,
-    source_file_path: sourcePath,
-    source_file_type: 'PowerPoint',
-    source_file_size: stats.size,
-    source_modified_at: stats.mtime.toISOString(),
-    content_hash: createHash('sha256').update(deckBytes).digest('hex'),
-    status: 'published',
-    featured: false,
-  }, { onConflict: 'slug' });
-  if (error) throw new Error(`Upsert failed for ${deck.slug}: ${error.message}`);
-  console.log(`    uploaded ${urls.length} slides + row ✓`);
 }
 
 console.log('\nDone.');
