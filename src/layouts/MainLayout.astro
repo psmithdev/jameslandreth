@@ -24,12 +24,14 @@ const user = (Astro.locals as any).user;
 
   <header class="bg-parchment border-b border-rule">
     <div class="max-w-6xl mx-auto px-6 py-5">
-      <div class="flex items-end justify-between">
+      <div class="flex items-end justify-between gap-4">
         <a href="/" class="no-underline group">
-          <p class="font-mono text-[13px] tracking-[0.18em] uppercase text-stamp mb-1.5">Document Archive</p>
-          <h1 class="font-display text-3xl text-ink leading-none group-hover:text-stamp transition-colors duration-200">Dr. James Landreth</h1>
+          <p class="font-mono text-[11px] sm:text-[13px] tracking-[0.18em] uppercase text-stamp mb-1.5">Document Archive</p>
+          <h1 class="font-display text-2xl sm:text-3xl text-ink leading-none group-hover:text-stamp transition-colors duration-200">Dr. James Landreth</h1>
         </a>
-        <nav class="flex items-center gap-8 pb-0.5">
+
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-8 pb-0.5">
           <a href="/" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Archive</a>
           <a href="/family-tree" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Family Tree</a>
           {/* <a href="/anniversary" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">60th Anniversary</a> */}
@@ -43,7 +45,39 @@ const user = (Astro.locals as any).user;
             <a href="/login" class="font-mono text-[13px] tracking-[0.12em] uppercase text-card bg-stamp hover:bg-stamp-hover px-4 py-2 transition-colors">Login</a>
           )}
         </nav>
+
+        <!-- Mobile menu toggle -->
+        <button
+          id="mobile-menu-toggle"
+          type="button"
+          class="md:hidden inline-flex items-center justify-center border border-rule p-2 text-ink-muted transition-colors hover:border-stamp hover:text-stamp"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <svg data-menu-open class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+          <svg data-menu-close class="hidden h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
       </div>
+
+      <!-- Mobile menu -->
+      <nav id="mobile-menu" class="hidden md:hidden mt-4 flex-col border-t border-rule pt-2">
+        <a href="/" class="block py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Archive</a>
+        <a href="/family-tree" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Tree</a>
+        <a href="https://artifacts.jameslandreth.com" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Treasures</a>
+        {user ? (
+          <div class="mt-2 flex items-center justify-between gap-4 border-t border-rule pt-3">
+            <span class="font-mono text-[13px] text-rule">{user.display_name || user.email}</span>
+            <a href="/api/auth/logout" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Logout</a>
+          </div>
+        ) : (
+          <a href="/login" class="mt-3 inline-block bg-stamp px-4 py-2.5 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover">Login</a>
+        )}
+      </nav>
     </div>
   </header>
 
@@ -57,6 +91,32 @@ const user = (Astro.locals as any).user;
       <div class="w-12 h-px bg-rule"></div>
     </div>
   </footer>
+
+  <script>
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const openIcon = menuToggle?.querySelector('[data-menu-open]');
+    const closeIcon = menuToggle?.querySelector('[data-menu-close]');
+
+    function setMenu(open: boolean) {
+      if (!menuToggle || !mobileMenu) return;
+      mobileMenu.classList.toggle('hidden', !open);
+      mobileMenu.classList.toggle('flex', open);
+      openIcon?.classList.toggle('hidden', open);
+      closeIcon?.classList.toggle('hidden', !open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+      menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+
+    menuToggle?.addEventListener('click', () => {
+      setMenu(mobileMenu?.classList.contains('hidden') ?? true);
+    });
+
+    // Collapse the menu when resizing up to the desktop breakpoint.
+    window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+      if (e.matches) setMenu(false);
+    });
+  </script>
 
 </body>
 </html>
