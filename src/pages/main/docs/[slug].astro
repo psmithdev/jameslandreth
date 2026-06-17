@@ -19,6 +19,7 @@ if (!doc) {
 const fileType = (doc.file_type || '').toString();
 const isHtml = /html/i.test(fileType);
 const isPdf = /pdf/i.test(fileType);
+const isImage = /image/i.test(fileType);
 const hasFile = Boolean(doc.file_path);
 const isSlideshow = /slideshow/i.test(fileType);
 // For slideshows, file_path is a JSON manifest — only offer a download when a
@@ -192,6 +193,10 @@ if (isSlideshow && hasFile) {
             </div>
           ) : (isHtml && proseHtml) ? (
             <article id="doc-prose" class="doc-prose mx-auto max-w-[68ch] bg-card border-x border-rule px-8 py-12 sm:px-12" set:html={proseHtml} />
+          ) : (hasFile && isImage) ? (
+            <div class="flex items-center justify-center bg-ink/90 p-4">
+              <img src={fileUrl} alt={doc.title} class="max-h-[80vh] w-full object-contain" />
+            </div>
           ) : (hasFile && isPdf) ? (
             <iframe
               id="pdf-frame"

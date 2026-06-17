@@ -32,10 +32,11 @@ if (!isAdmin(user)) {
       <button id="browse-btn" class="border border-stamp bg-stamp px-6 py-2.5 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover">
         Choose File
       </button>
-      <input type="file" id="file-input" class="hidden" accept=".pdf,.doc,.docx" />
-      <div class="flex justify-center gap-6 mt-6 font-mono text-[12px] tracking-[0.1em] uppercase text-rule">
+      <input type="file" id="file-input" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp" />
+      <div class="flex flex-wrap justify-center gap-6 mt-6 font-mono text-[12px] tracking-[0.1em] uppercase text-rule">
         <span>PDF</span>
         <span>Word (.doc, .docx)</span>
+        <span>Photos (.jpg, .png, .gif, .webp)</span>
       </div>
     </div>
 

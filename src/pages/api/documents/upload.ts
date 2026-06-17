@@ -33,7 +33,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
   let fileSize: number | null = null;
   if (file && file.size > 0) {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    fileType = ext === 'pdf' ? 'PDF' : 'Word';
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    fileType = ext === 'pdf' ? 'PDF' : imageExts.includes(ext) ? 'Image' : 'Word';
     filePath = `${slug}.${ext}`;
     fileSize = file.size;
 
