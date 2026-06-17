@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { isAdmin } from '../lib/auth';
 
 interface Props {
   title?: string;
@@ -7,6 +8,7 @@ interface Props {
 
 const { title = 'Dr. James Landreth - Document Archive' } = Astro.props;
 const user = (Astro.locals as any).user;
+const admin = isAdmin(user);
 ---
 
 <!DOCTYPE html>
@@ -38,6 +40,12 @@ const user = (Astro.locals as any).user;
           <a href="https://artifacts.jameslandreth.com" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Family Treasures</a>
           {user ? (
             <div class="flex items-center gap-6">
+              {admin && (
+                <Fragment>
+                  <a href="/upload" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Upload</a>
+                  <a href="/admin" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Admin</a>
+                </Fragment>
+              )}
               <span class="font-mono text-[13px] text-rule">{user.display_name || user.email}</span>
               <a href="/api/auth/logout" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Logout</a>
             </div>
@@ -69,6 +77,12 @@ const user = (Astro.locals as any).user;
         <a href="/" class="block py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Archive</a>
         <a href="/family-tree" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Tree</a>
         <a href="https://artifacts.jameslandreth.com" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Treasures</a>
+        {admin && (
+          <Fragment>
+            <a href="/upload" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Upload</a>
+            <a href="/admin" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Admin</a>
+          </Fragment>
+        )}
         {user ? (
           <div class="mt-2 flex items-center justify-between gap-4 border-t border-rule pt-3">
             <span class="font-mono text-[13px] text-rule">{user.display_name || user.email}</span>
