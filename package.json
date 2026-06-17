@@ -13,6 +13,7 @@
     "documents:scan": "node scripts/sync-documents.mjs --scan",
     "documents:dry-run": "node scripts/sync-documents.mjs --dry-run",
     "documents:upload": "node scripts/sync-documents.mjs --upload",
+    "family-tree:seed": "node scripts/seed-family-trees.mjs",
     "classify-photos": "node scripts/classify-photos.mjs",
     "review-photos": "node scripts/review-photos.mjs",
     "propose-artifacts": "node scripts/propose-artifacts.mjs",

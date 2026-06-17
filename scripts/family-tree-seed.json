@@ -1,0 +1,751 @@
+{
+  "littlefield": {
+    "label": "Littlefield & Walsh-Flick",
+    "legendFamilies": [
+      "walsh",
+      "flick",
+      "littlefield",
+      "spouse"
+    ],
+    "people": {
+      "ggf-walsh": {
+        "name": "Mr. Walsh",
+        "family": "walsh",
+        "dates": "",
+        "info": "Walsh family patriarch. Family emigrated from Ireland."
+      },
+      "ggm-walsh": {
+        "name": "Mrs. Walsh",
+        "family": "spouse",
+        "dates": "",
+        "info": ""
+      },
+      "ggf-flick": {
+        "name": "Mr. Flick",
+        "family": "flick",
+        "dates": "",
+        "info": "Flick family patriarch."
+      },
+      "ggm-flick": {
+        "name": "Mrs. Flick",
+        "family": "spouse",
+        "dates": "",
+        "info": ""
+      },
+      "ggf-littlefield": {
+        "name": "Mr. Littlefield",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Littlefield family patriarch."
+      },
+      "ggm-littlefield": {
+        "name": "Mrs. Littlefield",
+        "family": "spouse",
+        "dates": "",
+        "info": ""
+      },
+      "gf-walsh-flick": {
+        "name": "Mr. Walsh",
+        "family": "walsh",
+        "dates": "",
+        "info": "Son of the Walsh family."
+      },
+      "gm-walsh-flick": {
+        "name": "Miss Flick",
+        "maiden": "née Flick",
+        "family": "flick",
+        "dates": "",
+        "info": "Daughter of the Flick family. Married into Walsh family."
+      },
+      "gf-littlefield": {
+        "name": "Mr. Littlefield",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Jim's paternal grandfather. Liked Buicks."
+      },
+      "gm-littlefield": {
+        "name": "Mrs. Littlefield",
+        "family": "spouse",
+        "dates": "",
+        "info": ""
+      },
+      "f-jim": {
+        "name": "Mr. Littlefield",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Jim's father. Liked Buicks."
+      },
+      "m-jim": {
+        "name": "Mrs. Littlefield",
+        "maiden": "née Walsh",
+        "family": "walsh",
+        "dates": "",
+        "info": "Jim's mother. Daughter of the Walsh-Flick line."
+      },
+      "aunt-lou": {
+        "name": "Aunt Lou",
+        "family": "walsh",
+        "dates": "",
+        "info": "Jim's aunt. Owned a Chrysler New Yorker."
+      },
+      "jim": {
+        "name": "Dr. James Littlefield",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Retired physician. Author of jameslandreth.com. Avid traveler, photographer, and writer."
+      },
+      "aleda": {
+        "name": "Aleda Littlefield",
+        "family": "spouse",
+        "dates": "",
+        "info": "Jim's wife. The Ostrom/Astrom family tree traces her maternal line."
+      },
+      "karen-l": {
+        "name": "Karen",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Daughter of Jim and Aleda. Children: Kurt, Benj. C."
+      },
+      "billy-l": {
+        "name": "Wm. \"Billy\"",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Adopted son of Jim and Aleda. Married Eric."
+      },
+      "leanne-l": {
+        "name": "Leanne",
+        "family": "littlefield",
+        "dates": "",
+        "info": "Adopted daughter of Jim and Aleda. Son: Mark."
+      }
+    },
+    "structure": {
+      "greatGrandparents": [
+        {
+          "partners": [
+            "ggf-walsh",
+            "ggm-walsh"
+          ],
+          "id": "gg-walsh"
+        },
+        {
+          "partners": [
+            "ggf-flick",
+            "ggm-flick"
+          ],
+          "id": "gg-flick"
+        },
+        {
+          "partners": [
+            "ggf-littlefield",
+            "ggm-littlefield"
+          ],
+          "id": "gg-littlefield"
+        }
+      ],
+      "grandparents": [
+        {
+          "partners": [
+            "gf-walsh-flick",
+            "gm-walsh-flick"
+          ],
+          "id": "g-walsh-flick"
+        },
+        {
+          "partners": [
+            "gf-littlefield",
+            "gm-littlefield"
+          ],
+          "id": "g-littlefield"
+        }
+      ],
+      "parents": [
+        {
+          "partners": [
+            "f-jim",
+            "m-jim"
+          ],
+          "id": "p-jim",
+          "siblings": [
+            "aunt-lou"
+          ]
+        }
+      ],
+      "current": [
+        {
+          "partners": [
+            "jim",
+            "aleda"
+          ],
+          "id": "c-jim"
+        }
+      ],
+      "children": [
+        {
+          "people": [
+            "karen-l",
+            "billy-l",
+            "leanne-l"
+          ]
+        }
+      ]
+    },
+    "generationOrder": [
+      "greatGrandparents",
+      "grandparents",
+      "parents",
+      "current",
+      "children"
+    ],
+    "generationLabels": {
+      "greatGrandparents": "Great-Grandparents",
+      "grandparents": "Grandparents",
+      "parents": "Parents",
+      "current": "Jim & Aleda",
+      "children": "Children"
+    }
+  },
+  "ostrom": {
+    "label": "Alice Ostrom Litzel Family Tree",
+    "legendFamilies": [
+      "ostrom",
+      "litzel",
+      "spouse"
+    ],
+    "people": {
+      "gggf-grandroth": {
+        "name": "Israel J. Grandroth",
+        "family": "ostrom",
+        "dates": "1797 – 1867",
+        "info": "Paternal great-great-grandfather on the Åström/Ostrom side."
+      },
+      "gggm-eriksdaughter": {
+        "name": "Ulrika C. Eriksdaughter",
+        "family": "spouse",
+        "dates": "1802 – 1865",
+        "info": ""
+      },
+      "gggf-graden": {
+        "name": "Anders Nilson Graden",
+        "family": "ostrom",
+        "dates": "1809 – 1845",
+        "info": ""
+      },
+      "gggm-nilsdotter": {
+        "name": "Brita Marg. Nilsdotter",
+        "family": "spouse",
+        "dates": "1836 – ?",
+        "info": ""
+      },
+      "gggf-person": {
+        "name": "Per Person",
+        "family": "ostrom",
+        "dates": "1776 – 1830",
+        "info": "Sundberg line ancestor."
+      },
+      "gggm-johnsdotter": {
+        "name": "Maria Johnsdotter",
+        "family": "spouse",
+        "dates": "1771 – 1826",
+        "info": ""
+      },
+      "gggf-bengtsson": {
+        "name": "Nils Bengtsson",
+        "family": "ostrom",
+        "dates": "1805 – 1888",
+        "info": ""
+      },
+      "gggm-magnusdotter": {
+        "name": "Kris. Kat. Magnusdotter",
+        "family": "spouse",
+        "dates": "1805 – 1881",
+        "info": ""
+      },
+      "ggf-israelsson": {
+        "name": "Anders Israelsson",
+        "family": "ostrom",
+        "dates": "1844 – 1916",
+        "info": "Son of Israel J. Grandroth."
+      },
+      "ggm-johansdotter": {
+        "name": "Karolina Ulrika Johansdotter",
+        "family": "spouse",
+        "dates": "1847 – 1913",
+        "info": ""
+      },
+      "ggf-sundberg": {
+        "name": "Nils Sundberg",
+        "family": "ostrom",
+        "dates": "1818 – 1893",
+        "info": ""
+      },
+      "ggm-nilsdotter2": {
+        "name": "Kris. Kat. Nilsdotter",
+        "family": "spouse",
+        "dates": "1833 – 1924",
+        "info": ""
+      },
+      "gf-ostrom": {
+        "name": "Anders Alfred Åström/Ostrom",
+        "family": "ostrom",
+        "dates": "1868 – 1930",
+        "info": "Son of Anders Israelsson and Karolina Ulrika Johansdotter. Swedish immigrant."
+      },
+      "gm-sundberg": {
+        "name": "Ida Amalia Sundberg",
+        "family": "ostrom",
+        "dates": "1870 – 1910",
+        "info": "Daughter of Nils Sundberg."
+      },
+      "hilda1": {
+        "name": "Hilda",
+        "family": "ostrom",
+        "dates": "1892, d. age 2",
+        "info": "Died in infancy."
+      },
+      "hilda2": {
+        "name": "Hilda Evalina",
+        "family": "ostrom",
+        "dates": "1896 – 1918",
+        "info": "Second daughter named Hilda."
+      },
+      "henry-berger": {
+        "name": "Henry Berger",
+        "family": "spouse",
+        "dates": "",
+        "info": "Husband of Hilda Evalina."
+      },
+      "helen": {
+        "name": "Helen",
+        "family": "ostrom",
+        "dates": "1901 – 1983",
+        "info": ""
+      },
+      "carl-schlipf": {
+        "name": "Carl G. Schlipf",
+        "family": "spouse",
+        "dates": "1906 – 1966",
+        "info": "Husband of Helen."
+      },
+      "alice": {
+        "name": "Alice Elvira",
+        "family": "ostrom",
+        "dates": "1903 – 1991",
+        "info": "Central figure of this family tree."
+      },
+      "edward-litzel": {
+        "name": "Edward Thomas Litzel",
+        "family": "litzel",
+        "dates": "1900 – 1961",
+        "info": "Husband of Alice Elvira."
+      },
+      "harold-sr": {
+        "name": "Harold",
+        "family": "ostrom",
+        "dates": "1905 – 1989",
+        "info": ""
+      },
+      "ruth": {
+        "name": "Ruth",
+        "family": "spouse",
+        "dates": "",
+        "info": "Wife of Harold."
+      },
+      "mildred": {
+        "name": "Mildred Linea",
+        "family": "ostrom",
+        "dates": "1908, d. age 1",
+        "info": "Died in infancy."
+      },
+      "baby-boy": {
+        "name": "Baby Boy",
+        "family": "ostrom",
+        "dates": "d. 1918",
+        "info": "Son of Hilda Evalina. Died in infancy."
+      },
+      "patricia": {
+        "name": "Patricia \"Patsy\"",
+        "family": "ostrom",
+        "dates": "1930 – 1981",
+        "info": "Daughter of Helen and Carl G. Schlipf."
+      },
+      "chas-ziegler": {
+        "name": "Chas. Ziegler",
+        "family": "spouse",
+        "dates": "",
+        "info": "First husband of Patricia."
+      },
+      "bill-cary": {
+        "name": "Bill Cary",
+        "family": "spouse",
+        "dates": "",
+        "info": "Second husband of Patricia."
+      },
+      "aleda": {
+        "name": "Aleda",
+        "family": "litzel",
+        "dates": "",
+        "info": "Daughter of Alice Elvira and Edward Thomas Litzel. Married James Littlefield."
+      },
+      "james-littlefield": {
+        "name": "James Littlefield",
+        "family": "spouse",
+        "dates": "",
+        "info": "Dr. James Littlefield. Retired physician."
+      },
+      "john-a": {
+        "name": "John A.",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Alice and Edward. Twin with Harold T."
+      },
+      "mary-lou-engle": {
+        "name": "Mary Lou Engle",
+        "family": "spouse",
+        "dates": "",
+        "info": "Wife of John A."
+      },
+      "harold-t": {
+        "name": "Harold T.",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Alice and Edward. Twin with John A."
+      },
+      "bunny-young": {
+        "name": "Barb. \"Bunny\" Young",
+        "family": "spouse",
+        "dates": "",
+        "info": "Wife of Harold T."
+      },
+      "heidi": {
+        "name": "Heidi",
+        "family": "ostrom",
+        "dates": "",
+        "info": "Daughter of Patricia."
+      },
+      "heather": {
+        "name": "Heather",
+        "family": "ostrom",
+        "dates": "",
+        "info": "Daughter of Patricia."
+      },
+      "kelly": {
+        "name": "Kelly",
+        "family": "ostrom",
+        "dates": "",
+        "info": "Daughter of Patricia."
+      },
+      "matthew": {
+        "name": "Matthew",
+        "family": "ostrom",
+        "dates": "",
+        "info": "Son of Patricia."
+      },
+      "karen": {
+        "name": "Karen",
+        "family": "litzel",
+        "dates": "",
+        "info": "Daughter of Aleda and James."
+      },
+      "billy": {
+        "name": "Wm. \"Billy\"",
+        "family": "litzel",
+        "dates": "",
+        "info": "Adopted son. Married Eric."
+      },
+      "eric": {
+        "name": "Eric",
+        "family": "spouse",
+        "dates": "",
+        "info": "Spouse of Billy."
+      },
+      "leanne": {
+        "name": "Leanne",
+        "family": "litzel",
+        "dates": "",
+        "info": "Adopted daughter."
+      },
+      "kurt-k": {
+        "name": "Kurt",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Karen."
+      },
+      "benj-c": {
+        "name": "Benj. C.",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Karen."
+      },
+      "mark": {
+        "name": "Mark",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Leanne."
+      },
+      "kurt-j": {
+        "name": "Kurt",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of John A."
+      },
+      "allen": {
+        "name": "Allen",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of John A. Married Kim."
+      },
+      "kim": {
+        "name": "Kim",
+        "family": "spouse",
+        "dates": "",
+        "info": "Wife of Allen."
+      },
+      "maxwell": {
+        "name": "Maxwell",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Allen and Kim."
+      },
+      "mason": {
+        "name": "Mason",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Allen and Kim."
+      },
+      "rusty": {
+        "name": "Harold T. \"Rusty\"",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Harold T."
+      },
+      "diana": {
+        "name": "Diana",
+        "family": "litzel",
+        "dates": "",
+        "info": "Daughter of Rusty."
+      },
+      "freddy": {
+        "name": "Chas. \"Freddy\"",
+        "family": "litzel",
+        "dates": "",
+        "info": "Son of Harold T."
+      }
+    },
+    "structure": {
+      "greatGreatGrandparents": [
+        {
+          "partners": [
+            "gggf-grandroth",
+            "gggm-eriksdaughter"
+          ],
+          "id": "ggg-grandroth"
+        },
+        {
+          "partners": [
+            "gggf-graden",
+            "gggm-nilsdotter"
+          ],
+          "id": "ggg-graden"
+        },
+        {
+          "partners": [
+            "gggf-person",
+            "gggm-johnsdotter"
+          ],
+          "id": "ggg-person"
+        },
+        {
+          "partners": [
+            "gggf-bengtsson",
+            "gggm-magnusdotter"
+          ],
+          "id": "ggg-bengtsson"
+        }
+      ],
+      "greatGrandparents": [
+        {
+          "partners": [
+            "ggf-israelsson",
+            "ggm-johansdotter"
+          ],
+          "id": "gg-israelsson"
+        },
+        {
+          "partners": [
+            "ggf-sundberg",
+            "ggm-nilsdotter2"
+          ],
+          "id": "gg-sundberg"
+        }
+      ],
+      "grandparents": [
+        {
+          "partners": [
+            "gf-ostrom",
+            "gm-sundberg"
+          ],
+          "id": "g-ostrom"
+        }
+      ],
+      "children_of_anders_ida": [
+        {
+          "people": [
+            "hilda1"
+          ]
+        },
+        {
+          "partners": [
+            "hilda2",
+            "henry-berger"
+          ],
+          "id": "c-hilda2"
+        },
+        {
+          "partners": [
+            "helen",
+            "carl-schlipf"
+          ],
+          "id": "c-helen"
+        },
+        {
+          "partners": [
+            "alice",
+            "edward-litzel"
+          ],
+          "id": "c-alice"
+        },
+        {
+          "partners": [
+            "harold-sr",
+            "ruth"
+          ],
+          "id": "c-harold"
+        },
+        {
+          "people": [
+            "mildred"
+          ]
+        }
+      ],
+      "grandchildren": [
+        {
+          "people": [
+            "baby-boy"
+          ]
+        },
+        {
+          "partners": [
+            "patricia",
+            "chas-ziegler"
+          ],
+          "id": "gc-patricia",
+          "siblings": [
+            "bill-cary"
+          ]
+        },
+        {
+          "partners": [
+            "aleda",
+            "james-littlefield"
+          ],
+          "id": "gc-aleda"
+        },
+        {
+          "partners": [
+            "john-a",
+            "mary-lou-engle"
+          ],
+          "id": "gc-john",
+          "siblings_note": "twins"
+        },
+        {
+          "partners": [
+            "harold-t",
+            "bunny-young"
+          ],
+          "id": "gc-harold-t"
+        }
+      ],
+      "greatGrandchildren": [
+        {
+          "people": [
+            "heidi",
+            "heather",
+            "kelly",
+            "matthew"
+          ],
+          "label": "Patricia's children"
+        },
+        {
+          "people": [
+            "karen",
+            "billy",
+            "leanne"
+          ],
+          "label": "Aleda & James's children"
+        },
+        {
+          "people": [
+            "kurt-j",
+            "allen"
+          ],
+          "label": "John A.'s children"
+        },
+        {
+          "people": [
+            "rusty",
+            "freddy"
+          ],
+          "label": "Harold T.'s children"
+        }
+      ],
+      "greatGreatGrandchildren": [
+        {
+          "people": [
+            "kurt-k",
+            "benj-c"
+          ],
+          "label": "Karen's children"
+        },
+        {
+          "people": [
+            "mark"
+          ],
+          "label": "Leanne's children"
+        },
+        {
+          "people": [
+            "maxwell",
+            "mason"
+          ],
+          "label": "Allen's children"
+        },
+        {
+          "people": [
+            "diana"
+          ],
+          "label": "Rusty's children"
+        }
+      ]
+    },
+    "generationOrder": [
+      "greatGreatGrandparents",
+      "greatGrandparents",
+      "grandparents",
+      "children_of_anders_ida",
+      "grandchildren",
+      "greatGrandchildren",
+      "greatGreatGrandchildren"
+    ],
+    "generationLabels": {
+      "greatGreatGrandparents": "2x Great-Grandparents",
+      "greatGrandparents": "Great-Grandparents",
+      "grandparents": "Grandparents",
+      "children_of_anders_ida": "Anders & Ida's Children",
+      "grandchildren": "Grandchildren",
+      "greatGrandchildren": "Great-Grandchildren",
+      "greatGreatGrandchildren": "Great-Great-Grandchildren"
+    }
+  }
+}
