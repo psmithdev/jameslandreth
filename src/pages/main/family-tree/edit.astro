@@ -1,0 +1,685 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import { isAdmin } from '../../../lib/auth';
+import { createServerClient } from '../../../lib/supabase';
+
+const user = (Astro.locals as any).user;
+
+// Admin guard (same pattern as upload.astro / admin.astro).
+if (!isAdmin(user)) {
+  return Astro.redirect('/login?redirect=/family-tree/edit');
+}
+
+const supabase = createServerClient();
+const { data: rows } = await supabase
+  .from('family_trees')
+  .select('tree_key, data')
+  .order('sort_order', { ascending: true });
+
+const familyTrees: Record<string, any> = {};
+for (const row of rows ?? []) {
+  familyTrees[row.tree_key] = row.data;
+}
+---
+
+<MainLayout title="Edit Family Tree - Admin">
+  <style is:global>
+    :root {
+      --ft-walsh: #6E1818;
+      --ft-flick: #B8860B;
+      --ft-littlefield: #1C2340;
+      --ft-litzel: #2D6A4F;
+      --ft-ostrom: #7B4F1A;
+      --ft-spouse: #8A8270;
+    }
+
+    /* Tabs (match the public tree page) */
+    .fte-tabs { display: flex; gap: 0; justify-content: flex-start; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 1px solid var(--color-rule); }
+    .fte-tab {
+      background: transparent; border: none; border-bottom: 2px solid transparent;
+      padding: 12px 24px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--color-ink-muted); cursor: pointer; margin-bottom: -1px;
+      transition: all 0.2s ease;
+    }
+    .fte-tab:hover { color: var(--color-stamp); }
+    .fte-tab.active { color: var(--color-stamp); border-bottom-color: var(--color-stamp); font-weight: 600; }
+
+    /* Save bar */
+    .fte-savebar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 24px;
+      background: var(--color-card); border: 1px solid var(--color-rule);
+    }
+    .fte-adv { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif); font-size: 14px; color: var(--color-ink-muted); cursor: pointer; }
+    .fte-adv input { width: 16px; height: 16px; accent-color: var(--color-stamp); }
+    .fte-savebar-right { display: flex; align-items: center; gap: 16px; }
+    .fte-status { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--color-ink-muted); }
+    .fte-status.dirty { color: var(--ft-walsh); }
+    .fte-link { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); }
+    .fte-link:hover { color: var(--color-stamp); }
+    .fte-save {
+      border: 1px solid var(--color-stamp); background: var(--color-stamp); color: var(--color-card);
+      padding: 9px 22px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s ease;
+    }
+    .fte-save:hover:not(:disabled) { background: var(--color-stamp-hover, #5a3a1a); }
+    .fte-save:disabled { opacity: 0.45; cursor: default; }
+
+    /* Settings panel */
+    .fte-settings { border: 1px solid var(--color-rule); background: var(--color-card); padding: 20px; margin-bottom: 28px; }
+    .fte-settings-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-stamp); margin-bottom: 14px; }
+    .fte-legend-edit { margin-top: 16px; }
+    .fte-sub-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 8px; }
+    .fte-legend-item { display: inline-flex; align-items: center; gap: 7px; margin: 0 16px 8px 0; font-family: var(--font-serif); font-size: 13px; color: var(--color-ink); cursor: pointer; }
+    .fte-legend-item input { width: 15px; height: 15px; accent-color: var(--color-stamp); }
+    .fte-dot { width: 11px; height: 11px; border: 1px solid var(--color-ink); display: inline-block; }
+
+    /* Generation cards */
+    .fte-gen { border: 1px solid var(--color-rule); background: var(--color-card); margin-bottom: 22px; }
+    .fte-gen-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 16px 18px; border-bottom: 1px solid var(--color-rule); background: var(--color-parchment); flex-wrap: wrap; }
+    .fte-gen-label { flex: 1; min-width: 200px; }
+    .fte-gen-controls { display: flex; gap: 8px; }
+
+    .fte-blocks { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+
+    .fte-block { border: 1px solid var(--color-rule); border-left-width: 3px; padding: 14px 16px; }
+    .fte-block.fte-couple { border-left-color: var(--color-stamp); }
+    .fte-block.fte-group { border-left-color: var(--ft-spouse); }
+    .fte-block-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .fte-block-kind { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-ink-muted); }
+
+    .fte-partners { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .fte-partners > .fte-person { flex: 1; min-width: 260px; }
+    .fte-amp { font-family: var(--font-display); font-size: 20px; color: var(--color-ink-muted); align-self: center; }
+    .fte-couple-extra { margin-top: 14px; }
+    .fte-siblings { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--color-rule); }
+    .fte-sibling-list, .fte-group-people { display: flex; flex-direction: column; gap: 12px; }
+    .fte-sibling, .fte-group-person { display: flex; gap: 10px; align-items: flex-start; }
+    .fte-sibling > .fte-person, .fte-group-person > .fte-person { flex: 1; }
+
+    /* Person editor card */
+    .fte-person { border: 1px solid var(--color-rule); border-left: 3px solid var(--color-rule); background: var(--color-parchment); padding: 12px 14px; }
+    .fte-person.fte-fam-walsh { border-left-color: var(--ft-walsh); }
+    .fte-person.fte-fam-flick { border-left-color: var(--ft-flick); }
+    .fte-person.fte-fam-littlefield { border-left-color: var(--ft-littlefield); }
+    .fte-person.fte-fam-litzel { border-left-color: var(--ft-litzel); }
+    .fte-person.fte-fam-ostrom { border-left-color: var(--ft-ostrom); }
+    .fte-person.fte-fam-spouse { border-left-color: var(--ft-spouse); }
+    .fte-person.fte-missing { color: var(--ft-walsh); font-family: var(--font-mono); font-size: 12px; }
+    .fte-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+    .fte-col2 { grid-column: 1 / -1; }
+
+    .fte-field { display: flex; flex-direction: column; gap: 4px; }
+    .fte-field > span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); }
+    .fte-field input[type="text"], .fte-field select, .fte-field textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--color-rule); background: var(--color-card);
+      color: var(--color-ink); font-family: var(--font-serif); font-size: 14px;
+    }
+    .fte-field input:focus, .fte-field select:focus, .fte-field textarea:focus { outline: none; border-color: var(--color-stamp); }
+    .fte-field textarea { resize: vertical; }
+    .fte-check { flex-direction: row; align-items: center; gap: 8px; }
+    .fte-check input { width: 16px; height: 16px; accent-color: var(--color-stamp); }
+    .fte-check > span { text-transform: none; letter-spacing: 0; font-size: 12px; font-family: var(--font-serif); color: var(--color-ink-muted); }
+
+    /* Buttons */
+    .fte-btn, .fte-btn-danger {
+      border: 1px solid var(--color-rule); background: var(--color-parchment); color: var(--color-ink);
+      padding: 7px 13px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
+    }
+    .fte-btn:hover:not(:disabled) { border-color: var(--color-stamp); color: var(--color-stamp); }
+    .fte-btn:disabled { opacity: 0.4; cursor: default; }
+    .fte-btn-danger { color: var(--ft-walsh); border-color: var(--ft-walsh); }
+    .fte-btn-danger:hover { background: var(--ft-walsh); color: var(--color-card); }
+
+    .fte-add-block, .fte-add-gen { display: flex; gap: 10px; padding: 0 18px 18px; }
+    .fte-add-gen { padding: 0; margin-bottom: 40px; }
+
+    /* Advanced (Phase 2) controls hidden until toggled */
+    .fte-struct, .fte-struct-row { display: none; }
+    .fte-show-advanced .fte-struct { display: inline-block; }
+    .fte-show-advanced .fte-struct-row { display: flex; }
+
+    @media (max-width: 640px) {
+      .fte-grid { grid-template-columns: 1fr; }
+      .fte-partners > .fte-person { min-width: 100%; }
+    }
+  </style>
+
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-2">Admin</p>
+      <h1 class="font-display text-4xl sm:text-5xl text-ink leading-tight mb-3">Edit Family Tree</h1>
+      <p class="font-serif text-lg text-ink-muted max-w-2xl leading-relaxed">
+        Change anyone's name, dates, family line, or notes, then click <strong>Save changes</strong>.
+        Your edits appear on the family tree page right away. Turn on <em>advanced editing</em> to add
+        or remove people, couples, and generations.
+      </p>
+    </div>
+
+    <div class="fte-savebar">
+      <label class="fte-adv">
+        <input type="checkbox" id="ft-advanced" />
+        Show advanced editing (add / remove people &amp; generations)
+      </label>
+      <div class="fte-savebar-right">
+        <span id="ft-status" class="fte-status">All changes saved</span>
+        <a href="/family-tree" class="fte-link">View tree →</a>
+        <button id="ft-save" class="fte-save" disabled>Save changes</button>
+      </div>
+    </div>
+
+    <div id="ft-root">
+      <div id="ft-tabs" class="fte-tabs"></div>
+      <div id="ft-settings" class="fte-settings"></div>
+      <div id="ft-editor"></div>
+    </div>
+
+    <div id="ft-empty" class="hidden border border-rule bg-card p-10 text-center font-serif text-ink-muted">
+      No family trees found in the database. Run <code class="font-mono text-sm">npm run family-tree:seed</code> to populate them.
+    </div>
+  </div>
+
+  <script type="application/json" id="ft-initial" set:html={JSON.stringify(familyTrees)}></script>
+
+  <script>
+    import { FAMILY_KEYS, FAMILY_LABELS, validateTree, makePersonId } from '../../../lib/familyTree';
+
+    type Person = { name: string; maiden?: string; family: string; dates?: string; info?: string; placeholder?: boolean };
+    type Block = any;
+    type Tree = {
+      label: string;
+      legendFamilies: string[];
+      people: Record<string, Person>;
+      structure: Record<string, Block[]>;
+      generationOrder: string[];
+      generationLabels: Record<string, string>;
+    };
+
+    const initial: Record<string, Tree> = JSON.parse(
+      document.getElementById('ft-initial')?.textContent || '{}',
+    );
+
+    const keys = Object.keys(initial);
+    const rootEl = document.getElementById('ft-root')!;
+    const tabsEl = document.getElementById('ft-tabs')!;
+    const settingsEl = document.getElementById('ft-settings')!;
+    const editorEl = document.getElementById('ft-editor')!;
+    const statusEl = document.getElementById('ft-status')!;
+    const saveBtn = document.getElementById('ft-save') as HTMLButtonElement;
+    const advChk = document.getElementById('ft-advanced') as HTMLInputElement;
+    const emptyEl = document.getElementById('ft-empty')!;
+
+    const state = {
+      trees: initial,
+      current: keys[0] || '',
+      dirty: new Set<string>(),
+      saving: false,
+    };
+
+    if (keys.length === 0) {
+      rootEl.classList.add('hidden');
+      document.querySelector('.fte-savebar')?.classList.add('hidden');
+      emptyEl.classList.remove('hidden');
+    }
+
+    const tree = (): Tree => state.trees[state.current];
+
+    function esc(v: unknown): string {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    const nameOf = (t: Tree, id: string): string => t.people[id]?.name || id;
+    const primaryFamily = (): string =>
+      (FAMILY_KEYS as readonly string[]).includes(state.current) ? state.current : 'spouse';
+
+    // ---- person reference counting + garbage collection -------------------
+    function refCount(t: Tree, id: string): number {
+      let c = 0;
+      for (const blocks of Object.values(t.structure)) {
+        for (const b of blocks as Block[]) {
+          if (Array.isArray(b.partners)) {
+            c += b.partners.filter((x: string) => x === id).length;
+            if (Array.isArray(b.siblings)) c += b.siblings.filter((x: string) => x === id).length;
+          } else if (Array.isArray(b.people)) {
+            c += b.people.filter((x: string) => x === id).length;
+          }
+        }
+      }
+      return c;
+    }
+    function gcPerson(t: Tree, id: string): void {
+      if (refCount(t, id) === 0) delete t.people[id];
+    }
+
+    function newPerson(t: Tree, opts: Partial<Person> = {}): string {
+      const id = makePersonId(opts.name || 'New person', Object.keys(t.people));
+      t.people[id] = { name: opts.name || 'New person', family: opts.family || primaryFamily(), dates: '', info: '' };
+      return id;
+    }
+    function newCoupleId(t: Tree): string {
+      const ids = new Set(
+        Object.values(t.structure).flatMap((bl) => (bl as Block[]).map((b) => b.id).filter(Boolean)),
+      );
+      let n = 1;
+      while (ids.has(`couple-${n}`)) n += 1;
+      return `couple-${n}`;
+    }
+    function slugKey(label: string, taken: Iterable<string>): string {
+      const set = new Set(taken);
+      const stem = (label || 'generation').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '') || 'generation';
+      if (!set.has(stem)) return stem;
+      let n = 2;
+      while (set.has(`${stem}_${n}`)) n += 1;
+      return `${stem}_${n}`;
+    }
+
+    // ---- rendering --------------------------------------------------------
+    function familyOptions(sel: string): string {
+      return FAMILY_KEYS.map(
+        (k) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${esc(FAMILY_LABELS[k])}</option>`,
+      ).join('');
+    }
+
+    function personCard(id: string): string {
+      const p = tree().people[id];
+      if (!p) return `<div class="fte-person fte-missing">Missing person: ${esc(id)}</div>`;
+      return `
+      <div class="fte-person fte-fam-${esc(p.family)}" data-pid="${esc(id)}">
+        <div class="fte-grid">
+          <label class="fte-field fte-col2"><span>Name</span>
+            <input type="text" data-edit="person" data-pid="${esc(id)}" data-field="name" value="${esc(p.name)}"></label>
+          <label class="fte-field"><span>Née / maiden name</span>
+            <input type="text" data-edit="person" data-pid="${esc(id)}" data-field="maiden" value="${esc(p.maiden || '')}" placeholder="e.g. née Flick"></label>
+          <label class="fte-field"><span>Family line</span>
+            <select data-edit="person" data-pid="${esc(id)}" data-field="family">${familyOptions(p.family)}</select></label>
+          <label class="fte-field"><span>Dates</span>
+            <input type="text" data-edit="person" data-pid="${esc(id)}" data-field="dates" value="${esc(p.dates || '')}" placeholder="e.g. 1903 – 1991"></label>
+          <label class="fte-field fte-check">
+            <input type="checkbox" data-edit="person" data-pid="${esc(id)}" data-field="placeholder" ${p.placeholder ? 'checked' : ''}>
+            <span>Unknown / placeholder</span></label>
+          <label class="fte-field fte-col2"><span>Notes</span>
+            <textarea data-edit="person" data-pid="${esc(id)}" data-field="info" rows="2">${esc(p.info || '')}</textarea></label>
+        </div>
+      </div>`;
+    }
+
+    function coupleCard(gen: string, idx: number, b: Block): string {
+      const sibs = (b.siblings || [])
+        .map(
+          (sid: string) => `
+        <div class="fte-sibling">
+          ${personCard(sid)}
+          <button class="fte-btn-danger fte-struct" data-action="remove-sibling" data-gen="${esc(gen)}" data-block="${idx}" data-pid="${esc(sid)}">Remove</button>
+        </div>`,
+        )
+        .join('');
+      return `
+      <div class="fte-block fte-couple">
+        <div class="fte-block-head">
+          <span class="fte-block-kind">Couple</span>
+          <button class="fte-btn-danger fte-struct" data-action="remove-couple" data-gen="${esc(gen)}" data-block="${idx}">Remove couple</button>
+        </div>
+        <div class="fte-partners">${personCard(b.partners[0])}<div class="fte-amp">&amp;</div>${personCard(b.partners[1])}</div>
+        <div class="fte-couple-extra">
+          <label class="fte-field"><span>Note under couple (e.g. “twins”)</span>
+            <input type="text" data-edit="twins-note" data-gen="${esc(gen)}" data-block="${idx}" value="${esc(b.siblings_note || '')}"></label>
+          <div class="fte-siblings">
+            <div class="fte-sub-label">Siblings shown beside this couple</div>
+            <div class="fte-sibling-list">${sibs}</div>
+            <button class="fte-btn fte-struct" style="margin-top:12px" data-action="add-sibling" data-gen="${esc(gen)}" data-block="${idx}">+ Add sibling</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function groupCard(gen: string, idx: number, b: Block): string {
+      const ppl = (b.people || [])
+        .map(
+          (pid: string) => `
+        <div class="fte-group-person">
+          ${personCard(pid)}
+          <button class="fte-btn-danger fte-struct" data-action="remove-group-person" data-gen="${esc(gen)}" data-block="${idx}" data-pid="${esc(pid)}">Remove</button>
+        </div>`,
+        )
+        .join('');
+      return `
+      <div class="fte-block fte-group">
+        <div class="fte-block-head">
+          <span class="fte-block-kind">Group</span>
+          <button class="fte-btn-danger fte-struct" data-action="remove-group" data-gen="${esc(gen)}" data-block="${idx}">Remove group</button>
+        </div>
+        <label class="fte-field"><span>Group label (optional)</span>
+          <input type="text" data-edit="group-label" data-gen="${esc(gen)}" data-block="${idx}" value="${esc(b.label || '')}" placeholder="e.g. Karen's children"></label>
+        <div class="fte-group-people" style="margin-top:12px">${ppl}</div>
+        <button class="fte-btn fte-struct" style="margin-top:12px" data-action="add-group-person" data-gen="${esc(gen)}" data-block="${idx}">+ Add person</button>
+      </div>`;
+    }
+
+    function generationCard(gen: string, gi: number, total: number): string {
+      const t = tree();
+      const blocks = t.structure[gen] || [];
+      const label = (t.generationLabels && t.generationLabels[gen]) || gen;
+      const body = blocks
+        .map((b, idx) => (Array.isArray(b.partners) ? coupleCard(gen, idx, b) : groupCard(gen, idx, b)))
+        .join('');
+      return `
+      <div class="fte-gen">
+        <div class="fte-gen-head">
+          <label class="fte-field fte-gen-label"><span>Generation label</span>
+            <input type="text" data-edit="gen-label" data-gen="${esc(gen)}" value="${esc(label)}"></label>
+          <div class="fte-gen-controls fte-struct-row">
+            <button class="fte-btn" data-action="move-gen-up" data-gen="${esc(gen)}" ${gi === 0 ? 'disabled' : ''}>↑ Up</button>
+            <button class="fte-btn" data-action="move-gen-down" data-gen="${esc(gen)}" ${gi === total - 1 ? 'disabled' : ''}>↓ Down</button>
+            <button class="fte-btn-danger" data-action="remove-gen" data-gen="${esc(gen)}">Delete generation</button>
+          </div>
+        </div>
+        <div class="fte-blocks">${body || '<p class="fte-sub-label">No people yet in this generation.</p>'}</div>
+        <div class="fte-add-block fte-struct-row">
+          <button class="fte-btn" data-action="add-couple" data-gen="${esc(gen)}">+ Add couple</button>
+          <button class="fte-btn" data-action="add-group" data-gen="${esc(gen)}">+ Add group</button>
+        </div>
+      </div>`;
+    }
+
+    function renderTabs(): void {
+      tabsEl.innerHTML = keys
+        .map(
+          (k) =>
+            `<button class="fte-tab ${k === state.current ? 'active' : ''}" data-tab="${esc(k)}">${esc(
+              state.trees[k].label || k,
+            )}${state.dirty.has(k) ? ' •' : ''}</button>`,
+        )
+        .join('');
+    }
+
+    function renderSettings(): void {
+      const t = tree();
+      const legend = FAMILY_KEYS.map(
+        (k) => `
+        <label class="fte-legend-item">
+          <input type="checkbox" data-edit="legend" data-family="${k}" ${(t.legendFamilies || []).includes(k) ? 'checked' : ''}>
+          <span class="fte-dot fte-fam-${k}" style="background:var(--ft-${k});border-color:var(--ft-${k})"></span> ${esc(FAMILY_LABELS[k])}
+        </label>`,
+      ).join('');
+      settingsEl.innerHTML = `
+        <div class="fte-settings-title">Tree settings</div>
+        <label class="fte-field" style="max-width:420px"><span>Tree name</span>
+          <input type="text" data-edit="tree-label" value="${esc(t.label || '')}"></label>
+        <div class="fte-legend-edit">
+          <div class="fte-sub-label">Legend — families shown in the key</div>${legend}
+        </div>`;
+    }
+
+    function renderEditor(): void {
+      const t = tree();
+      const order = t.generationOrder && t.generationOrder.length ? t.generationOrder : Object.keys(t.structure);
+      editorEl.innerHTML =
+        order.map((gen, gi) => generationCard(gen, gi, order.length)).join('') +
+        `<div class="fte-add-gen fte-struct-row"><button class="fte-btn" data-action="add-generation">+ Add generation</button></div>`;
+    }
+
+    function updateSaveBar(): void {
+      const dirty = state.dirty.size > 0;
+      statusEl.textContent = state.saving ? 'Saving…' : dirty ? 'Unsaved changes' : 'All changes saved';
+      statusEl.classList.toggle('dirty', dirty && !state.saving);
+      saveBtn.disabled = !dirty || state.saving;
+    }
+
+    function renderAll(): void {
+      if (!state.current) return;
+      renderTabs();
+      renderSettings();
+      renderEditor();
+      updateSaveBar();
+    }
+
+    function markDirty(): void {
+      state.dirty.add(state.current);
+      renderTabs();
+      updateSaveBar();
+    }
+
+    function reRenderEditor(): void {
+      const y = window.scrollY;
+      renderEditor();
+      renderTabs();
+      window.scrollTo(0, y);
+    }
+
+    // ---- structural operations (return true if changed) -------------------
+    function addCouple(t: Tree, gen: string): boolean {
+      const a = newPerson(t, { family: primaryFamily() });
+      const b = newPerson(t, { name: 'Spouse', family: 'spouse' });
+      t.structure[gen].push({ partners: [a, b], id: newCoupleId(t) });
+      return true;
+    }
+    function removeCouple(t: Tree, gen: string, idx: number): boolean {
+      const b = t.structure[gen][idx];
+      const names = b.partners.map((id: string) => nameOf(t, id)).join(' & ');
+      const sib = (b.siblings || []).length;
+      const total = b.partners.length + sib;
+      if (!confirm(`Remove this couple (${names})${sib ? ` and ${sib} sibling(s)` : ''}? This deletes ${total} ${total === 1 ? 'person' : 'people'} and cannot be undone.`)) return false;
+      const ids = [...b.partners, ...(b.siblings || [])];
+      t.structure[gen].splice(idx, 1);
+      ids.forEach((id) => gcPerson(t, id));
+      return true;
+    }
+    function addSibling(t: Tree, gen: string, idx: number): boolean {
+      const b = t.structure[gen][idx];
+      b.siblings = b.siblings || [];
+      b.siblings.push(newPerson(t));
+      return true;
+    }
+    function addGroup(t: Tree, gen: string): boolean {
+      t.structure[gen].push({ people: [], label: '' });
+      return true;
+    }
+    function removeGroup(t: Tree, gen: string, idx: number): boolean {
+      const b = t.structure[gen][idx];
+      const n = (b.people || []).length;
+      if (!confirm(`Remove this group${b.label ? ` (“${b.label}”)` : ''} and its ${n} ${n === 1 ? 'person' : 'people'}? This cannot be undone.`)) return false;
+      const ids = [...(b.people || [])];
+      t.structure[gen].splice(idx, 1);
+      ids.forEach((id) => gcPerson(t, id));
+      return true;
+    }
+    function addGroupPerson(t: Tree, gen: string, idx: number): boolean {
+      const b = t.structure[gen][idx];
+      b.people = b.people || [];
+      b.people.push(newPerson(t));
+      return true;
+    }
+    function removeRef(t: Tree, gen: string, idx: number, pid: string, kind: 'sibling' | 'group'): boolean {
+      if (!confirm(`Remove ${nameOf(t, pid)}? This cannot be undone.`)) return false;
+      const b = t.structure[gen][idx];
+      if (kind === 'sibling') {
+        b.siblings = (b.siblings || []).filter((x: string) => x !== pid);
+        if (b.siblings.length === 0) delete b.siblings;
+      } else {
+        b.people = (b.people || []).filter((x: string) => x !== pid);
+      }
+      gcPerson(t, pid);
+      return true;
+    }
+    function collectGenIds(t: Tree, gen: string): string[] {
+      const ids = new Set<string>();
+      for (const b of t.structure[gen] || []) {
+        if (Array.isArray(b.partners)) {
+          b.partners.forEach((id: string) => ids.add(id));
+          (b.siblings || []).forEach((id: string) => ids.add(id));
+        } else if (Array.isArray(b.people)) {
+          b.people.forEach((id: string) => ids.add(id));
+        }
+      }
+      return [...ids];
+    }
+    function removeGen(t: Tree, gen: string): boolean {
+      const label = (t.generationLabels && t.generationLabels[gen]) || gen;
+      const ids = collectGenIds(t, gen);
+      if (!confirm(`Delete the “${label}” generation and its ${ids.length} ${ids.length === 1 ? 'person' : 'people'}? This cannot be undone.`)) return false;
+      delete t.structure[gen];
+      if (t.generationLabels) delete t.generationLabels[gen];
+      t.generationOrder = (t.generationOrder || []).filter((k) => k !== gen);
+      ids.forEach((id) => gcPerson(t, id));
+      return true;
+    }
+    function moveGen(t: Tree, gen: string, dir: number): boolean {
+      const order = t.generationOrder && t.generationOrder.length ? t.generationOrder : (t.generationOrder = Object.keys(t.structure));
+      const i = order.indexOf(gen);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= order.length) return false;
+      [order[i], order[j]] = [order[j], order[i]];
+      return true;
+    }
+    function addGeneration(t: Tree): boolean {
+      const label = prompt('Name for the new generation (e.g. “Grandchildren”):', 'New generation');
+      if (label === null) return false;
+      t.generationOrder = t.generationOrder && t.generationOrder.length ? t.generationOrder : Object.keys(t.structure);
+      const key = slugKey(label, [...Object.keys(t.structure), ...t.generationOrder]);
+      t.structure[key] = [];
+      t.generationLabels = t.generationLabels || {};
+      t.generationLabels[key] = label || key;
+      t.generationOrder.push(key);
+      return true;
+    }
+
+    // ---- event delegation -------------------------------------------------
+    rootEl.addEventListener('input', (e) => {
+      const el = e.target as HTMLInputElement;
+      const edit = el.dataset.edit;
+      if (!edit) return;
+      const t = tree();
+      if (edit === 'person') {
+        const p = t.people[el.dataset.pid!];
+        if (!p) return;
+        const f = el.dataset.field!;
+        if (f === 'placeholder') {
+          if (el.checked) p.placeholder = true;
+          else delete p.placeholder;
+        } else {
+          (p as any)[f] = el.value;
+        }
+        if (f === 'family') {
+          const card = el.closest('.fte-person');
+          if (card) card.className = 'fte-person fte-fam-' + el.value;
+        }
+      } else if (edit === 'gen-label') {
+        t.generationLabels = t.generationLabels || {};
+        t.generationLabels[el.dataset.gen!] = el.value;
+      } else if (edit === 'group-label') {
+        t.structure[el.dataset.gen!][+el.dataset.block!].label = el.value;
+      } else if (edit === 'twins-note') {
+        t.structure[el.dataset.gen!][+el.dataset.block!].siblings_note = el.value;
+      } else if (edit === 'tree-label') {
+        t.label = el.value;
+        renderTabs();
+      } else if (edit === 'legend') {
+        const fam = el.dataset.family!;
+        t.legendFamilies = t.legendFamilies || [];
+        if (el.checked) {
+          if (!t.legendFamilies.includes(fam)) t.legendFamilies.push(fam);
+        } else {
+          t.legendFamilies = t.legendFamilies.filter((x) => x !== fam);
+        }
+      } else {
+        return;
+      }
+      markDirty();
+    });
+
+    rootEl.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('[data-action],[data-tab]') as HTMLElement | null;
+      if (!btn) return;
+      if (btn.dataset.tab) {
+        if (btn.dataset.tab !== state.current) {
+          state.current = btn.dataset.tab;
+          renderAll();
+          window.scrollTo(0, 0);
+        }
+        return;
+      }
+      const action = btn.dataset.action!;
+      const t = tree();
+      const gen = btn.dataset.gen!;
+      const idx = btn.dataset.block != null ? +btn.dataset.block : -1;
+      const pid = btn.dataset.pid!;
+      let changed = false;
+      switch (action) {
+        case 'add-couple': changed = addCouple(t, gen); break;
+        case 'remove-couple': changed = removeCouple(t, gen, idx); break;
+        case 'add-sibling': changed = addSibling(t, gen, idx); break;
+        case 'remove-sibling': changed = removeRef(t, gen, idx, pid, 'sibling'); break;
+        case 'add-group': changed = addGroup(t, gen); break;
+        case 'remove-group': changed = removeGroup(t, gen, idx); break;
+        case 'add-group-person': changed = addGroupPerson(t, gen, idx); break;
+        case 'remove-group-person': changed = removeRef(t, gen, idx, pid, 'group'); break;
+        case 'move-gen-up': changed = moveGen(t, gen, -1); break;
+        case 'move-gen-down': changed = moveGen(t, gen, 1); break;
+        case 'remove-gen': changed = removeGen(t, gen); break;
+        case 'add-generation': changed = addGeneration(t); break;
+      }
+      if (changed) {
+        markDirty();
+        reRenderEditor();
+      }
+    });
+
+    advChk.addEventListener('change', () => {
+      rootEl.classList.toggle('fte-show-advanced', advChk.checked);
+    });
+
+    saveBtn.addEventListener('click', save);
+
+    async function save(): Promise<void> {
+      const problems: string[] = [];
+      for (const k of state.dirty) {
+        const errs = validateTree(state.trees[k]);
+        if (errs.length) problems.push(`• ${state.trees[k].label || k}: ${errs[0]}`);
+      }
+      if (problems.length) {
+        alert('Please fix these before saving:\n\n' + problems.join('\n'));
+        return;
+      }
+      state.saving = true;
+      updateSaveBar();
+      try {
+        for (const k of [...state.dirty]) {
+          const res = await fetch('/api/family-tree/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tree_key: k, data: state.trees[k] }),
+          });
+          const out = await res.json();
+          if (!res.ok) {
+            throw new Error(out.error + (out.details ? '\n' + out.details.join('\n') : ''));
+          }
+          state.dirty.delete(k);
+        }
+        state.saving = false;
+        renderTabs();
+        updateSaveBar();
+        statusEl.textContent = 'All changes saved ✓';
+      } catch (err: any) {
+        state.saving = false;
+        updateSaveBar();
+        alert('Save failed: ' + (err?.message || err));
+      }
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+      if (state.dirty.size > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    renderAll();
+  </script>
+</MainLayout>
