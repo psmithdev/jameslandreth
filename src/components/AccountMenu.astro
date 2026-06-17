@@ -1,0 +1,117 @@
+---
+import type { UserProfile } from '../lib/auth';
+
+interface MenuLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  user: UserProfile;
+  /** Theme accent used for the avatar and link hovers. */
+  accent?: 'stamp' | 'stamp-art';
+  /** Admin/utility links rendered above "Log out". */
+  links?: MenuLink[];
+}
+
+const { user, accent = 'stamp', links = [] } = Astro.props;
+
+const identity = user.display_name || user.email;
+
+/** Derive 1–2 letter initials from a name or email local part. */
+function initialsOf(source: string): string {
+  const parts = source.replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0][0].toUpperCase();
+}
+
+const initials = initialsOf(identity);
+
+// Tailwind needs literal class strings, so map accents explicitly.
+const theme = {
+  stamp: {
+    avatar: 'bg-stamp text-card',
+    hover: 'hover:bg-parchment-dark hover:text-stamp',
+    ring: 'focus-visible:ring-stamp',
+  },
+  'stamp-art': {
+    avatar: 'bg-stamp-art text-card',
+    hover: 'hover:bg-parchment-dark hover:text-stamp-art',
+    ring: 'focus-visible:ring-stamp-art',
+  },
+}[accent];
+---
+
+<div class="relative" data-account-menu>
+  <button
+    type="button"
+    data-account-trigger
+    class={`flex h-9 w-9 items-center justify-center overflow-hidden rounded-full font-mono text-[12px] tracking-wide transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-parchment ${theme.avatar} ${theme.ring}`}
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-label="Account menu"
+  >
+    {user.avatar_url
+      ? <img src={user.avatar_url} alt="" class="h-full w-full object-cover" />
+      : <span>{initials}</span>}
+  </button>
+
+  <div
+    data-account-panel
+    class="absolute right-0 top-full mt-3 hidden w-56 origin-top-right border border-rule bg-card shadow-lg z-50"
+    role="menu"
+    aria-label="Account"
+  >
+    <div class="border-b border-rule px-4 py-3">
+      <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-rule">Signed in as</p>
+      <p class="mt-0.5 truncate font-mono text-[13px] text-ink" title={identity}>{identity}</p>
+    </div>
+
+    {links.length > 0 && (
+      <div class="border-b border-rule py-1">
+        {links.map((link) => (
+          <a
+            href={link.href}
+            role="menuitem"
+            class={`block px-4 py-2 font-mono text-[13px] tracking-[0.08em] uppercase text-ink-muted transition-colors ${theme.hover}`}
+          >{link.label}</a>
+        ))}
+      </div>
+    )}
+
+    <div class="py-1">
+      <a
+        href="/api/auth/logout"
+        role="menuitem"
+        class={`block px-4 py-2 font-mono text-[13px] tracking-[0.08em] uppercase text-ink-muted transition-colors ${theme.hover}`}
+      >Log out</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const menu = document.querySelector<HTMLElement>('[data-account-menu]');
+  const trigger = menu?.querySelector<HTMLButtonElement>('[data-account-trigger]');
+  const panel = menu?.querySelector<HTMLElement>('[data-account-panel]');
+
+  if (menu && trigger && panel) {
+    const setOpen = (open: boolean) => {
+      panel.classList.toggle('hidden', !open);
+      trigger.setAttribute('aria-expanded', String(open));
+    };
+
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(panel.classList.contains('hidden'));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!menu.contains(event.target as Node)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+</script>

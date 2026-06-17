@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { isAdmin } from '../lib/auth';
+import AccountMenu from '../components/AccountMenu.astro';
 
 interface Props {
   title?: string;
@@ -39,16 +40,14 @@ const admin = isAdmin(user);
           {/* <a href="/anniversary" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">60th Anniversary</a> */}
           <a href="https://artifacts.jameslandreth.com" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Family Treasures</a>
           {user ? (
-            <div class="flex items-center gap-6">
-              {admin && (
-                <Fragment>
-                  <a href="/upload" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Upload</a>
-                  <a href="/admin" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Admin</a>
-                </Fragment>
-              )}
-              <span class="font-mono text-[13px] text-rule">{user.display_name || user.email}</span>
-              <a href="/api/auth/logout" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Logout</a>
-            </div>
+            <AccountMenu
+              user={user}
+              accent="stamp"
+              links={admin ? [
+                { href: '/upload', label: 'Upload' },
+                { href: '/admin', label: 'Admin' },
+              ] : []}
+            />
           ) : (
             <a href="/login" class="font-mono text-[13px] tracking-[0.12em] uppercase text-card bg-stamp hover:bg-stamp-hover px-4 py-2 transition-colors">Login</a>
           )}
