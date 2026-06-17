@@ -97,6 +97,17 @@ if (user) {
       e.preventDefault();
       errorDiv.classList.add('hidden');
 
+      const defaultLabel = isSignUp ? 'Sign Up' : 'Sign In';
+      submitBtn.disabled = true;
+      submitBtn.textContent = isSignUp ? 'Creating account…' : 'Signing in…';
+      submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+      const restore = () => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = defaultLabel;
+        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+      };
+
       const email = (document.getElementById('email') as HTMLInputElement).value;
       const password = (document.getElementById('password') as HTMLInputElement).value;
 
@@ -106,6 +117,7 @@ if (user) {
       if (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
+        restore();
         return;
       }
 
@@ -121,7 +133,12 @@ if (user) {
         });
 
         if (res.ok) {
+          // Keep the button disabled — the page is navigating away.
           window.location.href = redirectTo;
+        } else {
+          errorDiv.textContent = 'Could not start your session. Please try again.';
+          errorDiv.classList.remove('hidden');
+          restore();
         }
       } else if (isSignUp) {
         errorDiv.textContent = 'Check your email to confirm your account.';
@@ -129,6 +146,9 @@ if (user) {
         errorDiv.classList.replace('bg-red-50', 'bg-green-50');
         errorDiv.classList.replace('border-red-200', 'border-green-200');
         errorDiv.classList.replace('text-red-700', 'text-green-700');
+        restore();
+      } else {
+        restore();
       }
     });
   </script>
