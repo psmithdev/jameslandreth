@@ -201,7 +201,8 @@ if (!isAdmin(user)) {
 
       const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Uploading...';
+      submitBtn.textContent = 'Uploading…';
+      submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
       try {
         const res = await fetch('/api/documents/upload', {
@@ -221,6 +222,7 @@ if (!isAdmin(user)) {
         errorDiv.classList.remove('hidden');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Upload Document';
+        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
       }
     });
   </script>
