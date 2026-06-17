@@ -77,7 +77,8 @@ src/pages/
     upload.astro          # admin document upload
     admin.astro           # admin dashboard
     login.astro
-    family-tree.astro
+    family-tree.astro        # public tree view (reads family_trees from DB)
+    family-tree/edit.astro    # admin tree editor (people + relationships)
   artifacts/
     index.astro           # artifacts.jameslandreth.com home
     items/[slug].astro    # individual artifact view
@@ -87,13 +88,18 @@ src/pages/
 
 ## Database Schema
 
-Tables: `profiles`, `documents`, `artifacts`, `comments`
+Tables: `profiles`, `documents`, `artifacts`, `comments`, `family_trees`
 
 Key points:
 - New Supabase users automatically get a `profiles` row via `handle_new_user()` trigger.
 - `documents.status` (`published`/`draft`/`archived`) gates RLS — only `published` docs are public.
 - `artifacts.status` (`available`/`claimed`/`gifted`) — all artifacts are publicly visible.
 - `comments.target_type` enum (`document` | `artifact`) links comments to either table.
+- `family_trees` — one JSONB row per tree (`tree_key`, `label`, `sort_order`, `data`). `data` is
+  the exact object the client renderer consumes. RLS: public read, admin write. Edited via
+  `/family-tree/edit` (POST to `/api/family-tree/update`). NOTE: Postgres `jsonb` does not preserve
+  object key order, so generation ordering lives in `data.generationOrder` (array) + `data.generationLabels`,
+  not in the order of `data.structure`'s keys. Re-seed with `npm run family-tree:seed`.
 - Storage buckets required: `documents`, `thumbnails`, `artifacts`, `avatars` (create via Supabase Dashboard).
 
 Migrations: `supabase/migrations/`. Apply via Supabase CLI (`supabase db push`) or Dashboard SQL editor.
