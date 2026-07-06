@@ -42,3 +42,6 @@ parker_psmith_dev_*/
 # Batch upload staging
 tmp/
 scripts/artifact-photo-map.json
+
+# Private business notes (never publish — repo is public)
+notes-private/
