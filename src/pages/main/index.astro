@@ -108,11 +108,15 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
           <div class="border border-rule bg-card p-4">
             <div id="slide-stage" class="h-full w-full">
-              <div class="aspect-video flex h-full items-center justify-center border border-dashed border-rule bg-parchment-dark p-6 text-center">
-                <div>
-                  <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-3">Retrospective 60</p>
-                  <p class="font-display text-4xl text-ink leading-tight">{firstSlide.title}</p>
-                </div>
+              <div class="aspect-video grid grid-cols-1 gap-3">
+                <button
+                  type="button"
+                  class="min-h-0 border border-rule bg-parchment-dark p-1 transition-colors hover:border-stamp focus:outline-none focus:ring-2 focus:ring-stamp"
+                  data-lightbox-image-index="0"
+                  aria-label={`Open image 1 from slide ${firstSlide.number}`}
+                >
+                  <img src={firstSlide.images[0]} alt="" class="h-full w-full object-contain" loading="eager" />
+                </button>
               </div>
             </div>
           </div>
