@@ -104,11 +104,11 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       </div>
 
       <section class="mt-6 grid gap-5 border border-rule bg-parchment p-4 sm:p-6 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)] lg:items-center">
-        <figure class="relative min-h-[280px] overflow-hidden bg-card shadow-[0_18px_50px_rgba(28,35,64,0.14)] outline outline-1 outline-[rgba(0,0,0,0.1)]">
+        <figure class="relative aspect-[2298/896] overflow-hidden bg-card shadow-[0_18px_50px_rgba(28,35,64,0.14)] outline outline-1 outline-[rgba(0,0,0,0.1)]">
           <img
             src={anniversaryBook.cover}
             alt=""
-            class="absolute inset-0 hidden h-full w-full object-cover"
+            class="absolute inset-0 hidden h-full w-full object-contain"
             data-anniversary-book-cover
             loading="lazy"
           />

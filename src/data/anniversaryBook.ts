@@ -8,7 +8,7 @@ export const anniversaryBook = {
   title: 'Landreth Family Album',
   subtitle: 'A finished 8x11 layflat hardcover photo book for the family archive.',
   pageCount: 46,
-  spreadCount: 23,
+  spreadCount: 24,
   cover: '/images/anniversary-book/cover.jpg',
   pdf: '/downloads/landreth-family-album.pdf',
 };
