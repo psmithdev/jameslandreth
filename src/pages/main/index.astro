@@ -61,14 +61,21 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         </article>
 
         <figure class="border border-rule bg-parchment p-3">
-          <img
-            src="/images/jim-aleda-wedding.png"
-            alt="Jim and Aleda on their wedding day"
-            class="h-[430px] w-full object-cover object-[50%_42%]"
-            loading="eager"
-          />
+          <button
+            id="open-wedding-photo"
+            type="button"
+            class="block w-full transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-stamp"
+            aria-label="Click to open the full slideshow of all 60 years, starting at the wedding day photos"
+          >
+            <img
+              src="/images/jim-aleda-wedding.png"
+              alt="Jim and Aleda on their wedding day"
+              class="h-[430px] w-full object-cover object-[50%_42%]"
+              loading="eager"
+            />
+          </button>
           <figcaption class="border-t border-rule pt-3 mt-3 text-center font-serif text-sm italic leading-relaxed text-ink-muted">
-            Jim and Aleda on their wedding day.
+            Jim and Aleda on their wedding day. Click the photo to open the full 60-years slideshow.
           </figcaption>
         </figure>
 
@@ -76,7 +83,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
           <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Slideshow</p>
           <h3 class="font-display text-3xl text-ink leading-tight mb-4">Retrospective 60</h3>
           <p class="font-serif text-ink-muted leading-relaxed mb-6">
-            A web preview of the PowerPoint retrospective, with {slideCount} slides and
+            The full retrospective, right here on the page — {slideCount} slides and
             selected original notes preserved beside the family photographs.
           </p>
           <a
@@ -98,8 +105,11 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       <section id="anniversary-slideshow" class="mt-8 border border-rule bg-parchment p-4 sm:p-6">
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-2">Presentation Preview</p>
+            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-rule mb-2">Full Slideshow &middot; All 60 Years</p>
             <h3 id="slide-title" class="font-display text-2xl sm:text-3xl text-ink leading-tight">{firstSlide.title}</h3>
+            <p class="font-serif text-sm text-ink-muted mt-2 max-w-2xl">
+              Click any photo below to open it full-size, then use the arrows (or the &larr; &rarr; keys) to page through all {slideCount} slides.
+            </p>
             <p id="slide-subtitle" class="hidden font-serif text-ink-muted leading-relaxed mt-2 max-w-2xl"></p>
           </div>
           <p id="slide-count" class="font-mono text-[13px] tracking-[0.14em] uppercase text-stamp">Slide 1 of {slideCount}</p>
@@ -359,6 +369,9 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         <div>
           <p id="slide-lightbox-count" class="font-mono text-[12px] tracking-[0.16em] uppercase text-stamp"></p>
           <h2 id="slide-lightbox-title" class="font-display text-2xl text-ink leading-tight"></h2>
+          <p class="font-serif text-sm text-ink-muted mt-1">
+            Click the &lt; and &gt; arrows below (or the left/right arrow keys) to page forward and back through the pictures.
+          </p>
         </div>
         <button
           type="button"
@@ -426,7 +439,18 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     const slideSubtitle = document.getElementById('slide-subtitle')!;
     const slideCount = document.getElementById('slide-count')!;
     let activeSlideIndex = 0;
-    let activeLightboxImageIndex = 0;
+    let activeFlatIndex = 0;
+
+    // Flattens every slide's images into one ordered list so the lightbox can page
+    // continuously through the whole 60-year presentation, not just one slide's photos.
+    const flatImages: { slideIndex: number; src: string }[] = [];
+    const slideImageOffsets: number[] = [];
+    retrospectiveSlides.forEach((slide, slideIndex) => {
+      slideImageOffsets[slideIndex] = flatImages.length;
+      slide.images.slice(0, 6).forEach((src) => {
+        flatImages.push({ slideIndex, src });
+      });
+    });
 
     function escapeHtml(value: string) {
       return value
@@ -528,25 +552,21 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     }
 
     function updateLightboxImage() {
-      const slide = retrospectiveSlides[activeSlideIndex];
-      const visibleImages = slide.images.slice(0, 6);
-      const imageCount = visibleImages.length;
-      if (imageCount === 0) return;
+      if (flatImages.length === 0) return;
+      activeFlatIndex = (activeFlatIndex + flatImages.length) % flatImages.length;
+      const { slideIndex, src } = flatImages[activeFlatIndex];
+      const slide = retrospectiveSlides[slideIndex];
 
-      activeLightboxImageIndex = (activeLightboxImageIndex + imageCount) % imageCount;
       slideLightboxTitle.textContent = slide.title;
-      slideLightboxCount.textContent = `Slide ${slide.number} · Image ${activeLightboxImageIndex + 1} of ${imageCount}`;
-      slideLightboxImage.src = visibleImages[activeLightboxImageIndex];
-      slideLightboxImage.alt = `${slide.title}, image ${activeLightboxImageIndex + 1}`;
-      const hasMultipleImages = imageCount > 1;
-      slideLightboxPrev.disabled = !hasMultipleImages;
-      slideLightboxNext.disabled = !hasMultipleImages;
-      slideLightboxPrev.classList.toggle('opacity-40', !hasMultipleImages);
-      slideLightboxNext.classList.toggle('opacity-40', !hasMultipleImages);
+      slideLightboxCount.textContent = `Slide ${slide.number} of ${retrospectiveSlides.length}`;
+      slideLightboxImage.src = src;
+      slideLightboxImage.alt = slide.title;
+
+      if (slideIndex !== activeSlideIndex) renderSlide(slideIndex);
     }
 
-    function showSlideLightbox(imageIndex: number) {
-      activeLightboxImageIndex = imageIndex;
+    function showSlideLightbox(flatIndex: number) {
+      activeFlatIndex = flatIndex;
       updateLightboxImage();
       slideLightbox.classList.remove('hidden');
       slideLightbox.classList.add('flex');
@@ -562,7 +582,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     }
 
     function showAdjacentLightboxImage(direction: number) {
-      activeLightboxImageIndex += direction;
+      activeFlatIndex += direction;
       updateLightboxImage();
     }
 
@@ -584,11 +604,18 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     slideStage.addEventListener('click', (event) => {
       const trigger = (event.target as HTMLElement).closest('[data-lightbox-image-index]') as HTMLElement | null;
       if (!trigger) return;
-      showSlideLightbox(Number(trigger.dataset.lightboxImageIndex || '0'));
+      const localIndex = Number(trigger.dataset.lightboxImageIndex || '0');
+      showSlideLightbox(slideImageOffsets[activeSlideIndex] + localIndex);
     });
     document.querySelectorAll('.slide-thumb').forEach((thumb) => {
       thumb.addEventListener('click', () => renderSlide(Number((thumb as HTMLElement).dataset.slideIndex || '0')));
     });
+
+    document.getElementById('open-wedding-photo')?.addEventListener('click', () => {
+      const weddingSlideIndex = retrospectiveSlides.findIndex((slide) => slide.number === 6);
+      showSlideLightbox(slideImageOffsets[weddingSlideIndex >= 0 ? weddingSlideIndex : 0]);
+    });
+
     renderSlide(0);
 
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
