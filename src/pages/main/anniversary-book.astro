@@ -1,0 +1,489 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { anniversaryBook, anniversaryBookSpreads } from '../../data/anniversaryBook';
+
+const firstSpread = anniversaryBookSpreads[0];
+---
+
+<MainLayout title="Landreth Family Album - Dr. James Landreth">
+  <article class="book-page">
+    <header class="book-hero">
+      <div class="book-hero-copy">
+        <p class="font-mono text-[12px] tracking-[0.26em] uppercase text-stamp">Commemorative Book</p>
+        <h1 class="font-display text-5xl md:text-6xl text-ink leading-tight mt-4">{anniversaryBook.title}</h1>
+        <p class="font-serif text-xl text-ink-muted leading-relaxed mt-5 max-w-2xl">
+          {anniversaryBook.subtitle} Browse the captured spreads here, or print this page to save
+          a family PDF once the final images are in place.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#book-reader" class="book-button book-button-primary">Read the Book</a>
+          <button id="print-book" type="button" class="book-button">Save as PDF</button>
+        </div>
+      </div>
+
+      <figure class="book-cover-shell" aria-label={`${anniversaryBook.title} cover preview`}>
+        <img src={anniversaryBook.cover} alt="" class="book-cover-image" data-book-image />
+        <div class="book-cover-fallback">
+          <div class="cover-wreath" aria-hidden="true"></div>
+          <p>Landreth<br />Family<br />Album</p>
+        </div>
+      </figure>
+    </header>
+
+    <section class="book-capture-note" aria-labelledby="capture-title">
+      <div>
+        <p class="font-mono text-[12px] tracking-[0.2em] uppercase text-rule mb-2">Snapfish Capture Workflow</p>
+        <h2 id="capture-title" class="font-display text-3xl text-ink leading-tight">How to get the book out of Snapfish</h2>
+      </div>
+      <ol class="book-steps">
+        <li>Open the builder, switch to <strong>Spreads</strong>, and use each spread&rsquo;s <strong>Large view</strong>.</li>
+        <li>Capture the cover and each spread as high-resolution screenshots.</li>
+        <li>Name them <code>cover.jpg</code>, then <code>spread-01.jpg</code> through <code>spread-23.jpg</code>.</li>
+        <li>Place them in <code>public/images/anniversary-book/</code> and <code>public/images/anniversary-book/spreads/</code>.</li>
+      </ol>
+    </section>
+
+    <section id="book-reader" class="book-reader" aria-labelledby="reader-title">
+      <div class="book-reader-header">
+        <div>
+          <p class="font-mono text-[12px] tracking-[0.2em] uppercase text-stamp">46 pages &middot; 23 spreads</p>
+          <h2 id="reader-title" class="font-display text-4xl text-ink leading-tight mt-2">Book Reader</h2>
+        </div>
+        <p id="reader-count" class="font-mono text-[13px] tracking-[0.14em] uppercase text-rule">
+          Spread {firstSpread.number} of {anniversaryBookSpreads.length}
+        </p>
+      </div>
+
+      <div class="book-stage-wrap">
+        <button id="spread-prev" type="button" class="spread-nav" aria-label="Previous spread">&lt;</button>
+        <figure class="book-stage">
+          <img
+            id="active-spread-image"
+            src={firstSpread.src}
+            alt={firstSpread.title}
+            class="active-spread-image"
+            data-book-image
+          />
+          <div id="active-spread-placeholder" class="spread-placeholder">
+            <p class="font-mono text-[12px] tracking-[0.2em] uppercase text-rule">Awaiting Capture</p>
+            <h3 class="font-display text-3xl text-ink mt-3">{firstSpread.title}</h3>
+            <p class="font-serif text-ink-muted mt-3">Add the Snapfish spread image at <code>{firstSpread.src}</code>.</p>
+          </div>
+          <figcaption id="active-spread-caption" class="book-caption">{firstSpread.title}</figcaption>
+        </figure>
+        <button id="spread-next" type="button" class="spread-nav" aria-label="Next spread">&gt;</button>
+      </div>
+
+      <div class="spread-strip" aria-label="Choose a book spread">
+        {anniversaryBookSpreads.map((spread) => (
+          <button
+            type="button"
+            class="spread-thumb"
+            data-spread-index={spread.number - 1}
+            aria-label={`Show ${spread.title}`}
+          >
+            <img src={spread.src} alt="" loading="lazy" data-book-image />
+            <span>{String(spread.number).padStart(2, '0')}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="print-spreads" aria-hidden="true">
+        <img src={anniversaryBook.cover} alt="" />
+        {anniversaryBookSpreads.map((spread) => (
+          <img src={spread.src} alt="" />
+        ))}
+      </div>
+    </section>
+  </article>
+
+  <script type="application/json" id="anniversary-book-data" set:html={JSON.stringify(anniversaryBookSpreads)}></script>
+
+  <script>
+    type BookSpread = {
+      number: number;
+      title: string;
+      src: string;
+    };
+
+    const spreads = JSON.parse(document.getElementById('anniversary-book-data')?.textContent || '[]') as BookSpread[];
+    const activeImage = document.getElementById('active-spread-image') as HTMLImageElement;
+    const activePlaceholder = document.getElementById('active-spread-placeholder')!;
+    const activeCaption = document.getElementById('active-spread-caption')!;
+    const readerCount = document.getElementById('reader-count')!;
+    let activeSpreadIndex = 0;
+
+    function markMissingImage(image: HTMLImageElement) {
+      image.dataset.missing = 'true';
+      image.hidden = true;
+    }
+
+    document.querySelectorAll<HTMLImageElement>('[data-book-image]').forEach((image) => {
+      image.addEventListener('error', () => markMissingImage(image), { once: true });
+    });
+
+    function renderSpread(index: number) {
+      activeSpreadIndex = (index + spreads.length) % spreads.length;
+      const spread = spreads[activeSpreadIndex];
+
+      activeImage.hidden = false;
+      activeImage.dataset.missing = '';
+      activeImage.src = spread.src;
+      activeImage.alt = spread.title;
+      activePlaceholder.querySelector('h3')!.textContent = spread.title;
+      activePlaceholder.querySelector('code')!.textContent = spread.src;
+      activeCaption.textContent = spread.title;
+      readerCount.textContent = `Spread ${spread.number} of ${spreads.length}`;
+      activePlaceholder.classList.remove('hidden');
+
+      document.querySelectorAll<HTMLElement>('.spread-thumb').forEach((thumb) => {
+        const selected = Number(thumb.dataset.spreadIndex || '0') === activeSpreadIndex;
+        thumb.classList.toggle('is-active', selected);
+      });
+    }
+
+    activeImage.addEventListener('load', () => {
+      if (!activeImage.dataset.missing) activePlaceholder.classList.add('hidden');
+    });
+    activeImage.addEventListener('error', () => {
+      markMissingImage(activeImage);
+      activePlaceholder.classList.remove('hidden');
+    });
+
+    document.getElementById('spread-prev')?.addEventListener('click', () => renderSpread(activeSpreadIndex - 1));
+    document.getElementById('spread-next')?.addEventListener('click', () => renderSpread(activeSpreadIndex + 1));
+    document.getElementById('print-book')?.addEventListener('click', () => window.print());
+    document.querySelectorAll<HTMLElement>('.spread-thumb').forEach((thumb) => {
+      thumb.addEventListener('click', () => renderSpread(Number(thumb.dataset.spreadIndex || '0')));
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') renderSpread(activeSpreadIndex - 1);
+      if (event.key === 'ArrowRight') renderSpread(activeSpreadIndex + 1);
+    });
+
+    renderSpread(0);
+  </script>
+</MainLayout>
+
+<style>
+  .book-page {
+    color: var(--color-ink);
+  }
+
+  .book-hero {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 3rem;
+  }
+
+  .book-hero-copy {
+    align-self: center;
+  }
+
+  .book-cover-shell {
+    position: relative;
+    min-height: 28rem;
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, rgba(28, 35, 64, 0.28), transparent 9%),
+      radial-gradient(circle at 40% 30%, rgba(244, 239, 228, 0.38), transparent 36%),
+      linear-gradient(135deg, #b7d28b, #93c9c6 55%, #d5dfaf);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.7) inset,
+      0 24px 70px rgba(28, 35, 64, 0.2),
+      0 0 0 1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .book-cover-image {
+    width: 100%;
+    height: 100%;
+    min-height: 28rem;
+    object-fit: cover;
+    display: block;
+  }
+
+  .book-cover-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .book-cover-image:not([hidden]) + .book-cover-fallback {
+    display: none;
+  }
+
+  .book-cover-fallback p {
+    position: relative;
+    z-index: 1;
+    padding: 1.25rem 1.5rem;
+    background: rgba(211, 226, 170, 0.72);
+    color: #24483a;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.8rem);
+    line-height: 1.12;
+    text-transform: uppercase;
+  }
+
+  .cover-wreath {
+    position: absolute;
+    width: min(72%, 25rem);
+    aspect-ratio: 1;
+    border-radius: 999px;
+    border: 2.5rem solid rgba(45, 106, 79, 0.2);
+    box-shadow:
+      2rem 0 0 rgba(45, 106, 79, 0.12),
+      -1.5rem 1rem 0 rgba(139, 31, 31, 0.08);
+    transform: rotate(-12deg);
+  }
+
+  .book-button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-rule);
+    padding: 0.8rem 1.1rem;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    transition-property: border-color, color, background-color, transform;
+    transition-duration: 180ms;
+  }
+
+  .book-button:hover {
+    border-color: var(--color-stamp);
+    color: var(--color-stamp);
+  }
+
+  .book-button:active,
+  .spread-nav:active,
+  .spread-thumb:active {
+    transform: scale(0.96);
+  }
+
+  .book-button-primary {
+    border-color: var(--color-stamp);
+    background: var(--color-stamp);
+    color: var(--color-card);
+  }
+
+  .book-button-primary:hover {
+    background: var(--color-stamp-hover);
+    color: var(--color-card);
+  }
+
+  .book-capture-note,
+  .book-reader {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .book-capture-note {
+    display: grid;
+    gap: 1.5rem;
+    border-block: 1px solid var(--color-rule);
+    background: var(--color-card);
+  }
+
+  .book-steps {
+    display: grid;
+    gap: 0.85rem;
+    padding-left: 1.25rem;
+    color: var(--color-ink-muted);
+    line-height: 1.65;
+  }
+
+  .book-steps code,
+  .spread-placeholder code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-stamp);
+  }
+
+  .book-reader-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .book-stage-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .book-stage {
+    position: relative;
+    min-height: 22rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-rule);
+    background: var(--color-card);
+    padding: 0.75rem;
+    box-shadow: 0 18px 50px rgba(28, 35, 64, 0.12);
+  }
+
+  .active-spread-image {
+    max-height: 72vh;
+    width: 100%;
+    object-fit: contain;
+    outline: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .spread-placeholder {
+    max-width: 34rem;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .book-caption {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    background: rgba(253, 250, 245, 0.9);
+    padding: 0.45rem 0.65rem;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-rule);
+  }
+
+  .spread-nav {
+    min-height: 44px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-parchment);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    transition-property: border-color, color, transform;
+    transition-duration: 180ms;
+  }
+
+  .spread-nav:hover {
+    border-color: var(--color-stamp);
+    color: var(--color-stamp);
+  }
+
+  .spread-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .spread-thumb {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--color-rule);
+    background: var(--color-card);
+    overflow: hidden;
+    transition-property: border-color, transform;
+    transition-duration: 180ms;
+  }
+
+  .spread-thumb:hover,
+  .spread-thumb.is-active {
+    border-color: var(--color-stamp);
+  }
+
+  .spread-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    outline: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .spread-thumb span {
+    position: absolute;
+    right: 0.25rem;
+    bottom: 0.25rem;
+    background: rgba(253, 250, 245, 0.92);
+    padding: 0.15rem 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ink-muted);
+  }
+
+  .print-spreads {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .book-hero {
+      grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 0.7fr);
+      padding-top: 5rem;
+    }
+
+    .book-capture-note {
+      grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
+      padding: 2rem;
+    }
+
+    .book-reader-header {
+      flex-direction: row;
+      align-items: end;
+      justify-content: space-between;
+    }
+
+    .book-stage-wrap {
+      grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+      align-items: center;
+    }
+  }
+
+  @media print {
+    header,
+    footer,
+    .book-hero,
+    .book-capture-note,
+    .book-reader-header,
+    .book-stage-wrap,
+    .spread-nav,
+    .spread-strip,
+    .book-caption {
+      display: none !important;
+    }
+
+    body {
+      background: white !important;
+    }
+
+    .book-reader {
+      max-width: none;
+      padding: 0;
+    }
+
+    .book-stage {
+      min-height: auto;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+      page-break-after: always;
+    }
+
+    .print-spreads {
+      display: block;
+    }
+
+    .print-spreads img {
+      display: block;
+      width: 100%;
+      height: auto;
+      outline: 0;
+      page-break-after: always;
+    }
+  }
+</style>
