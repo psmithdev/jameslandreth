@@ -397,6 +397,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
             alt=""
             class="max-h-[68vh] w-full object-contain"
           />
+          <p id="slide-lightbox-caption" class="hidden border-t border-rule bg-card px-3 py-2 text-center font-serif text-sm leading-relaxed text-ink-muted"></p>
         </div>
         <button
           id="slide-lightbox-next"
@@ -418,6 +419,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       title: string;
       subtitle: string;
       images: string[];
+      captions?: string[];
       imageCount: number;
       notes?: string[];
     };
@@ -429,6 +431,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     const slideLightboxTitle = document.getElementById('slide-lightbox-title')!;
     const slideLightboxCount = document.getElementById('slide-lightbox-count')!;
     const slideLightboxImage = document.getElementById('slide-lightbox-image') as HTMLImageElement;
+    const slideLightboxCaption = document.getElementById('slide-lightbox-caption')!;
     const slideLightboxPrev = document.getElementById('slide-lightbox-prev') as HTMLButtonElement;
     const slideLightboxNext = document.getElementById('slide-lightbox-next') as HTMLButtonElement;
     const closeLightboxButtons = document.querySelectorAll('[data-lightbox-close]');
@@ -443,12 +446,12 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
 
     // Flattens every slide's images into one ordered list so the lightbox can page
     // continuously through the whole 60-year presentation, not just one slide's photos.
-    const flatImages: { slideIndex: number; src: string }[] = [];
+    const flatImages: { imageIndex: number; slideIndex: number; src: string }[] = [];
     const slideImageOffsets: number[] = [];
     retrospectiveSlides.forEach((slide, slideIndex) => {
       slideImageOffsets[slideIndex] = flatImages.length;
-      slide.images.slice(0, 6).forEach((src) => {
-        flatImages.push({ slideIndex, src });
+      slide.images.slice(0, 6).forEach((src, imageIndex) => {
+        flatImages.push({ imageIndex, slideIndex, src });
       });
     });
 
@@ -498,6 +501,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       }
 
       const visibleImages = slide.images.slice(0, 6);
+      const captions = slide.captions || [];
       const gridClass = visibleImages.length === 1
         ? 'grid-cols-1'
         : visibleImages.length === 2
@@ -505,16 +509,19 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
           : 'grid-cols-2 sm:grid-cols-3';
 
       const imageGrid = `
-        <div class="aspect-video grid ${gridClass} gap-3">
+        <div class="grid ${gridClass} gap-3">
           ${visibleImages.map((src, index) => `
-            <button
-              type="button"
-              class="min-h-0 border border-rule bg-parchment-dark p-1 transition-colors hover:border-stamp focus:outline-none focus:ring-2 focus:ring-stamp ${visibleImages.length === 3 && index === 0 ? 'sm:row-span-2' : ''}"
-              data-lightbox-image-index="${index}"
-              aria-label="Open image ${index + 1} from slide ${slide.number}"
-            >
-              <img src="${src}" alt="" class="h-full w-full ${visibleImages.length === 1 ? 'object-contain' : 'object-cover'}" loading="lazy" />
-            </button>
+            <figure class="min-h-0 ${visibleImages.length === 3 && index === 0 ? 'sm:row-span-2' : ''}">
+              <button
+                type="button"
+                class="block w-full border border-rule bg-parchment-dark p-1 transition-colors hover:border-stamp focus:outline-none focus:ring-2 focus:ring-stamp"
+                data-lightbox-image-index="${index}"
+                aria-label="Open image ${index + 1} from slide ${slide.number}"
+              >
+                <img src="${src}" alt="${escapeHtml(captions[index] || slide.title)}" class="max-h-[540px] w-full object-contain" loading="lazy" />
+              </button>
+              ${captions[index] ? `<figcaption class="mt-2 border-l border-rule pl-3 font-serif text-sm leading-relaxed text-ink-muted">${escapeHtml(captions[index])}</figcaption>` : ''}
+            </figure>
           `).join('')}
         </div>
       `;
@@ -534,8 +541,8 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       activeSlideIndex = (index + retrospectiveSlides.length) % retrospectiveSlides.length;
       const slide = retrospectiveSlides[activeSlideIndex];
       slideTitle.textContent = slide.title;
-      if (slide.notes && slide.notes.length > 0) {
-        slideSubtitle.textContent = 'Original slide wording preserved below.';
+      if (slide.subtitle) {
+        slideSubtitle.textContent = slide.subtitle;
         slideSubtitle.classList.remove('hidden');
       } else {
         slideSubtitle.textContent = '';
@@ -554,13 +561,16 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     function updateLightboxImage() {
       if (flatImages.length === 0) return;
       activeFlatIndex = (activeFlatIndex + flatImages.length) % flatImages.length;
-      const { slideIndex, src } = flatImages[activeFlatIndex];
+      const { imageIndex, slideIndex, src } = flatImages[activeFlatIndex];
       const slide = retrospectiveSlides[slideIndex];
+      const caption = slide.captions?.[imageIndex] || '';
 
       slideLightboxTitle.textContent = slide.title;
       slideLightboxCount.textContent = `Slide ${slide.number} of ${retrospectiveSlides.length}`;
       slideLightboxImage.src = src;
-      slideLightboxImage.alt = slide.title;
+      slideLightboxImage.alt = caption || slide.title;
+      slideLightboxCaption.textContent = caption;
+      slideLightboxCaption.classList.toggle('hidden', !caption);
 
       if (slideIndex !== activeSlideIndex) renderSlide(slideIndex);
     }

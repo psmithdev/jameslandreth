@@ -6,6 +6,9 @@
     "images": [
       "/images/newspaper/jim-aleda-canada-mountain.jpg"
     ],
+    "captions": [
+      "Aleda and Jim: 60 years married, the early years."
+    ],
     "imageCount": 1
   },
   {
@@ -18,6 +21,12 @@
       "/images/retrospective-60/slide-02-image-3.jpg",
       "/images/retrospective-60/slide-02-image-4.png"
     ],
+    "captions": [
+      "Aleda: McDowell High, Millcreek, PA.",
+      "High school graduation portraits.",
+      "Jim: LaSalle High, Wynwood, PA.",
+      "Pennsylvania: State College and Philadelphia."
+    ],
     "imageCount": 4
   },
   {
@@ -28,6 +37,11 @@
       "/images/retrospective-60/slide-03-image-1.jpg",
       "/images/retrospective-60/slide-03-image-2.jpg",
       "/images/retrospective-60/slide-03-image-3.jpg"
+    ],
+    "captions": [
+      "College years at Pennsylvania State University.",
+      "Pennsylvania State University.",
+      "College years, 1962-1966."
     ],
     "imageCount": 3
   },
@@ -41,6 +55,12 @@
       "/images/retrospective-60/slide-04-image-3.jpg",
       "/images/retrospective-60/slide-04-image-4.jpg"
     ],
+    "captions": [
+      "Fred K. and Beal T.",
+      "Aleda and her '59 Ford convertible at State College.",
+      "Aleda and Jean Hlinsky.",
+      "The happy couple."
+    ],
     "imageCount": 4
   },
   {
@@ -52,6 +72,11 @@
       "/images/retrospective-60/slide-05-image-2.jpg",
       "/images/retrospective-60/slide-05-image-3.jpg"
     ],
+    "captions": [
+      "Penn State yearbook: La Vie. Aleda and Jim are one person apart.",
+      "Aleda's graduation portrait.",
+      "PSU graduation."
+    ],
     "imageCount": 3
   },
   {
@@ -62,6 +87,11 @@
       "/images/retrospective-60/slide-06-image-1.jpg",
       "/images/retrospective-60/slide-06-image-2.jpg",
       "/images/retrospective-60/slide-06-image-3.jpg"
+    ],
+    "captions": [
+      "June 11, 1966.",
+      "Eisenhower Chapel, Penn State University, State College, PA.",
+      "The Main Event."
     ],
     "imageCount": 3
   },
@@ -87,6 +117,11 @@
       "/images/retrospective-60/slide-08-image-2.jpg",
       "/images/retrospective-60/slide-08-image-3.jpg"
     ],
+    "captions": [
+      "Grading book for Jim at Upper Dublin HS.",
+      "Jim teaches Chemistry at Father Judge H.S., Philadelphia, PA.",
+      "Jim teaches at Upper Dublin H.S., Fort Washington, PA."
+    ],
     "imageCount": 3,
     "notes": [
       "1966 - 67 Aleda teaches Levittown schools",
@@ -106,6 +141,10 @@
     "images": [
       "/images/retrospective-60/slide-09-image-1.jpg",
       "/images/retrospective-60/slide-09-image-2.jpg"
+    ],
+    "captions": [
+      "1 Oakdene Ave., Kingston, Jamaica.",
+      "Kingston, Jamaica."
     ],
     "imageCount": 2
   },
@@ -138,6 +177,10 @@
       "/images/retrospective-60/slide-12-image-1.jpg",
       "/images/retrospective-60/slide-12-image-2.jpg"
     ],
+    "captions": [
+      "Aleda teaching Psychology and Methods at The Mico.",
+      "Jim teaching general science at The Mico."
+    ],
     "imageCount": 2
   },
   {
@@ -148,6 +191,10 @@
       "/images/retrospective-60/slide-13-image-1.jpg",
       "/images/retrospective-60/slide-13-image-2.jpg"
     ],
+    "captions": [
+      "Four girls on a wall, Kingston.",
+      "School party at Alpha Academy, Kingston."
+    ],
     "imageCount": 2
   },
   {
@@ -157,6 +204,10 @@
     "images": [
       "/images/retrospective-60/slide-14-image-1.jpg",
       "/images/retrospective-60/slide-14-image-2.jpg"
+    ],
+    "captions": [
+      "Jim, Smokey, Castro.",
+      "Aleda saying \"good-by\" to Castro."
     ],
     "imageCount": 2
   },
@@ -189,6 +240,11 @@
       "/images/retrospective-60/slide-17-image-1.jpg",
       "/images/retrospective-60/slide-17-image-2.jpg",
       "/images/retrospective-60/slide-17-image-3.jpg"
+    ],
+    "captions": [
+      "Machu Picchu.",
+      "Machu Picchu.",
+      "Machu Picchu."
     ],
     "imageCount": 3
   },
@@ -236,6 +292,12 @@
       "/images/retrospective-60/slide-20-image-3.jpg",
       "/images/retrospective-60/slide-20-image-4.jpg"
     ],
+    "captions": [
+      "Jim probably napping.",
+      "Anatomy class.",
+      "Leon Malmud, M.D. and friend.",
+      "Lecture hall."
+    ],
     "imageCount": 4
   },
   {
@@ -244,6 +306,9 @@
     "subtitle": "Jim\u2019s page in \u201cSkull\u201d yearbook. Note: Jim was editor of the \u201cSkull\u201d yearbook Jim at confirmation 1955, St. Leonard\u2019s Academy Jim climbin \u2019 the neig...",
     "images": [
       "/images/retrospective-60/slide-21-image-1.jpg"
+    ],
+    "captions": [
+      "Jim's page in \"Skull\" yearbook, with notes preserved beside the image."
     ],
     "imageCount": 1,
     "notes": [
@@ -286,6 +351,11 @@
       "/images/retrospective-60/slide-23-image-2.jpg",
       "/images/retrospective-60/slide-23-image-3.jpg"
     ],
+    "captions": [
+      "Abington.",
+      "Bringing Leanne home.",
+      "Leanne."
+    ],
     "imageCount": 3
   },
   {
@@ -296,6 +366,11 @@
       "/images/retrospective-60/slide-24-image-1.jpg",
       "/images/retrospective-60/slide-24-image-2.jpg",
       "/images/retrospective-60/slide-24-image-3.jpg"
+    ],
+    "captions": [
+      "\"Hmmm. Heme positive.\"",
+      "Albert Einstein Medical College, Philadelphia, PA.",
+      "AEMC: origin of the ER story."
     ],
     "imageCount": 3,
     "notes": [
@@ -324,6 +399,11 @@
       "/images/retrospective-60/slide-26-image-2.jpg",
       "/images/retrospective-60/slide-26-image-3.jpg"
     ],
+    "captions": [
+      "Off to Seattle.",
+      "If you can see Mt. Rainier, it's going to rain.",
+      "If you can't see Mt. Rainier, it's raining."
+    ],
     "imageCount": 3,
     "notes": [
       "Old Indian wisdom: If you can see Mt. Rainier, it is going to rain. If you cannot see it, it is raining."
@@ -339,6 +419,12 @@
       "/images/retrospective-60/slide-27-image-3.jpg",
       "/images/retrospective-60/slide-27-image-4.jpg"
     ],
+    "captions": [
+      "Nuclear Medicine Fellowship.",
+      "Seattle, NE 90th Street, Wedgewood.",
+      "Seattle, NE 90th Street, Wedgewood.",
+      "Seattle, NE 90th Street, Wedgewood."
+    ],
     "imageCount": 4
   },
   {
@@ -351,6 +437,12 @@
       "/images/retrospective-60/slide-28-image-3.jpg",
       "/images/retrospective-60/slide-28-image-4.png"
     ],
+    "captions": [
+      "Nuclear Medicine Fellowship at U.W.",
+      "Thomas G. Rudd, M.D.",
+      "Nuclear Medicine Fellowship at U.W.",
+      "University of Washington, Seattle, WA."
+    ],
     "imageCount": 4
   },
   {
@@ -361,6 +453,11 @@
       "/images/retrospective-60/slide-29-image-1.jpg",
       "/images/retrospective-60/slide-29-image-2.jpg",
       "/images/retrospective-60/slide-29-image-3.jpg"
+    ],
+    "captions": [
+      "New Kid on the Block: Mark Landreth.",
+      "New Kid on the Block: Mark Landreth.",
+      "New Kid on the Block: Mark Landreth."
     ],
     "imageCount": 3
   },
@@ -373,6 +470,11 @@
       "/images/retrospective-60/slide-30-image-2.jpg",
       "/images/retrospective-60/slide-30-image-3.jpg"
     ],
+    "captions": [
+      "On to Puyallup (Edgewood).",
+      "On to Puyallup (Edgewood).",
+      "On to Puyallup (Edgewood)."
+    ],
     "imageCount": 3
   },
   {
@@ -381,6 +483,9 @@
     "subtitle": "",
     "images": [
       "/images/retrospective-60/slide-31-image-1.jpg"
+    ],
+    "captions": [
+      "The View (Edgewood)."
     ],
     "imageCount": 1
   },
@@ -393,6 +498,11 @@
       "/images/retrospective-60/slide-32-image-2.jpg",
       "/images/retrospective-60/slide-32-image-3.jpg"
     ],
+    "captions": [
+      "Puyallup (Edgewood).",
+      "Puyallup (Edgewood).",
+      "Puyallup (Edgewood)."
+    ],
     "imageCount": 3
   },
   {
@@ -402,6 +512,10 @@
     "images": [
       "/images/retrospective-60/slide-33-image-1.jpg",
       "/images/retrospective-60/slide-33-image-2.jpg"
+    ],
+    "captions": [
+      "Finally made it to the cover of the Ladue News.",
+      "<- Das ist alles."
     ],
     "imageCount": 2,
     "notes": [
