@@ -541,7 +541,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       activeSlideIndex = (index + retrospectiveSlides.length) % retrospectiveSlides.length;
       const slide = retrospectiveSlides[activeSlideIndex];
       slideTitle.textContent = slide.title;
-      if (slide.subtitle) {
+      if (slide.subtitle && (!slide.captions || slide.captions.length === 0)) {
         slideSubtitle.textContent = slide.subtitle;
         slideSubtitle.classList.remove('hidden');
       } else {
