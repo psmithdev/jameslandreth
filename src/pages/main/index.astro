@@ -103,39 +103,31 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         </article>
       </div>
 
-      <section class="mt-6 grid gap-5 border border-rule bg-parchment p-4 sm:p-6 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)] lg:items-center">
-        <figure class="relative aspect-[2298/896] overflow-hidden bg-card shadow-[0_18px_50px_rgba(28,35,64,0.14)] outline outline-1 outline-[rgba(0,0,0,0.1)]">
-          <img
-            src={anniversaryBook.cover}
-            alt=""
-            class="absolute inset-0 hidden h-full w-full object-contain"
-            data-anniversary-book-cover
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(28,35,64,0.25),transparent_10%),radial-gradient(circle_at_42%_32%,rgba(244,239,228,0.38),transparent_36%),linear-gradient(135deg,#b7d28b,#93c9c6_55%,#d5dfaf)]" data-anniversary-book-fallback></div>
-          <div class="absolute inset-0 grid place-items-center p-8 text-center" data-anniversary-book-fallback>
-            <div class="relative">
-              <div class="absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rotate-[-12deg] rounded-full border-[28px] border-available/15"></div>
-              <p class="relative bg-[#d3e2aa]/75 px-5 py-4 font-display text-3xl uppercase leading-tight text-[#24483a] sm:text-4xl">
-                Landreth<br />Family<br />Album
-              </p>
-            </div>
+      <section class="mt-6 border border-rule bg-parchment px-5 py-4 sm:px-6">
+        <div class="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-center">
+          <figure class="relative bg-card p-3 shadow-[0_14px_42px_rgba(28,35,64,0.12)] outline outline-1 outline-[rgba(0,0,0,0.1)]">
+            <img
+              src={anniversaryBook.cover}
+              alt="Cover spread of the Landreth Family Album"
+              class="block aspect-[2298/896] h-auto w-full object-contain outline outline-1 outline-[rgba(0,0,0,0.1)]"
+              data-anniversary-book-cover
+              loading="lazy"
+            />
+          </figure>
+          <div class="py-1">
+            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Commemorative Book</p>
+            <h3 class="font-display text-2xl sm:text-3xl text-ink leading-tight mb-4">{anniversaryBook.title}</h3>
+            <p class="font-serif text-ink-muted leading-relaxed mb-6">
+              A finished {anniversaryBook.pageCount}-page family album, captured from the printed-book
+              layout and rebuilt here as a readable online book.
+            </p>
+            <a
+              href="/anniversary-book"
+              class="inline-flex border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
+            >
+              Open Book Reader
+            </a>
           </div>
-        </figure>
-        <div class="py-2">
-          <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Commemorative Book</p>
-          <h3 class="font-display text-3xl sm:text-4xl text-ink leading-tight mb-4">{anniversaryBook.title}</h3>
-          <p class="font-serif text-ink-muted leading-relaxed mb-6">
-            The finished Snapfish-style family album belongs beside the anniversary newspaper and
-            retrospective slideshow as a browsable book object: {anniversaryBook.pageCount} pages,
-            captured as full spreads for reading on the site.
-          </p>
-          <a
-            href="/anniversary-book"
-            class="inline-flex border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
-          >
-            Open Book Reader
-          </a>
         </div>
       </section>
 
@@ -664,13 +656,6 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
     });
 
     renderSlide(0);
-
-    const anniversaryBookCover = document.querySelector('[data-anniversary-book-cover]') as HTMLImageElement | null;
-    const anniversaryBookFallback = document.querySelectorAll('[data-anniversary-book-fallback]');
-    anniversaryBookCover?.addEventListener('load', () => {
-      anniversaryBookCover.classList.remove('hidden');
-      anniversaryBookFallback.forEach((element) => element.classList.add('hidden'));
-    });
 
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
     const categorySelect = document.getElementById('filter-category') as HTMLSelectElement;
