@@ -13,7 +13,7 @@ const firstSpread = anniversaryBookSpreads[0];
         <h1 class="font-display text-5xl md:text-6xl text-ink leading-tight mt-4">{anniversaryBook.title}</h1>
         <p class="font-serif text-xl text-ink-muted leading-relaxed mt-5 max-w-2xl">
           {anniversaryBook.subtitle} Browse the captured spreads here, or print this page to save
-          a family PDF once the final images are in place.
+          a family PDF.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href="#book-reader" class="book-button book-button-primary">Read the Book</a>
@@ -29,19 +29,6 @@ const firstSpread = anniversaryBookSpreads[0];
         </div>
       </figure>
     </header>
-
-    <section class="book-capture-note" aria-labelledby="capture-title">
-      <div>
-        <p class="font-mono text-[12px] tracking-[0.2em] uppercase text-rule mb-2">Snapfish Capture Workflow</p>
-        <h2 id="capture-title" class="font-display text-3xl text-ink leading-tight">How to get the book out of Snapfish</h2>
-      </div>
-      <ol class="book-steps">
-        <li>Open the builder, switch to <strong>Spreads</strong>, and use each spread&rsquo;s <strong>Large view</strong>.</li>
-        <li>Capture the cover and each spread as high-resolution screenshots.</li>
-        <li>Name them <code>cover.jpg</code>, then <code>spread-01.jpg</code> through <code>spread-24.jpg</code>.</li>
-        <li>Place them in <code>public/images/anniversary-book/</code> and <code>public/images/anniversary-book/spreads/</code>.</li>
-      </ol>
-    </section>
 
     <section id="book-reader" class="book-reader" aria-labelledby="reader-title">
       <div class="book-reader-header">
@@ -282,29 +269,12 @@ const firstSpread = anniversaryBookSpreads[0];
     color: var(--color-card);
   }
 
-  .book-capture-note,
   .book-reader {
     max-width: 72rem;
     margin: 0 auto;
     padding: 2rem 1.5rem;
   }
 
-  .book-capture-note {
-    display: grid;
-    gap: 1.5rem;
-    border-block: 1px solid var(--color-rule);
-    background: var(--color-card);
-  }
-
-  .book-steps {
-    display: grid;
-    gap: 0.85rem;
-    padding-left: 1.25rem;
-    color: var(--color-ink-muted);
-    line-height: 1.65;
-  }
-
-  .book-steps code,
   .spread-placeholder code {
     font-family: var(--font-mono);
     font-size: 0.78rem;
@@ -427,11 +397,6 @@ const firstSpread = anniversaryBookSpreads[0];
       padding-top: 5rem;
     }
 
-    .book-capture-note {
-      grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
-      padding: 2rem;
-    }
-
     .book-reader-header {
       flex-direction: row;
       align-items: end;
@@ -448,7 +413,6 @@ const firstSpread = anniversaryBookSpreads[0];
     header,
     footer,
     .book-hero,
-    .book-capture-note,
     .book-reader-header,
     .book-stage-wrap,
     .spread-nav,
