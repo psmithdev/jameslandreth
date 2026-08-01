@@ -12,12 +12,12 @@ const firstSpread = anniversaryBookSpreads[0];
         <p class="font-mono text-[12px] tracking-[0.26em] uppercase text-stamp">Commemorative Book</p>
         <h1 class="font-display text-5xl md:text-6xl text-ink leading-tight mt-4">{anniversaryBook.title}</h1>
         <p class="font-serif text-xl text-ink-muted leading-relaxed mt-5 max-w-2xl">
-          {anniversaryBook.subtitle} Browse the captured spreads here, or print this page to save
-          a family PDF.
+          {anniversaryBook.subtitle} Browse the captured spreads here, or save the readable
+          family PDF.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href="#book-reader" class="book-button book-button-primary">Read the Book</a>
-          <button id="print-book" type="button" class="book-button">Save as PDF</button>
+          <a href={anniversaryBook.pdf} class="book-button" download>Save as PDF</a>
         </div>
       </div>
 
@@ -83,7 +83,6 @@ const firstSpread = anniversaryBookSpreads[0];
       </div>
 
       <div class="print-spreads" aria-hidden="true">
-        <img src={anniversaryBook.cover} alt="" />
         {anniversaryBookSpreads.map((spread) => (
           <img src={spread.src} alt="" />
         ))}
@@ -188,7 +187,6 @@ const firstSpread = anniversaryBookSpreads[0];
 
     document.getElementById('spread-prev')?.addEventListener('click', showPrevious);
     document.getElementById('spread-next')?.addEventListener('click', showNext);
-    document.getElementById('print-book')?.addEventListener('click', () => window.print());
     document.querySelectorAll<HTMLElement>('.spread-thumb').forEach((thumb) => {
       thumb.addEventListener('click', () => renderSpread(Number(thumb.dataset.spreadIndex || '0')));
     });
@@ -529,6 +527,11 @@ const firstSpread = anniversaryBookSpreads[0];
   }
 
   @media print {
+    @page {
+      size: landscape;
+      margin: 0.25in;
+    }
+
     header,
     footer,
     .book-hero,
@@ -542,6 +545,7 @@ const firstSpread = anniversaryBookSpreads[0];
 
     body {
       background: white !important;
+      margin: 0 !important;
     }
 
     .book-reader {
@@ -563,10 +567,12 @@ const firstSpread = anniversaryBookSpreads[0];
 
     .print-spreads img {
       display: block;
-      width: 100%;
-      height: auto;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
       outline: 0;
       page-break-after: always;
+      break-after: page;
     }
   }
 </style>
