@@ -44,10 +44,37 @@ if (downloadPath) {
 // Supabase serves stored HTML as text/plain, so an <iframe src> shows raw
 // source. Instead we download the file server-side, strip its TextEdit/Word
 // inline styling, and render the semantic markup as themed prose.
-function extractProse(html: string): string {
+function normalizeText(value: string): string {
+  return value
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function cleanExcerpt(value: string | null, title: string): string {
+  if (!value) return '';
+  const escapedTitle = title
+    .trim()
+    .split(/\s+/)
+    .map((word: string) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('\\s+');
+  return value
+    .trim()
+    .replace(new RegExp(`^${escapedTitle}\\s*[:—–-]?\\s*`, 'i'), '')
+    .replace(/^INTRO\b\s*[:—–-]?\s*/i, '')
+    .trim();
+}
+
+function extractProse(html: string, title: string): string {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   let inner = bodyMatch ? bodyMatch[1] : html;
-  return inner
+  inner = inner
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<meta[^>]*>/gi, '')
@@ -55,15 +82,30 @@ function extractProse(html: string): string {
     .replace(/\sclass="[^"]*"/gi, '')
     .replace(/\sstyle="[^"]*"/gi, '')
     .trim();
+
+  // Word documents often repeat their title as the first paragraph. The page
+  // already provides a proper article masthead, so remove exact repetitions.
+  const firstBlock = inner.match(/^\s*<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>/i);
+  if (firstBlock && normalizeText(firstBlock[2]) === normalizeText(title)) {
+    inner = inner.slice(firstBlock[0].length).trim();
+  }
+
+  return inner;
 }
 
 let proseHtml = '';
 if (isHtml && hasFile) {
   const { data: blob } = await supabase.storage.from('documents').download(doc.file_path);
   if (blob) {
-    proseHtml = extractProse(await blob.text());
+    proseHtml = extractProse(await blob.text(), doc.title);
   }
 }
+
+const proseText = proseHtml.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+const wordCount = proseText ? proseText.split(' ').length : 0;
+const readingMinutes = Math.max(1, Math.ceil(wordCount / 225));
+const isEssayReader = isHtml && Boolean(proseHtml);
+const displayExcerpt = cleanExcerpt(doc.excerpt, doc.title);
 
 // Slideshows store a JSON manifest (list of slide image URLs) at file_path.
 // We fetch it server-side and render a themed image gallery.
@@ -82,157 +124,125 @@ if (isSlideshow && hasFile) {
 ---
 
 <MainLayout title={`${doc.title} - Dr. James Landreth`}>
-  <div class="max-w-6xl mx-auto px-6 py-10">
-    <!-- Top bar -->
-    <div class="flex items-center justify-between mb-8">
+  <div class:list={["mx-auto px-6 py-10 sm:py-12", isEssayReader ? "max-w-5xl" : "max-w-6xl"]}>
+    <div class:list={["flex items-center justify-between", isEssayReader ? "mb-10" : "mb-8"]}>
       <a
-        href="/"
-        class="inline-flex items-center gap-2 border border-rule px-4 py-2 font-mono text-[13px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+        href={isEssayReader ? '/essays' : '/'}
+        class="inline-flex min-h-11 items-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        Back to Archive
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        {isEssayReader ? 'All Essays' : 'Back to Archive'}
       </a>
       {hasDownload && (
         <a
           href={downloadUrl}
           download
-          class="inline-flex items-center gap-2 border border-rule px-4 py-2 font-mono text-[13px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp hover:text-stamp"
+          class="inline-flex min-h-11 items-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Download
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4-4 4m0 0-4-4m4 4V4" /></svg>
+          Download {isEssayReader ? downloadType : ''}
         </a>
       )}
     </div>
 
-    <!-- Main layout: sidebar + viewer -->
-    <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
-      <!-- Document Info Sidebar -->
-      <aside class="bg-card border border-rule p-7 h-fit lg:sticky lg:top-28">
-        <div class="mb-6">
-          <p class="font-mono text-[12px] tracking-[0.14em] uppercase text-stamp mb-3">{doc.category}</p>
-          <h1 class="font-display text-2xl text-ink leading-snug">{doc.title}</h1>
+    {isEssayReader && (
+      <header class="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
+        <p class="mb-4 font-mono text-[11px] tracking-[0.2em] uppercase text-stamp">{doc.category} · The Reading Room</p>
+        <h1 class="text-balance font-display text-4xl leading-tight text-ink sm:text-5xl">{doc.title}</h1>
+        {displayExcerpt && <p class="mx-auto mt-5 line-clamp-4 max-w-2xl text-pretty font-serif text-lg leading-relaxed text-ink-muted sm:line-clamp-none">{displayExcerpt}</p>}
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-mono text-[11px] tracking-[0.12em] uppercase text-rule">
+          {doc.date && <span>{doc.date}</span>}
+          {doc.date && <span aria-hidden="true">·</span>}
+          <span>{readingMinutes} min read</span>
+          {doc.pages && <span aria-hidden="true">·</span>}
+          {doc.pages && <span>{doc.pages}</span>}
         </div>
-
-        <div class="flex flex-col gap-3 mb-5 pb-5 border-b border-rule">
-          {doc.date && (
-            <div class="flex justify-between items-baseline text-sm gap-4">
-              <span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Date</span>
-              <span class="font-serif text-ink-muted text-right">{doc.date}</span>
-            </div>
-          )}
-          {doc.location && (
-            <div class="flex justify-between items-baseline text-sm gap-4">
-              <span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Location</span>
-              <span class="font-serif text-ink-muted text-right">{doc.location}</span>
-            </div>
-          )}
-          {doc.pages && (
-            <div class="flex justify-between items-baseline text-sm gap-4">
-              <span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Length</span>
-              <span class="font-serif text-ink-muted text-right">{doc.pages}</span>
-            </div>
-          )}
-          <div class="flex justify-between items-baseline text-sm gap-4">
-            <span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Format</span>
-            <span class="font-serif text-ink-muted text-right">{doc.file_type}</span>
-          </div>
-        </div>
-
-        {doc.excerpt && (
-          <p class="font-serif text-base text-ink-muted leading-relaxed mb-5">{doc.excerpt}</p>
-        )}
-
         {doc.tags && doc.tags.length > 0 && (
-          <div class="flex flex-wrap gap-1.5">
-            {doc.tags.map((tag: string) => (
-              <span class="font-mono text-[11px] tracking-[0.1em] uppercase border border-rule text-rule px-1.5 py-0.5">{tag}</span>
-            ))}
+          <div class="mt-5 flex flex-wrap justify-center gap-2">
+            {doc.tags.map((tag: string) => <span class="border border-rule px-2 py-1 font-mono text-[10px] tracking-[0.11em] uppercase text-rule">{tag}</span>)}
           </div>
         )}
-      </aside>
+      </header>
+    )}
 
-      <!-- Document Viewer -->
-      <div class="bg-card border border-rule overflow-hidden min-h-[calc(100vh-220px)] flex flex-col">
-        <!-- Toolbar -->
-        <div class="bg-parchment-dark border-b border-rule px-5 py-3 flex items-center justify-between">
+    <div class:list={[isEssayReader ? "block" : "grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]"]}>
+      {!isEssayReader && (
+        <aside class="h-fit border border-rule bg-card p-7 lg:sticky lg:top-28">
+          <div class="mb-6">
+            <p class="mb-3 font-mono text-[12px] tracking-[0.14em] uppercase text-stamp">{doc.category}</p>
+            <h1 class="text-balance font-display text-2xl leading-snug text-ink">{doc.title}</h1>
+          </div>
+          <div class="mb-5 flex flex-col gap-3 border-b border-rule pb-5">
+            {doc.date && <div class="flex items-baseline justify-between gap-4 text-sm"><span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Date</span><span class="text-right font-serif text-ink-muted">{doc.date}</span></div>}
+            {doc.location && <div class="flex items-baseline justify-between gap-4 text-sm"><span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Location</span><span class="text-right font-serif text-ink-muted">{doc.location}</span></div>}
+            {doc.pages && <div class="flex items-baseline justify-between gap-4 text-sm"><span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Length</span><span class="text-right font-serif text-ink-muted">{doc.pages}</span></div>}
+            <div class="flex items-baseline justify-between gap-4 text-sm"><span class="font-mono text-[12px] tracking-[0.1em] uppercase text-rule">Format</span><span class="text-right font-serif text-ink-muted">{doc.file_type}</span></div>
+          </div>
+          {doc.excerpt && <p class="mb-5 text-pretty font-serif text-base leading-relaxed text-ink-muted">{doc.excerpt}</p>}
+          {doc.tags && doc.tags.length > 0 && <div class="flex flex-wrap gap-1.5">{doc.tags.map((tag: string) => <span class="border border-rule px-1.5 py-0.5 font-mono text-[11px] tracking-[0.1em] uppercase text-rule">{tag}</span>)}</div>}
+        </aside>
+      )}
+
+      <div class:list={[
+        "flex flex-col overflow-hidden bg-card",
+        isEssayReader
+          ? "essay-shell shadow-[0_0_0_1px_rgba(28,35,64,0.06),0_1px_2px_-1px_rgba(28,35,64,0.08),0_18px_55px_rgba(28,35,64,0.07)]"
+          : "min-h-[calc(100vh-220px)] border border-rule"
+      ]}>
+        <div class:list={[
+          "relative flex items-center justify-between gap-4 border-b border-rule px-4 py-3 sm:px-5",
+          isEssayReader ? "essay-toolbar sticky top-0 z-20 bg-parchment-dark/95 backdrop-blur" : "bg-parchment-dark"
+        ]}>
           {(isSlideshow && slides.length) ? (
-            <span class="font-mono text-[12px] tracking-[0.14em] uppercase text-ink-muted">
-              Slide <span id="slide-counter">1</span> of {slides.length}
-            </span>
-          ) : (isHtml && proseHtml) ? (
-            <div class="flex items-center gap-2">
-              <button id="zoom-out" class="w-8 h-8 border border-rule bg-card font-mono text-ink transition-colors hover:border-stamp hover:text-stamp" aria-label="Decrease text size">A-</button>
-              <span id="zoom-level" class="font-mono text-[12px] tracking-[0.1em] uppercase text-ink-muted min-w-[3.5rem] text-center">100%</span>
-              <button id="zoom-in" class="w-8 h-8 border border-rule bg-card font-mono text-ink transition-colors hover:border-stamp hover:text-stamp" aria-label="Increase text size">A+</button>
-              <button id="zoom-fit" class="ml-1 px-3 h-8 border border-rule bg-card font-mono text-[12px] tracking-[0.1em] uppercase text-ink-muted transition-colors hover:border-stamp hover:text-stamp">Reset</button>
-            </div>
+            <span class="font-mono text-[12px] tracking-[0.14em] uppercase text-ink-muted">Slide <span id="slide-counter" class="tabular-nums">1</span> of {slides.length}</span>
+          ) : isEssayReader ? (
+            <span class="font-mono text-[11px] tracking-[0.15em] uppercase text-ink-muted"><span id="reading-progress-label" class="tabular-nums">0%</span> read</span>
           ) : (
             <span class="font-mono text-[12px] tracking-[0.14em] uppercase text-rule">Document Preview</span>
           )}
-          <div class="font-mono text-[12px] tracking-[0.14em] uppercase text-rule">
-            {doc.file_type} Document
-          </div>
+          {isEssayReader ? (
+            <div class="flex items-center gap-1.5">
+              <span class="mr-1 hidden font-mono text-[10px] tracking-[0.12em] uppercase text-rule sm:inline">Text size</span>
+              <button id="zoom-out" class="reader-control" aria-label="Decrease text size">A−</button>
+              <span id="zoom-level" class="min-w-[2.7rem] text-center font-mono text-[10px] tracking-[0.08em] text-ink-muted tabular-nums">100%</span>
+              <button id="zoom-in" class="reader-control" aria-label="Increase text size">A+</button>
+              <button id="zoom-fit" class="reader-reset">Reset</button>
+            </div>
+          ) : (
+            <div class="font-mono text-[12px] tracking-[0.14em] uppercase text-rule">{doc.file_type} Document</div>
+          )}
+          {isEssayReader && <div id="reading-progress" class="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-stamp"></div>}
         </div>
 
-        <!-- Body -->
-        <div class="flex-1 bg-parchment-dark/40">
+        <div class:list={["flex-1", isEssayReader ? "bg-card" : "bg-parchment-dark/40"]}>
           {(isSlideshow && slides.length) ? (
             <div id="slideshow" data-slides={JSON.stringify(slides)} class="flex h-full flex-col">
               <div class="relative flex flex-1 items-center justify-center bg-ink/90">
-                <img id="slide-image" src={slides[0]} alt={`${doc.title} — slide 1`} class="max-h-[72vh] w-full object-contain" />
-                <button id="slide-prev" aria-label="Previous slide" class="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-rule bg-parchment/90 font-mono text-2xl leading-none text-ink transition-colors hover:border-stamp hover:text-stamp">&lsaquo;</button>
-                <button id="slide-next" aria-label="Next slide" class="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-rule bg-parchment/90 font-mono text-2xl leading-none text-ink transition-colors hover:border-stamp hover:text-stamp">&rsaquo;</button>
+                <img id="slide-image" src={slides[0]} alt={`${doc.title} — slide 1`} class="max-h-[72vh] w-full object-contain outline outline-1 -outline-offset-1 outline-black/10" />
+                <button id="slide-prev" aria-label="Previous slide" class="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-rule bg-parchment/90 font-mono text-2xl leading-none text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">&lsaquo;</button>
+                <button id="slide-next" aria-label="Next slide" class="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-rule bg-parchment/90 font-mono text-2xl leading-none text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">&rsaquo;</button>
               </div>
               <div id="slide-rail" class="flex gap-2 overflow-x-auto border-t border-rule bg-parchment-dark p-3">
-                {slides.map((src, i) => (
-                  <button class="slide-thumb shrink-0 border border-rule p-0.5 transition-colors hover:border-stamp" data-index={i} aria-label={`Go to slide ${i + 1}`}>
-                    <img src={src} loading="lazy" alt="" class="block h-14 w-auto" />
-                  </button>
-                ))}
+                {slides.map((src, i) => <button class="slide-thumb shrink-0 border border-rule p-0.5 transition-[border-color,scale] duration-150 hover:border-stamp active:scale-[0.96]" data-index={i} aria-label={`Go to slide ${i + 1}`}><img src={src} loading="lazy" alt="" class="block h-14 w-auto outline outline-1 -outline-offset-1 outline-black/10" /></button>)}
               </div>
             </div>
-          ) : (isHtml && proseHtml) ? (
-            <article id="doc-prose" class="doc-prose mx-auto max-w-[68ch] bg-card border-x border-rule px-8 py-12 sm:px-12" set:html={proseHtml} />
+          ) : isEssayReader ? (
+            <>
+              <article id="doc-prose" class="doc-prose mx-auto max-w-[70ch] px-7 py-12 sm:px-12 sm:py-16 lg:px-16 lg:py-20" set:html={proseHtml} />
+              <footer class="mx-auto mb-14 max-w-[70ch] px-7 text-center sm:px-12">
+                <div class="mx-auto mb-7 flex items-center justify-center gap-3" aria-hidden="true"><span class="h-px w-10 bg-rule"></span><span class="font-display text-stamp">◆</span><span class="h-px w-10 bg-rule"></span></div>
+                <p class="font-mono text-[10px] tracking-[0.16em] uppercase text-rule">End of essay</p>
+                <a href="/essays" class="mt-5 inline-flex min-h-11 items-center border border-rule px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">Return to all essays</a>
+              </footer>
+            </>
           ) : (hasFile && isImage) ? (
-            <div class="flex items-center justify-center bg-ink/90 p-4">
-              <img src={fileUrl} alt={doc.title} class="max-h-[80vh] w-full object-contain" />
-            </div>
+            <div class="flex items-center justify-center bg-ink/90 p-4"><img src={fileUrl} alt={doc.title} class="max-h-[80vh] w-full object-contain outline outline-1 -outline-offset-1 outline-black/10" /></div>
           ) : (hasFile && isPdf) ? (
-            <iframe
-              id="pdf-frame"
-              src={fileUrl}
-              class="w-full h-[80vh] border-0"
-              title={doc.title}
-            />
+            <iframe id="pdf-frame" src={fileUrl} class="h-[80vh] w-full border-0" title={doc.title} />
           ) : hasFile ? (
-            <div class="flex items-center justify-center min-h-[60vh] p-10">
-              <div class="text-center max-w-sm">
-                <p class="font-mono text-[12px] tracking-[0.16em] uppercase text-stamp mb-3">{doc.file_type} File</p>
-                <h3 class="font-display text-2xl text-ink mb-3">Available to Download</h3>
-                <p class="font-serif text-ink-muted leading-relaxed mb-6">
-                  This {doc.file_type} document can&rsquo;t be previewed in the browser. Download it to read the original.
-                </p>
-                <a
-                  href={downloadUrl}
-                  download
-                  class="inline-flex items-center gap-2 border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                  Download {downloadType}
-                </a>
-              </div>
-            </div>
+            <div class="flex min-h-[60vh] items-center justify-center p-10"><div class="max-w-sm text-center"><p class="mb-3 font-mono text-[12px] tracking-[0.16em] uppercase text-stamp">{doc.file_type} File</p><h3 class="mb-3 font-display text-2xl text-ink">Available to Download</h3><p class="mb-6 text-pretty font-serif leading-relaxed text-ink-muted">This {doc.file_type} document can&rsquo;t be previewed in the browser. Download it to read the original.</p><a href={downloadUrl} download class="inline-flex min-h-11 items-center gap-2 border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-[background-color,scale] duration-150 hover:bg-stamp-hover active:scale-[0.96]">Download {downloadType}</a></div></div>
           ) : (
-            <div class="flex items-center justify-center min-h-[60vh] p-10">
-              <div class="text-center max-w-md">
-                <p class="font-mono text-[12px] tracking-[0.16em] uppercase text-stamp mb-3">Not Yet Available</p>
-                <h3 class="font-display text-2xl text-ink mb-3">Document Coming Soon</h3>
-                <p class="font-serif text-ink-muted leading-relaxed">
-                  The file for this {doc.file_type} document hasn&rsquo;t been added to the archive yet.
-                  Please check back later.
-                </p>
-              </div>
-            </div>
+            <div class="flex min-h-[60vh] items-center justify-center p-10"><div class="max-w-md text-center"><p class="mb-3 font-mono text-[12px] tracking-[0.16em] uppercase text-stamp">Not Yet Available</p><h3 class="mb-3 font-display text-2xl text-ink">Document Coming Soon</h3><p class="text-pretty font-serif leading-relaxed text-ink-muted">The file for this {doc.file_type} document hasn&rsquo;t been added to the archive yet. Please check back later.</p></div></div>
           )}
         </div>
       </div>
@@ -240,23 +250,64 @@ if (isSlideshow && hasFile) {
   </div>
 
   <style>
+    .reader-control,
+    .reader-reset {
+      min-width: 40px;
+      min-height: 40px;
+      border: 1px solid var(--color-rule);
+      background: var(--color-card);
+      color: var(--color-ink);
+      font-family: var(--font-mono);
+      transition-property: color, border-color, scale;
+      transition-duration: 150ms;
+    }
+    .reader-control:hover,
+    .reader-reset:hover {
+      border-color: var(--color-stamp);
+      color: var(--color-stamp);
+    }
+    .reader-control:active,
+    .reader-reset:active {
+      scale: 0.96;
+    }
+    .reader-reset {
+      padding: 0 0.65rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
     .doc-prose {
       font-family: var(--font-serif);
       color: var(--color-ink);
-      font-size: var(--prose-size, 1.0625rem);
-      line-height: 1.75;
+      font-size: var(--prose-size, 1.125rem);
+      line-height: 1.85;
+      overflow-wrap: anywhere;
     }
     .doc-prose :global(p) {
-      margin: 0 0 1.1rem;
+      margin: 0 0 1.45em;
     }
     .doc-prose :global(p:empty),
     .doc-prose :global(p > br:only-child) {
       margin: 0;
     }
+    .doc-prose :global(h1),
+    .doc-prose :global(h2),
+    .doc-prose :global(h3),
+    .doc-prose :global(h4) {
+      margin: 2.25em 0 0.75em;
+      font-family: var(--font-display);
+      font-weight: 400;
+      line-height: 1.3;
+      text-wrap: balance;
+    }
+    .doc-prose :global(h1) { font-size: 1.8em; }
+    .doc-prose :global(h2) { font-size: 1.5em; }
+    .doc-prose :global(h3),
+    .doc-prose :global(h4) { font-size: 1.2em; }
     .doc-prose :global(b),
     .doc-prose :global(strong) {
       color: var(--color-ink);
-      font-weight: 600;
+      font-weight: 700;
     }
     .doc-prose :global(i),
     .doc-prose :global(em) {
@@ -268,19 +319,46 @@ if (isSlideshow && hasFile) {
     .doc-prose :global(a) {
       color: var(--color-stamp);
       text-decoration: underline;
-      text-underline-offset: 2px;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+    .doc-prose :global(ul),
+    .doc-prose :global(ol) {
+      margin: 0 0 1.5em 1.3em;
+    }
+    .doc-prose :global(li) {
+      margin-bottom: 0.5em;
+      padding-left: 0.35em;
+    }
+    .doc-prose :global(blockquote) {
+      margin: 2em 0;
+      border-left: 3px solid var(--color-stamp);
+      padding: 0.5em 0 0.5em 1.4em;
+      color: var(--color-ink-muted);
+      font-style: italic;
+    }
+    .doc-prose :global(hr) {
+      margin: 2.5em auto;
+      width: 4rem;
+      border: 0;
+      border-top: 1px solid var(--color-rule);
     }
     .doc-prose :global(img) {
       max-width: 100%;
       height: auto;
-      margin: 1.5rem auto;
+      margin: 2rem auto;
       display: block;
-      border: 1px solid var(--color-rule);
+      outline: 1px solid rgba(0, 0, 0, 0.1);
+      outline-offset: -1px;
+      box-shadow: 0 12px 34px rgba(28, 35, 64, 0.08);
     }
     .doc-prose :global(table) {
+      display: block;
       width: 100%;
+      overflow-x: auto;
       border-collapse: collapse;
-      margin: 1.5rem 0;
+      margin: 2rem 0;
+      font-size: 0.9em;
     }
     .doc-prose :global(td),
     .doc-prose :global(th) {
@@ -288,18 +366,53 @@ if (isSlideshow && hasFile) {
       padding: 0.5rem 0.75rem;
       text-align: left;
     }
+    @media (max-width: 640px) {
+      .essay-toolbar {
+        margin-inline: -1px;
+      }
+      .reader-reset {
+        display: none;
+      }
+      .doc-prose {
+        line-height: 1.78;
+      }
+    }
   </style>
 
   <script>
     // Text-size zoom for HTML prose (A-/A+/Reset).
     let zoomLevel = 100;
-    const baseRem = 1.0625;
+    try {
+      const savedZoom = Number(window.localStorage.getItem('essay-text-size'));
+      if (savedZoom >= 80 && savedZoom <= 160) zoomLevel = savedZoom;
+    } catch {
+      // Reading preferences are optional when storage is unavailable.
+    }
+    const baseRem = 1.125;
     const zoomDisplay = document.getElementById('zoom-level');
     const prose = document.getElementById('doc-prose');
+    const progressBar = document.getElementById('reading-progress');
+    const progressLabel = document.getElementById('reading-progress-label');
 
     function applyZoom() {
       if (zoomDisplay) zoomDisplay.textContent = `${zoomLevel}%`;
       if (prose) prose.style.setProperty('--prose-size', `${(baseRem * zoomLevel) / 100}rem`);
+      try {
+        window.localStorage.setItem('essay-text-size', String(zoomLevel));
+      } catch {
+        // Reading preferences are optional when storage is unavailable.
+      }
+      updateReadingProgress();
+    }
+
+    function updateReadingProgress() {
+      if (!prose || !progressBar || !progressLabel) return;
+      const start = prose.getBoundingClientRect().top + window.scrollY - 120;
+      const distance = Math.max(1, prose.offsetHeight - window.innerHeight * 0.55);
+      const progress = Math.min(1, Math.max(0, (window.scrollY - start) / distance));
+      const percentage = Math.round(progress * 100);
+      progressBar.style.transform = `scaleX(${progress})`;
+      progressLabel.textContent = `${percentage}%`;
     }
 
     document.getElementById('zoom-in')?.addEventListener('click', () => {
@@ -314,6 +427,18 @@ if (isSlideshow && hasFile) {
       zoomLevel = 100;
       applyZoom();
     });
+    applyZoom();
+
+    let progressFrame = 0;
+    const requestProgressUpdate = () => {
+      if (progressFrame) return;
+      progressFrame = window.requestAnimationFrame(() => {
+        updateReadingProgress();
+        progressFrame = 0;
+      });
+    };
+    window.addEventListener('scroll', requestProgressUpdate, { passive: true });
+    window.addEventListener('resize', requestProgressUpdate);
 
     // Slideshow gallery navigation.
     const slideshow = document.getElementById('slideshow');
@@ -348,7 +473,7 @@ if (isSlideshow && hasFile) {
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        window.location.href = '/';
+        window.location.href = prose ? '/essays' : '/';
       } else if (prose && (e.key === '+' || e.key === '=')) {
         e.preventDefault();
         zoomLevel = Math.min(180, zoomLevel + 10);

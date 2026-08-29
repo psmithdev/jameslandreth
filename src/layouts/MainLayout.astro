@@ -34,8 +34,9 @@ const admin = isAdmin(user);
         </a>
 
         <!-- Desktop nav -->
-        <nav class="hidden md:flex items-center gap-8 pb-0.5">
+        <nav class="hidden lg:flex items-center gap-7 pb-0.5">
           <a href="/" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Archive</a>
+          <a href="/essays" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Essays</a>
           <a href="/family-tree" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Family Tree</a>
           {/* <a href="/anniversary" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">60th Anniversary</a> */}
           <a href="https://artifacts.jameslandreth.com" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Family Treasures</a>
@@ -57,7 +58,7 @@ const admin = isAdmin(user);
         <button
           id="mobile-menu-toggle"
           type="button"
-          class="md:hidden inline-flex items-center justify-center border border-rule p-2 text-ink-muted transition-colors hover:border-stamp hover:text-stamp"
+          class="lg:hidden inline-flex items-center justify-center border border-rule p-2 text-ink-muted transition-colors hover:border-stamp hover:text-stamp"
           aria-label="Open menu"
           aria-expanded="false"
           aria-controls="mobile-menu"
@@ -72,8 +73,9 @@ const admin = isAdmin(user);
       </div>
 
       <!-- Mobile menu -->
-      <nav id="mobile-menu" class="hidden md:hidden mt-4 flex-col border-t border-rule pt-2">
+      <nav id="mobile-menu" class="hidden lg:hidden mt-4 flex-col border-t border-rule pt-2">
         <a href="/" class="block py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Archive</a>
+        <a href="/essays" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Essays</a>
         <a href="/family-tree" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Tree</a>
         <a href="https://artifacts.jameslandreth.com" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Treasures</a>
         {admin && (
@@ -126,7 +128,7 @@ const admin = isAdmin(user);
     });
 
     // Collapse the menu when resizing up to the desktop breakpoint.
-    window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
       if (e.matches) setMenu(false);
     });
   </script>

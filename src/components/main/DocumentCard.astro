@@ -16,7 +16,7 @@ interface Props {
 const { slug, title, category, excerpt, date, year, location, tags, pages, fileType, featured } = Astro.props;
 ---
 
-<a href={`/main/docs/${slug}`} class="group block bg-card border border-rule hover:border-ink-muted transition-colors duration-200 overflow-hidden">
+<a href={`/docs/${slug}`} class="group block overflow-hidden border border-rule bg-card transition-[border-color,transform] duration-200 hover:border-ink-muted active:scale-[0.96]">
   <div class="p-5">
 
     <!-- Category stamp + file type -->
@@ -28,12 +28,12 @@ const { slug, title, category, excerpt, date, year, location, tags, pages, fileT
     </div>
 
     <!-- Title -->
-    <h3 class="font-display text-xl text-ink mb-2 leading-snug group-hover:text-stamp transition-colors duration-200">
+    <h3 class="text-balance font-display text-xl text-ink mb-2 leading-snug group-hover:text-stamp transition-colors duration-200">
       {title}
     </h3>
 
     <!-- Excerpt -->
-    <p class="font-serif text-base text-ink-muted mb-4 line-clamp-3 leading-relaxed">
+    <p class="text-pretty font-serif text-base text-ink-muted mb-4 line-clamp-3 leading-relaxed">
       {excerpt}
     </p>
 

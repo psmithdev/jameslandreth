@@ -206,6 +206,14 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         carefully preserved to share with family, friends, and fellow travelers.
       </p>
 
+      <a
+        href="/essays"
+        class="mb-8 inline-flex min-h-11 items-center gap-2 border border-stamp bg-stamp px-5 py-2.5 font-mono text-[12px] tracking-[0.13em] uppercase text-card transition-[background-color,scale] duration-150 hover:bg-stamp-hover active:scale-[0.96]"
+      >
+        Enter the Essay Reading Room
+        <span aria-hidden="true">→</span>
+      </a>
+
       <div class="grid grid-cols-2 gap-x-6 gap-y-6 lg:flex lg:items-stretch lg:gap-0">
         <div class="lg:pr-8 lg:mr-8 lg:border-r lg:border-rule">
           <div class="font-mono text-4xl text-stamp font-bold leading-none">{totalDocs}</div>
@@ -310,7 +318,7 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
       <div class="flex flex-wrap gap-2" id="timeline-nav">
         {years.map(y => (
           <button
-            class="timeline-year font-mono text-[13px] tracking-[0.1em] uppercase px-4 py-2 border border-rule text-ink-muted hover:border-stamp hover:text-stamp hover:bg-parchment-dark transition-all"
+            class="timeline-year font-mono text-[13px] tracking-[0.1em] uppercase px-4 py-2 border border-rule text-ink-muted hover:border-stamp hover:text-stamp hover:bg-parchment-dark transition-[color,background-color,border-color,scale] duration-150 active:scale-[0.96]"
             data-year={y}
           >
             {y}
