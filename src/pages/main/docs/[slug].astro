@@ -72,6 +72,16 @@ function cleanExcerpt(value: string | null, title: string): string {
     .trim();
 }
 
+function formatArchiveDate(value: string | null): string {
+  if (!value) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(value));
+}
+
 function extractProse(html: string, title: string): string {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   let inner = bodyMatch ? bodyMatch[1] : html;
@@ -108,6 +118,7 @@ const readingMinutes = Math.max(1, Math.ceil(wordCount / 225));
 const isEssayReader = isHtml && Boolean(proseHtml);
 const currentEditorial = getEssayEditorial(doc.slug);
 const displayExcerpt = currentEditorial.deck || cleanExcerpt(doc.excerpt, doc.title);
+const sourceModifiedLabel = formatArchiveDate(doc.source_modified_at);
 
 let previousEssay = null;
 let nextEssay = null;
@@ -161,10 +172,10 @@ if (isSlideshow && hasFile) {
 
 <MainLayout title={`${doc.title} - Dr. James Landreth`}>
   <div class:list={["mx-auto px-6 py-10 sm:py-12", isEssayReader ? "max-w-5xl" : "max-w-6xl"]}>
-    <div class:list={["flex items-center justify-between", isEssayReader ? "mb-10" : "mb-8"]}>
+    <div class:list={["flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center", isEssayReader ? "mb-10" : "mb-8"]}>
       <a
         href={isEssayReader ? '/essays' : '/'}
-        class="inline-flex min-h-11 items-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
+        class="inline-flex min-h-11 items-center justify-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
       >
         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         {isEssayReader ? 'All Essays' : 'Back to Archive'}
@@ -173,16 +184,16 @@ if (isSlideshow && hasFile) {
         <a
           href={downloadUrl}
           download
-          class="inline-flex min-h-11 items-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
+          class="inline-flex min-h-11 items-center justify-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
         >
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4-4 4m0 0-4-4m4 4V4" /></svg>
-          Download {isEssayReader ? downloadType : ''}
+          Download {isEssayReader ? `original ${downloadType}` : ''}
         </a>
       )}
     </div>
 
     {isEssayReader && (
-      <header class="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
+      <header class="mx-auto mb-8 max-w-3xl text-center sm:mb-10">
         <p class="mb-4 font-mono text-[11px] tracking-[0.2em] uppercase text-stamp">{doc.category} · The Reading Room</p>
         <h1 class="text-balance font-display text-4xl leading-tight text-ink sm:text-5xl">{doc.title}</h1>
         {displayExcerpt && <p class="mx-auto mt-5 line-clamp-4 max-w-2xl text-pretty font-serif text-lg leading-relaxed text-ink-muted sm:line-clamp-none">{displayExcerpt}</p>}
@@ -199,6 +210,35 @@ if (isSlideshow && hasFile) {
           </div>
         )}
       </header>
+    )}
+
+    {isEssayReader && (
+      <section class="mb-8 bg-parchment-dark/55 p-5 shadow-[0_0_0_1px_rgba(28,35,64,0.06)] sm:mb-10 sm:p-6" aria-labelledby="archive-details-title">
+        <div class="flex flex-col justify-between gap-2 border-b border-rule pb-4 sm:flex-row sm:items-end">
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.17em] uppercase text-stamp">Document provenance</p>
+            <h2 id="archive-details-title" class="mt-1 font-display text-xl text-ink">About this archive copy</h2>
+          </div>
+          {hasDownload && <a href={downloadUrl} download class="font-mono text-[10px] tracking-[0.12em] uppercase text-stamp underline decoration-rule underline-offset-4 transition-colors duration-150 hover:text-stamp-hover">View the preserved original</a>}
+        </div>
+        <dl class="grid gap-5 pt-5 sm:grid-cols-3">
+          <div>
+            <dt class="font-mono text-[9px] tracking-[0.14em] uppercase text-rule">Document type</dt>
+            <dd class="mt-2 text-pretty font-serif text-sm leading-relaxed text-ink">{currentEditorial.documentKind}</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-[9px] tracking-[0.14em] uppercase text-rule">Credit</dt>
+            <dd class="mt-2 text-pretty font-serif text-sm leading-relaxed text-ink">{currentEditorial.credit}</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-[9px] tracking-[0.14em] uppercase text-rule">Preserved source</dt>
+            <dd class="mt-2 text-pretty font-serif text-sm leading-relaxed text-ink">
+              {doc.source_file_type || doc.file_type}{sourceModifiedLabel ? ` · source file last modified ${sourceModifiedLabel}` : ''}
+            </dd>
+          </div>
+        </dl>
+        {currentEditorial.sourceNote && <p class="mt-5 border-t border-rule pt-4 text-pretty font-serif text-xs italic leading-relaxed text-ink-muted">{currentEditorial.sourceNote}</p>}
+      </section>
     )}
 
     <div class:list={[isEssayReader ? "block" : "grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]"]}>

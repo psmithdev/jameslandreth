@@ -8,6 +8,9 @@ export type EssayCollection = {
 export type EssayEditorial = {
   deck: string;
   collections: string[];
+  documentKind?: string;
+  credit?: string;
+  sourceNote?: string;
 };
 
 export const essayCollections: EssayCollection[] = [
@@ -63,6 +66,9 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'aphorisms-as-dictated-by-james-j-walsh': {
     deck: 'A preserved collection of family sayings, practical wisdom, and memorable turns of phrase.',
     collections: ['family', 'ideas', 'arts'],
+    documentKind: 'Family reference document',
+    credit: 'Dictated by James J. Walsh and preserved by the family',
+    sourceNote: 'Presented from the preserved eight-page PDF.',
   },
   'banana-bread-bananakaka': {
     deck: 'A family recipe becomes a path through Swedish ancestry, migration, and memories shared across generations.',
@@ -83,6 +89,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'how-well-do-you-know-jim-littlefield-the-vanity-game': {
     deck: 'A personal quiz built from the objects, episodes, and inside stories that make up Jim’s life.',
     collections: ['family', 'arts'],
+    documentKind: 'Family game & object history',
   },
   'in-the-shop': {
     deck: 'A wartime factory photograph opens a reflection on tools, work, and skills learned at the shop bench.',
@@ -95,14 +102,20 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'james-joyce-and-his-influences': {
     deck: 'A preserved dissertation abstract tracing James Joyce’s influence on William Faulkner and Anthony Burgess.',
     collections: ['arts', 'ideas'],
+    documentKind: 'Preserved dissertation abstract',
+    credit: 'Abstract by Maxine Burke, Drake University, July 1981',
+    sourceNote: 'Preserved as reference material in the family document archive.',
   },
   'jim-and-aleda-a-timeline': {
     deck: 'Six decades of marriage, family, work, and travel gathered into one affectionate chronology.',
     collections: ['family'],
+    documentKind: 'Personal family timeline',
   },
   'jokes-i-often-tell': {
     deck: 'A well-worn collection of the jokes and one-liners Jim loves to tell—and the people who first told them.',
     collections: ['family', 'arts'],
+    documentKind: 'Family humor collection',
+    credit: 'Collected by Jim, with acknowledgement of the original storytellers',
   },
   'life-is-not-a-problem-to-be-solved-but-a-mystery-to-be-lived': {
     deck: 'A brief meditation on Joseph Campbell, following one’s bliss, and learning to live inside life’s mystery.',
@@ -123,6 +136,9 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'physics-is-important-quantum-mechanics-and-reality': {
     deck: 'A reading collection about quantum mechanics, reality, and why the questions of physics reach beyond equations.',
     collections: ['ideas'],
+    documentKind: 'Preserved reading collection',
+    credit: 'Includes source material from Aeon on quantum mechanics and reality',
+    sourceNote: 'This archive item preserves reading material rather than claiming original authorship of the source essay.',
   },
   'pierre-the-balloon-poodle': {
     deck: 'A small balloon dog, the Edinburgh Fringe, and a bilingual story whose language is part of the joke.',
@@ -151,6 +167,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'story-songs': {
     deck: 'Reflections on narrative songs and the enduring pleasure of music that knows how to tell a story.',
     collections: ['arts'],
+    documentKind: 'Personal music reflection',
   },
   'the-french-lesson': {
     deck: 'A trip toward the Dordogne becomes a warm comedy about language, confidence, and being understood abroad.',
@@ -167,6 +184,9 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'thinking-god-knows-what-james-joyce-and-trieste': {
     deck: 'A preserved biographical essay about James Joyce, Trieste, and the complicated geography of an artist’s life.',
     collections: ['arts', 'travel'],
+    documentKind: 'Preserved biographical article',
+    credit: 'Article by Luciano Mangiafico, originally dated January 1, 2013',
+    sourceNote: 'Preserved as James Joyce reference material in the family archive.',
   },
   'top-25-defining-u-s-events-of-the-last-60-years': {
     deck: 'A concise personal survey of the political, social, scientific, and cultural events that reshaped modern America.',
@@ -183,5 +203,10 @@ export const essayEditorial: Record<string, EssayEditorial> = {
 };
 
 export function getEssayEditorial(slug: string): EssayEditorial {
-  return essayEditorial[slug] || { deck: '', collections: [] };
+  return {
+    documentKind: 'Original archive essay',
+    credit: 'From the James Landreth family document archive',
+    sourceNote: 'Transcribed for online reading from the preserved original document.',
+    ...(essayEditorial[slug] || { deck: '', collections: [] }),
+  };
 }
