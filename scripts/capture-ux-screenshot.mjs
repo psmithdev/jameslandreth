@@ -3,10 +3,10 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 
-const [url, outputArg, widthArg = '1440', heightArg = '1200'] = process.argv.slice(2);
+const [url, outputArg, widthArg = '1440', heightArg = '1200', scrollTarget] = process.argv.slice(2);
 
 if (!url || !outputArg) {
-  console.error('Usage: node scripts/capture-ux-screenshot.mjs <url> <output.png> [width] [height]');
+  console.error('Usage: node scripts/capture-ux-screenshot.mjs <url> <output.png> [width] [height] [scroll-selector]');
   process.exit(1);
 }
 
@@ -102,7 +102,11 @@ try {
   }
 
   await wait(500);
-  await client.send('Runtime.evaluate', { expression: 'window.scrollTo(0, 0)' });
+  await client.send('Runtime.evaluate', {
+    expression: scrollTarget
+      ? `document.querySelector(${JSON.stringify(scrollTarget)})?.scrollIntoView({ block: 'start' })`
+      : 'window.scrollTo(0, 0)',
+  });
   const { data } = await client.send('Page.captureScreenshot', {
     format: 'png',
     fromSurface: true,
