@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
+import { essayCollections, getEssayEditorial } from '../../../data/essayEditorial';
 import { createServerClient } from '../../../lib/supabase';
 
 const { slug } = Astro.params;
@@ -105,7 +106,42 @@ const proseText = proseHtml.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').re
 const wordCount = proseText ? proseText.split(' ').length : 0;
 const readingMinutes = Math.max(1, Math.ceil(wordCount / 225));
 const isEssayReader = isHtml && Boolean(proseHtml);
-const displayExcerpt = cleanExcerpt(doc.excerpt, doc.title);
+const currentEditorial = getEssayEditorial(doc.slug);
+const displayExcerpt = currentEditorial.deck || cleanExcerpt(doc.excerpt, doc.title);
+
+let previousEssay = null;
+let nextEssay = null;
+let relatedEssays = [];
+
+if (isEssayReader) {
+  const { data: essayData } = await supabase
+    .from('documents')
+    .select('slug,title,excerpt,date,year,tags,pages,file_type')
+    .eq('status', 'published')
+    .eq('category', 'Essay');
+
+  const availableEssays = (essayData || [])
+    .map((essay) => ({ ...essay, editorial: getEssayEditorial(essay.slug) }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+  const currentIndex = availableEssays.findIndex((essay) => essay.slug === doc.slug);
+  previousEssay = currentIndex > 0 ? availableEssays[currentIndex - 1] : null;
+  nextEssay = currentIndex >= 0 && currentIndex < availableEssays.length - 1
+    ? availableEssays[currentIndex + 1]
+    : null;
+
+  const currentTags = new Set((doc.tags || []).map((tag: string) => tag.toLowerCase()));
+  const currentCollections = new Set(currentEditorial.collections);
+  relatedEssays = availableEssays
+    .filter((essay) => essay.slug !== doc.slug)
+    .map((essay) => {
+      const sharedCollections = essay.editorial.collections.filter((collection) => currentCollections.has(collection)).length;
+      const sharedTags = (essay.tags || []).filter((tag: string) => currentTags.has(tag.toLowerCase())).length;
+      return { ...essay, relevance: sharedCollections * 4 + sharedTags * 2 + (/html/i.test(essay.file_type || '') ? 1 : 0) };
+    })
+    .filter((essay) => essay.relevance > 1)
+    .sort((a, b) => b.relevance - a.relevance || a.title.localeCompare(b.title))
+    .slice(0, 3);
+}
 
 // Slideshows store a JSON manifest (list of slide image URLs) at file_path.
 // We fetch it server-side and render a themed image gallery.
@@ -229,10 +265,58 @@ if (isSlideshow && hasFile) {
           ) : isEssayReader ? (
             <>
               <article id="doc-prose" class="doc-prose mx-auto max-w-[70ch] px-7 py-12 sm:px-12 sm:py-16 lg:px-16 lg:py-20" set:html={proseHtml} />
-              <footer class="mx-auto mb-14 max-w-[70ch] px-7 text-center sm:px-12">
-                <div class="mx-auto mb-7 flex items-center justify-center gap-3" aria-hidden="true"><span class="h-px w-10 bg-rule"></span><span class="font-display text-stamp">◆</span><span class="h-px w-10 bg-rule"></span></div>
-                <p class="font-mono text-[10px] tracking-[0.16em] uppercase text-rule">End of essay</p>
-                <a href="/essays" class="mt-5 inline-flex min-h-11 items-center border border-rule px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">Return to all essays</a>
+              <footer id="essay-continuity" class="border-t border-rule bg-parchment-dark/35 px-7 py-12 sm:px-12 sm:py-14">
+                <div class="mx-auto max-w-4xl">
+                  <div class="text-center">
+                    <div class="mx-auto mb-6 flex items-center justify-center gap-3" aria-hidden="true"><span class="h-px w-10 bg-rule"></span><span class="font-display text-stamp">◆</span><span class="h-px w-10 bg-rule"></span></div>
+                    <p class="font-mono text-[10px] tracking-[0.16em] uppercase text-rule">End of essay</p>
+                    <h2 class="mt-3 text-balance font-display text-3xl text-ink">Continue Reading</h2>
+                    <p class="mx-auto mt-2 max-w-xl text-pretty font-serif text-sm leading-relaxed text-ink-muted">Move through the archive in order, or follow one of the themes connected to this essay.</p>
+                  </div>
+
+                  {(previousEssay || nextEssay) && (
+                    <nav class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Previous and next essays">
+                      {previousEssay ? (
+                        <a href={`/docs/${previousEssay.slug}`} class="continuity-card group flex min-h-[150px] flex-col bg-card p-5 text-left transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 active:scale-[0.96]">
+                          <span class="font-mono text-[10px] tracking-[0.14em] uppercase text-stamp">← Previous essay</span>
+                          <span class="mt-5 text-balance font-display text-xl leading-snug text-ink transition-colors duration-150 group-hover:text-stamp">{previousEssay.title}</span>
+                          <span class="mt-auto pt-4 font-mono text-[10px] tracking-[0.11em] uppercase text-rule">{previousEssay.pages}</span>
+                        </a>
+                      ) : <span aria-hidden="true"></span>}
+                      {nextEssay && (
+                        <a href={`/docs/${nextEssay.slug}`} class="continuity-card group flex min-h-[150px] flex-col bg-card p-5 text-left transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 active:scale-[0.96] sm:text-right">
+                          <span class="font-mono text-[10px] tracking-[0.14em] uppercase text-stamp">Next essay →</span>
+                          <span class="mt-5 text-balance font-display text-xl leading-snug text-ink transition-colors duration-150 group-hover:text-stamp">{nextEssay.title}</span>
+                          <span class="mt-auto pt-4 font-mono text-[10px] tracking-[0.11em] uppercase text-rule">{nextEssay.pages}</span>
+                        </a>
+                      )}
+                    </nav>
+                  )}
+
+                  {relatedEssays.length > 0 && (
+                    <section class="mt-10 border-t border-rule pt-8" aria-labelledby="related-essays-title">
+                      <div class="mb-5 flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
+                        <h3 id="related-essays-title" class="font-display text-2xl text-ink">You may also enjoy</h3>
+                        <p class="font-mono text-[10px] tracking-[0.12em] uppercase text-rule">Related by topic</p>
+                      </div>
+                      <div class="grid gap-3 md:grid-cols-3">
+                        {relatedEssays.map((essay) => {
+                          const collection = essayCollections.find((item) => essay.editorial.collections.includes(item.id));
+                          return (
+                            <a href={`/docs/${essay.slug}`} class="continuity-card group flex min-h-[190px] flex-col bg-card p-5 text-left transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 active:scale-[0.96]">
+                              <span class="font-mono text-[10px] tracking-[0.13em] uppercase text-stamp">{collection?.label || 'From the archive'}</span>
+                              <span class="mt-5 text-balance font-display text-xl leading-snug text-ink transition-colors duration-150 group-hover:text-stamp">{essay.title}</span>
+                              <span class="mt-3 line-clamp-3 text-pretty font-serif text-sm leading-relaxed text-ink-muted">{essay.editorial.deck || cleanExcerpt(essay.excerpt, essay.title)}</span>
+                              <span class="mt-auto pt-5 font-mono text-[10px] tracking-[0.11em] uppercase text-rule">Read next →</span>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+
+                  <div class="mt-9 text-center"><a href="/essays" class="inline-flex min-h-11 items-center border border-rule px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">Return to all essays</a></div>
+                </div>
               </footer>
             </>
           ) : (hasFile && isImage) ? (
@@ -250,6 +334,18 @@ if (isSlideshow && hasFile) {
   </div>
 
   <style>
+    .continuity-card {
+      box-shadow:
+        0 0 0 1px rgba(28, 35, 64, 0.07),
+        0 1px 2px -1px rgba(28, 35, 64, 0.07),
+        0 8px 22px rgba(28, 35, 64, 0.04);
+    }
+    .continuity-card:hover {
+      box-shadow:
+        0 0 0 1px rgba(139, 31, 31, 0.2),
+        0 2px 4px -1px rgba(28, 35, 64, 0.09),
+        0 12px 28px rgba(28, 35, 64, 0.07);
+    }
     .reader-control,
     .reader-reset {
       min-width: 40px;
