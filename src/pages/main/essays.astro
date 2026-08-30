@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { essayCollections, getEssayEditorial, startHereSlugs } from '../../data/essayEditorial';
 import { createServerClient } from '../../lib/supabase';
 
 const supabase = createServerClient();
@@ -9,12 +10,17 @@ const { data, error } = await supabase
   .eq('status', 'published')
   .eq('category', 'Essay');
 
-const essays = (data || []).sort((a, b) => {
-  const yearDifference = (b.year || 0) - (a.year || 0);
-  return yearDifference || a.title.localeCompare(b.title);
-});
+const essays = (data || [])
+  .map((essay) => ({ ...essay, editorial: getEssayEditorial(essay.slug) }))
+  .sort((a, b) => {
+    const yearDifference = (b.year || 0) - (a.year || 0);
+    return yearDifference || a.title.localeCompare(b.title);
+  });
 const onlineCount = essays.filter((essay) => /html/i.test(essay.file_type || '')).length;
 const topicCount = new Set(essays.flatMap((essay) => essay.tags || [])).size;
+const startHere = startHereSlugs
+  .map((slug) => essays.find((essay) => essay.slug === slug))
+  .filter(Boolean);
 
 function cleanExcerpt(value: string | null, title: string): string {
   if (!value) return '';
@@ -29,175 +35,177 @@ function cleanExcerpt(value: string | null, title: string): string {
     .replace(/^INTRO\b\s*[:—–-]?\s*/i, '')
     .trim();
 }
+
+function pageNumber(pages: string | null): number {
+  return Number.parseInt(pages || '0', 10) || 0;
+}
+
+function readingLabel(pages: string | null): string {
+  const count = pageNumber(pages);
+  const minutes = Math.max(2, count * 2);
+  return `${minutes} min`;
+}
 ---
 
 <MainLayout title="Essays & Reflections - Dr. James Landreth">
-  <div class="mx-auto max-w-6xl px-6 py-10 sm:py-14">
-    <nav class="mb-9 flex items-center gap-2 font-mono text-[12px] tracking-[0.14em] uppercase text-rule" aria-label="Breadcrumb">
+  <div class="mx-auto max-w-6xl overflow-x-clip px-5 py-9 sm:px-6 sm:py-14">
+    <nav class="mb-8 flex items-center gap-2 font-mono text-[12px] tracking-[0.14em] uppercase text-rule sm:mb-9" aria-label="Breadcrumb">
       <a href="/" class="transition-colors duration-150 hover:text-stamp">Archive</a>
       <span aria-hidden="true">/</span>
       <span class="text-stamp">Essays</span>
     </nav>
 
-    <header class="grid gap-8 border-b border-rule pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-      <div class="max-w-3xl">
+    <header class="grid gap-8 border-b border-rule pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:pb-10">
+      <div class="min-w-0 max-w-3xl">
         <p class="mb-3 font-mono text-[12px] tracking-[0.2em] uppercase text-stamp">The Reading Room</p>
-        <h1 class="text-balance font-display text-4xl leading-tight text-ink sm:text-5xl">Essays &amp; Reflections</h1>
+        <h1 class="text-balance font-display text-[2.55rem] leading-[1.05] text-ink sm:text-5xl">Essays &amp; Reflections</h1>
         <p class="mt-5 max-w-2xl text-pretty font-serif text-lg leading-relaxed text-ink-muted">
           Stories of family, travel, medicine, history, and the small observations gathered over a lifetime.
-          Read the essays here, or download the preserved originals.
+          Begin with a favorite, browse a collection, or explore the complete archive.
         </p>
       </div>
-      <dl class="grid grid-cols-3 gap-6 lg:min-w-[360px]">
-        <div class="border-l border-rule pl-4">
-          <dt class="font-mono text-[11px] tracking-[0.14em] uppercase text-rule">Essays</dt>
-          <dd class="mt-1 font-display text-3xl text-ink">{essays.length}</dd>
-        </div>
-        <div class="border-l border-rule pl-4">
-          <dt class="font-mono text-[11px] tracking-[0.14em] uppercase text-rule">Online</dt>
-          <dd class="mt-1 font-display text-3xl text-ink">{onlineCount}</dd>
-        </div>
-        <div class="border-l border-rule pl-4">
-          <dt class="font-mono text-[11px] tracking-[0.14em] uppercase text-rule">Topics</dt>
-          <dd class="mt-1 font-display text-3xl text-ink">{topicCount}</dd>
-        </div>
+      <dl class="grid min-w-0 grid-cols-3 gap-2 sm:gap-6 lg:min-w-[360px]">
+        <div class="min-w-0 border-l border-rule pl-3 sm:pl-4"><dt class="font-mono text-[10px] tracking-[0.12em] uppercase text-rule sm:text-[11px]">Essays</dt><dd class="mt-1 font-display text-3xl text-ink tabular-nums">{essays.length}</dd></div>
+        <div class="min-w-0 border-l border-rule pl-3 sm:pl-4"><dt class="font-mono text-[10px] tracking-[0.12em] uppercase text-rule sm:text-[11px]">Online</dt><dd class="mt-1 font-display text-3xl text-ink tabular-nums">{onlineCount}</dd></div>
+        <div class="min-w-0 border-l border-rule pl-3 sm:pl-4"><dt class="font-mono text-[10px] tracking-[0.12em] uppercase text-rule sm:text-[11px]">Topics</dt><dd class="mt-1 font-display text-3xl text-ink tabular-nums">{topicCount}</dd></div>
       </dl>
     </header>
 
     {error ? (
-      <section class="mt-10 bg-card p-8 text-center shadow-[0_0_0_1px_rgba(28,35,64,0.06)]">
-        <p class="font-serif text-ink-muted">The essays could not be loaded. Please try again shortly.</p>
-      </section>
+      <section class="mt-10 bg-card p-8 text-center shadow-[0_0_0_1px_rgba(28,35,64,0.06)]"><p class="font-serif text-ink-muted">The essays could not be loaded. Please try again shortly.</p></section>
     ) : (
       <>
-        <section class="mt-8 flex flex-col gap-4 bg-parchment-dark/60 p-4 shadow-[0_0_0_1px_rgba(28,35,64,0.06)] sm:flex-row sm:items-center sm:justify-between sm:p-5" aria-label="Essay filters">
-          <label class="relative block min-w-0 flex-1 sm:max-w-xl">
-            <span class="sr-only">Search essays</span>
-            <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-rule" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" /></svg>
-            <input
-              id="essay-search"
-              type="search"
-              placeholder="Search titles, stories, and topics…"
-              class="h-12 w-full border border-rule bg-card pl-11 pr-4 font-serif text-base text-ink outline-none transition-colors duration-150 placeholder:text-rule focus:border-stamp"
-            />
-          </label>
-          <div id="essay-format-filters" class="flex flex-wrap gap-2">
-            <button type="button" class="essay-filter is-active" data-format="all">All</button>
-            <button type="button" class="essay-filter" data-format="html">Read online</button>
-            <button type="button" class="essay-filter" data-format="file">Original files</button>
+        <section class="mt-10" aria-labelledby="start-here-title">
+          <div class="mb-5 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+            <div><p class="mb-2 font-mono text-[11px] tracking-[0.18em] uppercase text-stamp">New to the archive?</p><h2 id="start-here-title" class="text-balance font-display text-3xl text-ink">Start Here</h2></div>
+            <p class="max-w-md text-pretty font-serif text-sm leading-relaxed text-ink-muted sm:text-right">Three inviting places to begin—one personal, one cultural, and one drawn from a life in medicine.</p>
+          </div>
+          <div class="grid gap-4 lg:grid-cols-3">
+            {startHere.map((essay, index) => (
+              <a href={`/docs/${essay.slug}`} class:list={['start-card group flex min-h-[280px] flex-col p-6 transition-[box-shadow,transform] duration-200 active:scale-[0.96]', index === 0 ? 'bg-ink text-card' : 'bg-card text-ink']}>
+                <div class="flex items-center justify-between font-mono text-[11px] tracking-[0.14em] uppercase"><span class={index === 0 ? 'text-parchment-dark' : 'text-stamp'}>Begin {String(index + 1).padStart(2, '0')}</span><span class="text-rule">{readingLabel(essay.pages)}</span></div>
+                <h3 class:list={['mt-9 text-balance font-display text-3xl leading-tight transition-colors duration-150', index === 0 ? 'text-card' : 'text-ink group-hover:text-stamp']}>{essay.title}</h3>
+                <p class:list={['mt-4 text-pretty font-serif text-[0.95rem] leading-relaxed', index === 0 ? 'text-parchment-dark' : 'text-ink-muted']}>{essay.editorial.deck || cleanExcerpt(essay.excerpt, essay.title)}</p>
+                <span class:list={['mt-auto pt-7 font-mono text-[11px] tracking-[0.14em] uppercase', index === 0 ? 'text-card' : 'text-stamp']}>Read essay <span aria-hidden="true">→</span></span>
+              </a>
+            ))}
           </div>
         </section>
 
-        <section class="mt-8" aria-labelledby="essay-list-title">
-          <div class="mb-5 flex items-center justify-between gap-4">
-            <h2 id="essay-list-title" class="font-mono text-[12px] tracking-[0.18em] uppercase text-ink-muted">All Essays</h2>
-            <p id="essay-result-count" class="font-mono text-[12px] tracking-[0.12em] uppercase text-rule tabular-nums">{essays.length} titles</p>
+        <section class="mt-12 border-y border-rule py-10" aria-labelledby="collections-title">
+          <div class="mb-6 max-w-2xl"><p class="mb-2 font-mono text-[11px] tracking-[0.18em] uppercase text-stamp">Browse by interest</p><h2 id="collections-title" class="text-balance font-display text-3xl text-ink">Explore the Collections</h2></div>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {essayCollections.map((collection, index) => {
+              const total = essays.filter((essay) => essay.editorial.collections.includes(collection.id)).length;
+              return (
+                <button type="button" class="collection-card collection-filter group min-h-[190px] bg-parchment-dark/50 p-5 text-left shadow-[0_0_0_1px_rgba(28,35,64,0.06)] transition-[box-shadow,transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-card hover:shadow-[0_0_0_1px_rgba(139,31,31,0.16),0_10px_28px_rgba(28,35,64,0.06)] active:scale-[0.96]" data-collection={collection.id} aria-pressed="false">
+                  <span class="flex items-center justify-between font-mono text-[10px] tracking-[0.14em] uppercase text-rule"><span>{String(index + 1).padStart(2, '0')} · {collection.eyebrow}</span><span class="tabular-nums">{total}</span></span>
+                  <span class="mt-7 block text-balance font-display text-2xl text-ink transition-colors duration-150 group-hover:text-stamp">{collection.label}</span>
+                  <span class="mt-3 block text-pretty font-serif text-sm leading-relaxed text-ink-muted">{collection.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="all-essays" class="scroll-mt-6 pt-10" aria-labelledby="essay-list-title">
+          <div class="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+            <div><p class="mb-2 font-mono text-[11px] tracking-[0.18em] uppercase text-stamp">The complete collection</p><h2 id="essay-list-title" class="font-display text-3xl text-ink">All Essays</h2></div>
+            <p id="essay-result-count" class="font-mono text-[12px] tracking-[0.12em] uppercase text-rule tabular-nums" aria-live="polite">{essays.length} titles</p>
           </div>
 
-          <div id="essay-grid" class="grid gap-4 md:grid-cols-2">
-            {essays.map((essay) => {
+          <div class="bg-parchment-dark/60 p-4 shadow-[0_0_0_1px_rgba(28,35,64,0.06)] sm:p-5" aria-label="Essay filters">
+            <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <label class="relative block min-w-0"><span class="sr-only">Search essays</span><svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-rule" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" /></svg><input id="essay-search" type="search" placeholder="Search titles, stories, and topics…" class="h-12 w-full min-w-0 border border-rule bg-card pl-11 pr-4 font-serif text-base text-ink outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-rule focus:border-stamp focus:shadow-[0_0_0_3px_rgba(139,31,31,0.10)]" /></label>
+              <label class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border border-rule bg-card px-4"><span class="font-mono text-[10px] tracking-[0.13em] uppercase text-rule">Sort</span><select id="essay-sort" class="h-12 min-w-0 bg-transparent font-mono text-[11px] tracking-[0.1em] uppercase text-ink outline-none"><option value="featured">Recommended</option><option value="newest">Newest first</option><option value="az">Title A–Z</option><option value="shortest">Shortest read</option></select></label>
+            </div>
+            <div class="mt-3 grid gap-3 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start">
+              <div id="essay-format-filters" class="grid grid-cols-1 gap-2 min-[430px]:grid-cols-3"><button type="button" class="essay-filter is-active" data-format="all" aria-pressed="true">All formats</button><button type="button" class="essay-filter" data-format="html" aria-pressed="false">Read online</button><button type="button" class="essay-filter" data-format="file" aria-pressed="false">Original files</button></div>
+              <div id="essay-collection-filters" class="flex min-w-0 flex-wrap gap-2 lg:justify-end"><button type="button" class="topic-filter is-active" data-collection="all" aria-pressed="true">All topics</button>{essayCollections.map((collection) => (<button type="button" class="topic-filter collection-filter" data-collection={collection.id} aria-pressed="false">{collection.label}</button>))}</div>
+            </div>
+          </div>
+
+          <div id="essay-grid" class="mt-7 grid gap-4 md:grid-cols-2">
+            {essays.map((essay, index) => {
               const format = /html/i.test(essay.file_type || '') ? 'html' : 'file';
-              const displayExcerpt = cleanExcerpt(essay.excerpt, essay.title);
-              const searchable = [essay.title, displayExcerpt, ...(essay.tags || [])].filter(Boolean).join(' ').toLowerCase();
+              const displayExcerpt = essay.editorial.deck || cleanExcerpt(essay.excerpt, essay.title);
+              const searchable = [essay.title, displayExcerpt, ...(essay.tags || []), ...essay.editorial.collections].filter(Boolean).join(' ').toLowerCase();
               return (
-                <article class="essay-card group relative bg-card shadow-[0_0_0_1px_rgba(28,35,64,0.07),0_1px_2px_-1px_rgba(28,35,64,0.08),0_8px_24px_rgba(28,35,64,0.035)] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(139,31,31,0.22),0_2px_4px_-1px_rgba(28,35,64,0.10),0_14px_32px_rgba(28,35,64,0.07)]" data-format={format} data-search={searchable}>
-                  <a href={`/docs/${essay.slug}`} class="flex h-full min-h-[250px] flex-col p-6 active:scale-[0.96] transition-transform duration-150">
-                    <div class="mb-5 flex items-center justify-between gap-4">
-                      <span class="font-mono text-[11px] tracking-[0.15em] uppercase text-stamp">
-                        {format === 'html' ? 'Read online' : essay.file_type}
-                      </span>
-                      <span class="font-mono text-[11px] tracking-[0.12em] uppercase text-rule">{essay.pages}</span>
-                    </div>
+                <article class="essay-card group relative min-w-0 bg-card shadow-[0_0_0_1px_rgba(28,35,64,0.07),0_1px_2px_-1px_rgba(28,35,64,0.08),0_8px_24px_rgba(28,35,64,0.035)] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(139,31,31,0.22),0_2px_4px_-1px_rgba(28,35,64,0.10),0_14px_32px_rgba(28,35,64,0.07)]" data-format={format} data-search={searchable} data-collections={essay.editorial.collections.join(' ')} data-year={essay.year || 0} data-pages={pageNumber(essay.pages)} data-title={essay.title.toLowerCase()} data-order={index}>
+                  <a href={`/docs/${essay.slug}`} class="flex h-full min-h-[250px] min-w-0 flex-col p-5 transition-transform duration-150 active:scale-[0.96] sm:p-6">
+                    <div class="mb-5 flex items-center justify-between gap-4"><span class="font-mono text-[11px] tracking-[0.15em] uppercase text-stamp">{format === 'html' ? 'Read online' : essay.file_type}</span><span class="font-mono text-[11px] tracking-[0.12em] uppercase text-rule">{readingLabel(essay.pages)} · {essay.pages}</span></div>
                     <h3 class="text-balance font-display text-2xl leading-snug text-ink transition-colors duration-150 group-hover:text-stamp">{essay.title}</h3>
-                    {displayExcerpt && (
-                      <p class="mt-3 line-clamp-3 text-pretty font-serif text-[0.95rem] leading-relaxed text-ink-muted">{displayExcerpt}</p>
-                    )}
-                    <div class="mt-auto flex items-end justify-between gap-5 pt-6">
-                      <div>
-                        {(essay.date || essay.location) && (
-                          <p class="mb-2 font-mono text-[11px] tracking-[0.1em] uppercase text-rule">
-                            {[essay.date, essay.location].filter(Boolean).join(' · ')}
-                          </p>
-                        )}
-                        {essay.tags?.length > 0 && (
-                          <div class="flex flex-wrap gap-x-3 gap-y-1">
-                            {essay.tags.slice(0, 3).map((tag: string) => (
-                              <span class="font-mono text-[10px] tracking-[0.11em] uppercase text-rule">{tag}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <span class="flex h-10 w-10 shrink-0 items-center justify-center bg-parchment-dark font-mono text-lg text-ink transition-[background-color,color,transform] duration-150 group-hover:translate-x-0.5 group-hover:bg-stamp group-hover:text-card" aria-hidden="true">→</span>
+                    {displayExcerpt && <p class="mt-3 line-clamp-3 text-pretty font-serif text-[0.95rem] leading-relaxed text-ink-muted">{displayExcerpt}</p>}
+                    <div class="mt-auto flex min-w-0 items-end justify-between gap-4 pt-6">
+                      <div class="min-w-0">{(essay.date || essay.location) && <p class="mb-2 truncate font-mono text-[11px] tracking-[0.1em] uppercase text-rule">{[essay.date, essay.location].filter(Boolean).join(' · ')}</p>}{essay.editorial.collections.length > 0 && <div class="flex flex-wrap gap-x-3 gap-y-1">{essay.editorial.collections.slice(0, 2).map((collectionId) => <span class="font-mono text-[10px] tracking-[0.11em] uppercase text-rule">{essayCollections.find((collection) => collection.id === collectionId)?.label}</span>)}</div>}</div>
+                      <span class="flex h-11 w-11 shrink-0 items-center justify-center bg-parchment-dark font-mono text-lg text-ink transition-[background-color,color,transform] duration-150 group-hover:translate-x-0.5 group-hover:bg-stamp group-hover:text-card" aria-hidden="true">→</span>
                     </div>
                   </a>
                 </article>
               );
             })}
           </div>
-
-          <div id="essay-empty" class="mt-8 hidden bg-card px-6 py-14 text-center shadow-[0_0_0_1px_rgba(28,35,64,0.06)]">
-            <p class="font-display text-2xl text-ink">No essays found</p>
-            <p class="mt-2 font-serif text-ink-muted">Try a different word or show all formats.</p>
-          </div>
+          <div id="essay-empty" class="mt-8 hidden bg-card px-6 py-14 text-center shadow-[0_0_0_1px_rgba(28,35,64,0.06)]"><p class="font-display text-2xl text-ink">No essays found</p><p class="mt-2 font-serif text-ink-muted">Try a different word or reset the browsing options.</p><button id="essay-reset" type="button" class="mt-5 min-h-11 border border-stamp px-4 font-mono text-[11px] tracking-[0.12em] uppercase text-stamp transition-[background-color,color,scale] duration-150 hover:bg-stamp hover:text-card active:scale-[0.96]">Reset filters</button></div>
         </section>
       </>
     )}
   </div>
 
   <style>
-    .essay-filter {
-      min-height: 44px;
-      padding: 0.65rem 0.9rem;
-      border: 1px solid var(--color-rule);
-      background: var(--color-card);
-      color: var(--color-ink-muted);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition-property: color, background-color, border-color, scale;
-      transition-duration: 150ms;
-    }
-    .essay-filter:hover,
-    .essay-filter.is-active {
-      border-color: var(--color-stamp);
-      background: var(--color-stamp);
-      color: var(--color-card);
-    }
-    .essay-filter:active {
-      scale: 0.96;
-    }
+    .start-card { box-shadow: 0 0 0 1px rgba(28,35,64,.07), 0 1px 2px -1px rgba(28,35,64,.08), 0 12px 34px rgba(28,35,64,.05); }
+    .start-card:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(139,31,31,.2), 0 2px 4px -1px rgba(28,35,64,.1), 0 18px 40px rgba(28,35,64,.08); }
+    .essay-filter, .topic-filter { min-height: 44px; padding: .65rem .85rem; border: 1px solid var(--color-rule); background: var(--color-card); color: var(--color-ink-muted); font-family: var(--font-mono); font-size: .66rem; letter-spacing: .1em; line-height: 1.25; text-transform: uppercase; transition-property: color, background-color, border-color, scale; transition-duration: 150ms; }
+    .topic-filter { min-height: 40px; padding-block: .5rem; background: transparent; }
+    .essay-filter:hover, .essay-filter.is-active, .topic-filter:hover, .topic-filter.is-active { border-color: var(--color-stamp); background: var(--color-stamp); color: var(--color-card); }
+    .essay-filter:active, .topic-filter:active { scale: .96; }
+    .collection-card.is-active { background: var(--color-card); box-shadow: 0 0 0 1px rgba(139,31,31,.34), 0 10px 28px rgba(28,35,64,.06); }
   </style>
 
   <script>
     const search = document.getElementById('essay-search') as HTMLInputElement | null;
+    const grid = document.getElementById('essay-grid');
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.essay-card'));
-    const filters = Array.from(document.querySelectorAll<HTMLButtonElement>('.essay-filter'));
+    const formatFilters = Array.from(document.querySelectorAll<HTMLButtonElement>('.essay-filter'));
+    const collectionFilters = Array.from(document.querySelectorAll<HTMLButtonElement>('.collection-filter'));
+    const topicFilters = Array.from(document.querySelectorAll<HTMLButtonElement>('.topic-filter'));
+    const sort = document.getElementById('essay-sort') as HTMLSelectElement | null;
     const count = document.getElementById('essay-result-count');
     const empty = document.getElementById('essay-empty');
-    let activeFormat = 'all';
+    const reset = document.getElementById('essay-reset');
+    const params = new URLSearchParams(window.location.search);
+    let activeFormat = params.get('format') || 'all';
+    let activeCollection = params.get('collection') || 'all';
+    if (search) search.value = params.get('q') || '';
+    if (sort) sort.value = params.get('sort') || 'featured';
 
-    function applyFilters() {
-      const query = search?.value.trim().toLowerCase() || '';
-      let visible = 0;
-      cards.forEach((card) => {
-        const matchesText = !query || (card.dataset.search || '').includes(query);
-        const matchesFormat = activeFormat === 'all' || card.dataset.format === activeFormat;
-        const show = matchesText && matchesFormat;
-        card.classList.toggle('hidden', !show);
-        if (show) visible += 1;
-      });
-      if (count) count.textContent = `${visible} ${visible === 1 ? 'title' : 'titles'}`;
-      empty?.classList.toggle('hidden', visible !== 0);
+    function updateControls() {
+      formatFilters.forEach((filter) => { const active = filter.dataset.format === activeFormat; filter.classList.toggle('is-active', active); filter.setAttribute('aria-pressed', String(active)); });
+      collectionFilters.forEach((filter) => { const active = filter.dataset.collection === activeCollection; filter.classList.toggle('is-active', active); filter.setAttribute('aria-pressed', String(active)); });
+      topicFilters.forEach((filter) => { const active = filter.dataset.collection === activeCollection; filter.classList.toggle('is-active', active); filter.setAttribute('aria-pressed', String(active)); });
     }
-
-    search?.addEventListener('input', applyFilters);
-    filters.forEach((filter) => {
-      filter.addEventListener('click', () => {
-        activeFormat = filter.dataset.format || 'all';
-        filters.forEach((item) => item.classList.toggle('is-active', item === filter));
-        applyFilters();
+    function updateUrl() {
+      const next = new URLSearchParams(); const query = search?.value.trim() || '';
+      if (query) next.set('q', query); if (activeFormat !== 'all') next.set('format', activeFormat); if (activeCollection !== 'all') next.set('collection', activeCollection); if (sort && sort.value !== 'featured') next.set('sort', sort.value);
+      const suffix = next.toString(); window.history.replaceState({}, '', suffix ? `${window.location.pathname}?${suffix}` : window.location.pathname);
+    }
+    function sortedCards() {
+      const mode = sort?.value || 'featured';
+      return [...cards].sort((a, b) => {
+        if (mode === 'newest') return Number(b.dataset.year) - Number(a.dataset.year) || (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        if (mode === 'az') return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        if (mode === 'shortest') return Number(a.dataset.pages) - Number(b.dataset.pages) || (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        return Number(a.dataset.order) - Number(b.dataset.order);
       });
-    });
+    }
+    function applyFilters() {
+      const query = search?.value.trim().toLowerCase() || ''; let visible = 0;
+      sortedCards().forEach((card) => { grid?.appendChild(card); const matchesText = !query || (card.dataset.search || '').includes(query); const matchesFormat = activeFormat === 'all' || card.dataset.format === activeFormat; const matchesCollection = activeCollection === 'all' || (card.dataset.collections || '').split(' ').includes(activeCollection); const show = matchesText && matchesFormat && matchesCollection; card.classList.toggle('hidden', !show); if (show) visible += 1; });
+      if (count) count.textContent = `${visible} ${visible === 1 ? 'title' : 'titles'}`; empty?.classList.toggle('hidden', visible !== 0); updateControls(); updateUrl();
+    }
+    search?.addEventListener('input', applyFilters); sort?.addEventListener('change', applyFilters);
+    formatFilters.forEach((filter) => filter.addEventListener('click', () => { activeFormat = filter.dataset.format || 'all'; applyFilters(); }));
+    collectionFilters.forEach((filter) => filter.addEventListener('click', () => { activeCollection = filter.dataset.collection || 'all'; applyFilters(); if (filter.classList.contains('collection-card')) document.getElementById('all-essays')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    reset?.addEventListener('click', () => { if (search) search.value = ''; if (sort) sort.value = 'featured'; activeFormat = 'all'; activeCollection = 'all'; applyFilters(); search?.focus(); });
+    applyFilters();
   </script>
 </MainLayout>
