@@ -75,6 +75,37 @@ function readingLabel(pages: string | null): string {
       <section class="mt-10 bg-card p-8 text-center shadow-[0_0_0_1px_rgba(28,35,64,0.06)]"><p class="font-serif text-ink-muted">The essays could not be loaded. Please try again shortly.</p></section>
     ) : (
       <>
+        <section id="reading-shelf" class="mt-10 hidden bg-ink p-6 text-card shadow-[0_0_0_1px_rgba(28,35,64,0.12),0_16px_44px_rgba(28,35,64,0.10)] sm:p-8" aria-labelledby="reading-shelf-title">
+          <div class="mb-6 flex flex-col justify-between gap-2 border-b border-card/15 pb-5 sm:flex-row sm:items-end">
+            <div>
+              <p class="font-mono text-[10px] tracking-[0.17em] uppercase text-parchment-dark">Private on this device</p>
+              <h2 id="reading-shelf-title" class="mt-2 font-display text-3xl text-card">Your Reading Shelf</h2>
+            </div>
+            <p class="max-w-sm text-pretty font-serif text-sm leading-relaxed text-parchment-dark sm:text-right">Pick up where you stopped or return to essays you saved. This history never leaves your browser.</p>
+          </div>
+          <div class="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
+            <a id="continue-reading-card" href="/essays" class="group hidden min-h-[230px] flex-col bg-card p-6 text-ink transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_14px_34px_rgba(0,0,0,0.16)] active:scale-[0.96]">
+              <span class="flex items-center justify-between font-mono text-[10px] tracking-[0.14em] uppercase text-stamp"><span id="continue-reading-label">Continue reading</span><span id="continue-reading-progress" class="tabular-nums">0%</span></span>
+              <span id="continue-reading-title" class="mt-7 text-balance font-display text-3xl leading-tight text-ink transition-colors duration-150 group-hover:text-stamp"></span>
+              <span id="continue-reading-deck" class="mt-3 line-clamp-2 text-pretty font-serif text-sm leading-relaxed text-ink-muted"></span>
+              <span class="mt-auto pt-6 font-mono text-[10px] tracking-[0.13em] uppercase text-stamp">Resume essay →</span>
+              <span class="mt-4 block h-1 bg-parchment-dark"><span id="continue-reading-bar" class="block h-full origin-left bg-stamp"></span></span>
+            </a>
+            <div class="min-w-0">
+              <div class="mb-4 flex items-center justify-between"><h3 class="font-display text-2xl text-card">Saved Essays</h3><span id="saved-essay-count" class="font-mono text-[10px] tracking-[0.12em] uppercase text-rule tabular-nums">0 saved</span></div>
+              <div id="saved-essay-list" class="grid gap-2">
+                {essays.map((essay) => (
+                  <a href={`/docs/${essay.slug}`} class="saved-essay-item group hidden min-h-16 items-center justify-between gap-4 border border-card/15 px-4 py-3 transition-[background-color,border-color,scale] duration-150 hover:border-card/35 hover:bg-card/5 active:scale-[0.96]" data-saved-slug={essay.slug}>
+                    <span class="min-w-0"><span class="line-clamp-1 font-display text-lg text-card">{essay.title}</span><span class="mt-1 block font-mono text-[9px] tracking-[0.12em] uppercase text-rule">{essay.pages}</span></span>
+                    <span class="shrink-0 text-parchment-dark transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                  </a>
+                ))}
+              </div>
+              <p id="saved-essay-empty" class="border border-dashed border-card/20 px-4 py-6 text-pretty font-serif text-sm leading-relaxed text-parchment-dark">Use “Save essay” while reading to build a short list here.</p>
+            </div>
+          </div>
+        </section>
+
         <section class="mt-10" aria-labelledby="start-here-title">
           <div class="mb-5 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
             <div><p class="mb-2 font-mono text-[11px] tracking-[0.18em] uppercase text-stamp">New to the archive?</p><h2 id="start-here-title" class="text-balance font-display text-3xl text-ink">Start Here</h2></div>
@@ -131,7 +162,7 @@ function readingLabel(pages: string | null): string {
               const displayExcerpt = essay.editorial.deck || cleanExcerpt(essay.excerpt, essay.title);
               const searchable = [essay.title, displayExcerpt, ...(essay.tags || []), ...essay.editorial.collections].filter(Boolean).join(' ').toLowerCase();
               return (
-                <article class="essay-card group relative min-w-0 bg-card shadow-[0_0_0_1px_rgba(28,35,64,0.07),0_1px_2px_-1px_rgba(28,35,64,0.08),0_8px_24px_rgba(28,35,64,0.035)] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(139,31,31,0.22),0_2px_4px_-1px_rgba(28,35,64,0.10),0_14px_32px_rgba(28,35,64,0.07)]" data-format={format} data-search={searchable} data-collections={essay.editorial.collections.join(' ')} data-year={essay.year || 0} data-pages={pageNumber(essay.pages)} data-title={essay.title.toLowerCase()} data-order={index}>
+                <article class="essay-card group relative min-w-0 bg-card shadow-[0_0_0_1px_rgba(28,35,64,0.07),0_1px_2px_-1px_rgba(28,35,64,0.08),0_8px_24px_rgba(28,35,64,0.035)] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(139,31,31,0.22),0_2px_4px_-1px_rgba(28,35,64,0.10),0_14px_32px_rgba(28,35,64,0.07)]" data-format={format} data-search={searchable} data-collections={essay.editorial.collections.join(' ')} data-year={essay.year || 0} data-pages={pageNumber(essay.pages)} data-title={essay.title.toLowerCase()} data-order={index} data-slug={essay.slug} data-deck={displayExcerpt}>
                   <a href={`/docs/${essay.slug}`} class="flex h-full min-h-[250px] min-w-0 flex-col p-5 transition-transform duration-150 active:scale-[0.96] sm:p-6">
                     <div class="mb-5 flex items-center justify-between gap-4"><span class="font-mono text-[11px] tracking-[0.15em] uppercase text-stamp">{format === 'html' ? 'Read online' : essay.file_type}</span><span class="font-mono text-[11px] tracking-[0.12em] uppercase text-rule">{readingLabel(essay.pages)} · {essay.pages}</span></div>
                     <h3 class="text-balance font-display text-2xl leading-snug text-ink transition-colors duration-150 group-hover:text-stamp">{essay.title}</h3>
@@ -175,6 +206,59 @@ function readingLabel(pages: string | null): string {
     const params = new URLSearchParams(window.location.search);
     let activeFormat = params.get('format') || 'all';
     let activeCollection = params.get('collection') || 'all';
+
+    const readingShelf = document.getElementById('reading-shelf');
+    const continueCard = document.getElementById('continue-reading-card') as HTMLAnchorElement | null;
+    const continueTitle = document.getElementById('continue-reading-title');
+    const continueDeck = document.getElementById('continue-reading-deck');
+    const continueProgress = document.getElementById('continue-reading-progress');
+    const continueBar = document.getElementById('continue-reading-bar');
+    const continueLabel = document.getElementById('continue-reading-label');
+    const savedItems = Array.from(document.querySelectorAll<HTMLElement>('.saved-essay-item'));
+    const savedCount = document.getElementById('saved-essay-count');
+    const savedEmpty = document.getElementById('saved-essay-empty');
+
+    function renderReadingShelf() {
+      let lastRead: { slug?: string; title?: string; deck?: string; progress?: number } | null = null;
+      let bookmarks: string[] = [];
+      try {
+        lastRead = JSON.parse(window.localStorage.getItem('essay-last-read') || 'null');
+        const storedBookmarks = JSON.parse(window.localStorage.getItem('essay-bookmarks') || '[]');
+        bookmarks = Array.isArray(storedBookmarks) ? storedBookmarks : [];
+      } catch {
+        lastRead = null;
+        bookmarks = [];
+      }
+
+      let hasContinue = false;
+      if (lastRead?.slug && continueCard) {
+        const archiveCard = cards.find((card) => card.dataset.slug === lastRead?.slug);
+        if (archiveCard) {
+          const progress = Math.min(1, Math.max(0, Number(lastRead.progress) || 0));
+          continueCard.href = `/docs/${lastRead.slug}?continue=1`;
+          continueCard.classList.remove('hidden');
+          continueCard.classList.add('flex');
+          if (continueTitle) continueTitle.textContent = lastRead.title || archiveCard.querySelector('h3')?.textContent || '';
+          if (continueDeck) continueDeck.textContent = lastRead.deck || archiveCard.dataset.deck || '';
+          if (continueProgress) continueProgress.textContent = `${Math.round(progress * 100)}%`;
+          if (continueBar) continueBar.style.transform = `scaleX(${progress})`;
+          if (continueLabel) continueLabel.textContent = progress >= 0.98 ? 'Read again' : 'Continue reading';
+          hasContinue = true;
+        }
+      }
+
+      let shown = 0;
+      savedItems.forEach((item) => {
+        const show = shown < 4 && bookmarks.includes(item.dataset.savedSlug || '');
+        item.classList.toggle('hidden', !show);
+        item.classList.toggle('flex', show);
+        if (show) shown += 1;
+      });
+      if (savedCount) savedCount.textContent = `${shown} saved`;
+      savedEmpty?.classList.toggle('hidden', shown > 0);
+      readingShelf?.classList.toggle('hidden', !hasContinue && shown === 0);
+    }
+
     if (search) search.value = params.get('q') || '';
     if (sort) sort.value = params.get('sort') || 'featured';
 
@@ -207,5 +291,6 @@ function readingLabel(pages: string | null): string {
     collectionFilters.forEach((filter) => filter.addEventListener('click', () => { activeCollection = filter.dataset.collection || 'all'; applyFilters(); if (filter.classList.contains('collection-card')) document.getElementById('all-essays')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
     reset?.addEventListener('click', () => { if (search) search.value = ''; if (sort) sort.value = 'featured'; activeFormat = 'all'; activeCollection = 'all'; applyFilters(); search?.focus(); });
     applyFilters();
+    renderReadingShelf();
   </script>
 </MainLayout>

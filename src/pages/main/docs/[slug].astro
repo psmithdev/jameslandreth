@@ -209,6 +209,22 @@ if (isSlideshow && hasFile) {
             {doc.tags.map((tag: string) => <span class="border border-rule px-2 py-1 font-mono text-[10px] tracking-[0.11em] uppercase text-rule">{tag}</span>)}
           </div>
         )}
+        <button
+          id="essay-bookmark-toggle"
+          type="button"
+          class="bookmark-toggle mt-6 inline-flex min-h-11 items-center gap-2 border border-rule bg-card px-4 py-2 font-mono text-[10px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
+          data-slug={doc.slug}
+          data-title={doc.title}
+          data-deck={displayExcerpt}
+          data-pages={doc.pages || ''}
+          aria-pressed="false"
+        >
+          <span class="relative block h-4 w-4" aria-hidden="true">
+            <svg data-bookmark-empty class="bookmark-icon is-visible absolute inset-0 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.6L6 21V4.75Z" /></svg>
+            <svg data-bookmark-filled class="bookmark-icon absolute inset-0 h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7.75 3A1.75 1.75 0 0 0 6 4.75V21l6-3.6 6 3.6V4.75A1.75 1.75 0 0 0 16.25 3h-8.5Z" /></svg>
+          </span>
+          <span id="essay-bookmark-label">Save essay</span>
+        </button>
       </header>
     )}
 
@@ -374,6 +390,19 @@ if (isSlideshow && hasFile) {
   </div>
 
   <style>
+    .bookmark-icon {
+      opacity: 0;
+      scale: 0.25;
+      filter: blur(4px);
+      transition-property: opacity, scale, filter;
+      transition-duration: 300ms;
+      transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+    }
+    .bookmark-icon.is-visible {
+      opacity: 1;
+      scale: 1;
+      filter: blur(0);
+    }
     .continuity-card {
       box-shadow:
         0 0 0 1px rgba(28, 35, 64, 0.07),
@@ -529,6 +558,65 @@ if (isSlideshow && hasFile) {
     const prose = document.getElementById('doc-prose');
     const progressBar = document.getElementById('reading-progress');
     const progressLabel = document.getElementById('reading-progress-label');
+    const bookmarkToggle = document.getElementById('essay-bookmark-toggle') as HTMLButtonElement | null;
+    const bookmarkLabel = document.getElementById('essay-bookmark-label');
+    const emptyBookmarkIcon = bookmarkToggle?.querySelector('[data-bookmark-empty]');
+    const filledBookmarkIcon = bookmarkToggle?.querySelector('[data-bookmark-filled]');
+    const currentEssayState = bookmarkToggle ? {
+      slug: bookmarkToggle.dataset.slug || '',
+      title: bookmarkToggle.dataset.title || '',
+      deck: bookmarkToggle.dataset.deck || '',
+      pages: bookmarkToggle.dataset.pages || '',
+    } : null;
+    let savedReadingState: { slug: string; progress: number } | null = null;
+    let lastSavedProgress = -1;
+    let lastSavedAt = 0;
+    try {
+      savedReadingState = JSON.parse(window.localStorage.getItem('essay-last-read') || 'null');
+    } catch {
+      savedReadingState = null;
+    }
+    const shouldRestoreReading = Boolean(
+      currentEssayState
+      && savedReadingState?.slug === currentEssayState.slug
+      && new URLSearchParams(window.location.search).get('continue') === '1'
+    );
+    let restoringReadingPosition = shouldRestoreReading;
+
+    function savedBookmarks(): string[] {
+      try {
+        const value = JSON.parse(window.localStorage.getItem('essay-bookmarks') || '[]');
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function updateBookmarkControl() {
+      if (!bookmarkToggle || !currentEssayState) return;
+      const saved = savedBookmarks().includes(currentEssayState.slug);
+      bookmarkToggle.setAttribute('aria-pressed', String(saved));
+      bookmarkToggle.classList.toggle('border-stamp', saved);
+      bookmarkToggle.classList.toggle('text-stamp', saved);
+      emptyBookmarkIcon?.classList.toggle('is-visible', !saved);
+      filledBookmarkIcon?.classList.toggle('is-visible', saved);
+      if (bookmarkLabel) bookmarkLabel.textContent = saved ? 'Saved to reading shelf' : 'Save essay';
+    }
+
+    bookmarkToggle?.addEventListener('click', () => {
+      if (!currentEssayState) return;
+      const bookmarks = savedBookmarks();
+      const next = bookmarks.includes(currentEssayState.slug)
+        ? bookmarks.filter((slug) => slug !== currentEssayState.slug)
+        : [...bookmarks, currentEssayState.slug];
+      try {
+        window.localStorage.setItem('essay-bookmarks', JSON.stringify(next));
+      } catch {
+        // Bookmarks are optional when storage is unavailable.
+      }
+      updateBookmarkControl();
+    });
+    updateBookmarkControl();
 
     function applyZoom() {
       if (zoomDisplay) zoomDisplay.textContent = `${zoomLevel}%`;
@@ -549,6 +637,22 @@ if (isSlideshow && hasFile) {
       const percentage = Math.round(progress * 100);
       progressBar.style.transform = `scaleX(${progress})`;
       progressLabel.textContent = `${percentage}%`;
+      if (!restoringReadingPosition && currentEssayState) {
+        const now = Date.now();
+        if (Math.abs(progress - lastSavedProgress) >= 0.01 || now - lastSavedAt > 3000) {
+          try {
+            window.localStorage.setItem('essay-last-read', JSON.stringify({
+              ...currentEssayState,
+              progress,
+              updatedAt: new Date().toISOString(),
+            }));
+            lastSavedProgress = progress;
+            lastSavedAt = now;
+          } catch {
+            // Reading history is optional when storage is unavailable.
+          }
+        }
+      }
     }
 
     document.getElementById('zoom-in')?.addEventListener('click', () => {
@@ -564,6 +668,19 @@ if (isSlideshow && hasFile) {
       applyZoom();
     });
     applyZoom();
+
+    if (shouldRestoreReading && savedReadingState && prose) {
+      window.addEventListener('load', () => {
+        window.requestAnimationFrame(() => {
+          const start = prose.getBoundingClientRect().top + window.scrollY - 120;
+          const distance = Math.max(1, prose.offsetHeight - window.innerHeight * 0.55);
+          window.scrollTo({ top: start + distance * Math.min(0.98, Math.max(0, savedReadingState?.progress || 0)), behavior: 'smooth' });
+          restoringReadingPosition = false;
+          window.history.replaceState({}, '', window.location.pathname);
+          updateReadingProgress();
+        });
+      }, { once: true });
+    }
 
     let progressFrame = 0;
     const requestProgressUpdate = () => {
