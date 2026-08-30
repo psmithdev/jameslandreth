@@ -3,10 +3,10 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 
-const [url, outputArg, widthArg = '1440', heightArg = '1200', scrollTarget] = process.argv.slice(2);
+const [url, outputArg, widthArg = '1440', heightArg = '1200', scrollTarget, storageJson] = process.argv.slice(2);
 
 if (!url || !outputArg) {
-  console.error('Usage: node scripts/capture-ux-screenshot.mjs <url> <output.png> [width] [height] [scroll-selector]');
+  console.error('Usage: node scripts/capture-ux-screenshot.mjs <url> <output.png> [width] [height] [scroll-selector] [storage-json]');
   process.exit(1);
 }
 
@@ -90,6 +90,12 @@ try {
     screenWidth: width,
     screenHeight: height,
   });
+  if (storageJson) {
+    const storage = JSON.parse(storageJson);
+    await client.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `for (const [key, value] of Object.entries(${JSON.stringify(storage)})) localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));`,
+    });
+  }
   await client.send('Page.navigate', { url });
 
   for (let attempt = 0; attempt < 100; attempt += 1) {
