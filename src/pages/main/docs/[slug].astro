@@ -58,6 +58,26 @@ function normalizeText(value: string): string {
     .toLowerCase();
 }
 
+function displayText(value: string): string {
+  return value
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function headingId(value: string, index: number): string {
+  const base = displayText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 64);
+  return `section-${base || index + 1}-${index + 1}`;
+}
+
 function cleanExcerpt(value: string | null, title: string): string {
   if (!value) return '';
   const escapedTitle = title
@@ -82,6 +102,10 @@ function formatArchiveDate(value: string | null): string {
   }).format(new Date(value));
 }
 
+function escapeAttr(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
 function extractProse(html: string, title: string): string {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   let inner = bodyMatch ? bodyMatch[1] : html;
@@ -101,6 +125,62 @@ function extractProse(html: string, title: string): string {
     inner = inner.slice(firstBlock[0].length).trim();
   }
 
+  // Word/TextEdit exports often leave images with no alt text, or a
+  // filename-shaped placeholder. Screen readers need something meaningful.
+  let imageIndex = 0;
+  inner = inner.replace(/<img\b([^>]*)>/gi, (imgTag, attrs) => {
+    imageIndex += 1;
+    const altMatch = attrs.match(/\salt="([^"]*)"/i);
+    const existingAlt = altMatch ? altMatch[1].trim() : '';
+    const isGeneric = !existingAlt
+      || /^(image|img|photo|picture)[\s_-]*\d*(\.\w+)?$/i.test(existingAlt)
+      || /(image|img|photo(graph)?|picture)\s*\d*$/i.test(existingAlt);
+    if (!isGeneric) return imgTag;
+    const fallbackAlt = escapeAttr(`Photograph from ${title}, image ${imageIndex}`);
+    const withoutAlt = altMatch ? attrs.replace(/\salt="[^"]*"/i, '') : attrs;
+    return `<img${withoutAlt} alt="${fallbackAlt}">`;
+  });
+
+  // TextEdit exports section labels as ordinary paragraphs. Promote only
+  // short, standalone labels (or fully bold paragraphs) so long documents
+  // gain real headings without mistaking emphasized prose for structure.
+  inner = inner.replace(/<p\b[^>]*>([\s\S]*?)<\/p>/gi, (paragraph, content) => {
+    const text = displayText(content);
+    const fullyBold = /^\s*<(b|strong)\b[^>]*>[\s\S]*<\/\1>\s*$/i.test(content);
+    const shortLabel = text.length >= 3
+      && text.length <= 70
+      && text.split(/\s+/).length <= 10
+      && !/[.!?;:]$/.test(text)
+      && !/^https?:/i.test(text)
+      && !/<br\s*\/?\s*>/i.test(content);
+    if (!fullyBold && !shortLabel) return paragraph;
+    const cleanContent = fullyBold
+      ? content.replace(/^\s*<(b|strong)\b[^>]*>/i, '').replace(/<\/(b|strong)>\s*$/i, '')
+      : content;
+    return `<h2>${cleanContent}</h2>`;
+  });
+
+  let headingIndex = 0;
+  inner = inner.replace(/<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_heading, level, content) => {
+    const id = headingId(content, headingIndex);
+    headingIndex += 1;
+    return `<h${level} id="${id}">${content}</h${level}>`;
+  });
+
+  let figureIndex = 0;
+  inner = inner.replace(/<figure\b[^>]*>([\s\S]*?)<\/figure>/gi, (_figure, content) => {
+    if (!/<img\b/i.test(content)) return _figure;
+    figureIndex += 1;
+    const caption = `Figure ${figureIndex} · Preserved with the original essay`;
+    const image = content.replace(/<img\b/i, `<img data-reader-image tabindex="0" role="button" data-caption="${caption}"`);
+    const withCaption = /<figcaption\b/i.test(image) ? image : `${image}<figcaption>${caption}</figcaption>`;
+    return `<figure>${withCaption}</figure>`;
+  });
+
+  // Tables scroll horizontally (see .doc-prose table below) — make that
+  // scroll reachable from the keyboard, not just by touch/mouse drag.
+  inner = inner.replace(/<table\b(?![^>]*tabindex)/gi, '<table tabindex="0"');
+
   return inner;
 }
 
@@ -113,6 +193,9 @@ if (isHtml && hasFile) {
 }
 
 const proseText = proseHtml.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+const tableOfContents = Array.from(proseHtml.matchAll(/<h([2-4])\b[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/gi))
+  .map((match) => ({ level: Number(match[1]), id: match[2], label: displayText(match[3]) }))
+  .filter((item) => item.label.length > 0);
 const wordCount = proseText ? proseText.split(' ').length : 0;
 const readingMinutes = Math.max(1, Math.ceil(wordCount / 225));
 const isEssayReader = isHtml && Boolean(proseHtml);
@@ -172,7 +255,7 @@ if (isSlideshow && hasFile) {
 
 <MainLayout title={`${doc.title} - Dr. James Landreth`}>
   <div class:list={["mx-auto px-6 py-10 sm:py-12", isEssayReader ? "max-w-5xl" : "max-w-6xl"]}>
-    <div class:list={["flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center", isEssayReader ? "mb-10" : "mb-8"]}>
+    <div id="essay-top" class:list={["flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center", isEssayReader ? "mb-10" : "mb-8"]}>
       <a
         href={isEssayReader ? '/essays' : '/'}
         class="inline-flex min-h-11 items-center justify-center gap-2 border border-rule px-4 py-2 font-mono text-[12px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]"
@@ -320,6 +403,20 @@ if (isSlideshow && hasFile) {
             </div>
           ) : isEssayReader ? (
             <>
+              {tableOfContents.length >= 3 && (
+                <nav class="toc-block mx-auto max-w-[70ch] border-b border-rule bg-parchment-dark/40 px-7 py-5 sm:px-12" aria-label="Table of contents">
+                  <details>
+                    <summary class="cursor-pointer select-none font-mono text-[11px] tracking-[0.14em] uppercase text-stamp">Contents ({tableOfContents.length} sections)</summary>
+                    <ol class="mt-4 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                      {tableOfContents.map((item) => (
+                        <li class:list={[item.level > 2 ? "pl-4" : ""]}>
+                          <a href={`#${item.id}`} class="font-serif text-sm leading-snug text-ink-muted transition-colors duration-150 hover:text-stamp">{item.label}</a>
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                </nav>
+              )}
               <article id="doc-prose" class="doc-prose mx-auto max-w-[70ch] px-7 py-12 sm:px-12 sm:py-16 lg:px-16 lg:py-20" set:html={proseHtml} />
               <footer id="essay-continuity" class="border-t border-rule bg-parchment-dark/35 px-7 py-12 sm:px-12 sm:py-14">
                 <div class="mx-auto max-w-4xl">
@@ -371,14 +468,17 @@ if (isSlideshow && hasFile) {
                     </section>
                   )}
 
-                  <div class="mt-9 text-center"><a href="/essays" class="inline-flex min-h-11 items-center border border-rule px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">Return to all essays</a></div>
+                  <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+                    <a href="/essays" class="inline-flex min-h-11 items-center border border-rule px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-ink transition-[border-color,color,scale] duration-150 hover:border-stamp hover:text-stamp active:scale-[0.96]">Return to all essays</a>
+                    <a href="#essay-top" class="inline-flex min-h-11 items-center px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-rule transition-colors duration-150 hover:text-stamp">Back to top ↑</a>
+                  </div>
                 </div>
               </footer>
             </>
           ) : (hasFile && isImage) ? (
             <div class="flex items-center justify-center bg-ink/90 p-4"><img src={fileUrl} alt={doc.title} class="max-h-[80vh] w-full object-contain outline outline-1 -outline-offset-1 outline-black/10" /></div>
           ) : (hasFile && isPdf) ? (
-            <iframe id="pdf-frame" src={fileUrl} class="h-[80vh] w-full border-0" title={doc.title} />
+            <iframe id="pdf-frame" src={fileUrl} loading="lazy" class="h-[80vh] w-full border-0" title={doc.title} />
           ) : hasFile ? (
             <div class="flex min-h-[60vh] items-center justify-center p-10"><div class="max-w-sm text-center"><p class="mb-3 font-mono text-[12px] tracking-[0.16em] uppercase text-stamp">{doc.file_type} File</p><h3 class="mb-3 font-display text-2xl text-ink">Available to Download</h3><p class="mb-6 text-pretty font-serif leading-relaxed text-ink-muted">This {doc.file_type} document can&rsquo;t be previewed in the browser. Download it to read the original.</p><a href={downloadUrl} download class="inline-flex min-h-11 items-center gap-2 border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-[background-color,scale] duration-150 hover:bg-stamp-hover active:scale-[0.96]">Download {downloadType}</a></div></div>
           ) : (
@@ -464,6 +564,15 @@ if (isSlideshow && hasFile) {
       font-weight: 400;
       line-height: 1.3;
       text-wrap: balance;
+      scroll-margin-top: 5rem;
+    }
+    .toc-block summary::marker,
+    .toc-block summary::-webkit-details-marker {
+      color: var(--color-stamp);
+    }
+    .toc-block summary:focus-visible {
+      outline: 2px solid var(--color-stamp);
+      outline-offset: 3px;
     }
     .doc-prose :global(h1) { font-size: 1.8em; }
     .doc-prose :global(h2) { font-size: 1.5em; }
