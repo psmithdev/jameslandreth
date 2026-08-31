@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import { isAdmin } from '../../lib/auth';
+import { documentCategories } from '../../data/documentCategories';
 
 const user = (Astro.locals as any).user;
 
@@ -65,16 +66,7 @@ if (!isAdmin(user)) {
           <label class="block font-mono text-[12px] tracking-[0.12em] uppercase text-ink-muted mb-1.5">Category *</label>
           <select name="category" required class="w-full px-4 py-2.5 border border-rule bg-parchment text-ink font-serif text-sm focus:outline-none focus:border-stamp focus:ring-2 focus:ring-stamp/20 transition">
             <option value="">Select category</option>
-            <option>Travel</option>
-            <option>Travel Journal</option>
-            <option>Essay</option>
-            <option>Family Newsletter</option>
-            <option>Family</option>
-            <option>Medical</option>
-            <option>Photography</option>
-            <option>Fiction</option>
-            <option>Education</option>
-            <option>Music</option>
+            {documentCategories.map((category) => <option>{category}</option>)}
           </select>
         </div>
       </div>
@@ -110,9 +102,18 @@ if (!isAdmin(user)) {
         </div>
       </div>
 
-      <div class="flex items-center gap-3 mb-6">
-        <input type="checkbox" name="featured" id="featured" class="w-4 h-4 accent-stamp border-rule" />
-        <label for="featured" class="font-serif text-sm text-ink-muted">Featured document</label>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 items-end">
+        <div>
+          <label class="block font-mono text-[12px] tracking-[0.12em] uppercase text-ink-muted mb-1.5">Status</label>
+          <select name="status" class="w-full px-4 py-2.5 border border-rule bg-parchment text-ink font-serif text-sm focus:outline-none focus:border-stamp focus:ring-2 focus:ring-stamp/20 transition">
+            <option value="published">Published — visible on the site now</option>
+            <option value="draft">To be filed — saved privately, not public yet</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-3 pb-2.5">
+          <input type="checkbox" name="featured" id="featured" class="w-4 h-4 accent-stamp border-rule" />
+          <label for="featured" class="font-serif text-sm text-ink-muted">Featured document</label>
+        </div>
       </div>
 
       <!-- Status messages -->

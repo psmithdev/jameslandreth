@@ -58,6 +58,9 @@ export const POST: APIRoute = async ({ locals, request }) => {
   const tagsStr = formData.get('tags') as string;
   const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
 
+  const statusInput = formData.get('status') as string;
+  const status = statusInput === 'draft' ? 'draft' : 'published';
+
   // Insert document record
   const { error: insertError } = await supabase
     .from('documents')
@@ -78,7 +81,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
       source_file_size: fileSize,
       source_modified_at: filePath ? new Date().toISOString() : null,
       featured: formData.get('featured') === 'on',
-      status: 'published',
+      status,
       created_by: user.id,
     });
 

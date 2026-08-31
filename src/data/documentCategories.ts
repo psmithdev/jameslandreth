@@ -1,0 +1,16 @@
+export const documentCategories = [
+  'Travel',
+  'Travel Journal',
+  'Essay',
+  'Family Newsletter',
+  'Family',
+  'Medical',
+  'Photography',
+  'Fiction',
+  'Education',
+  'Music',
+  'Humor',
+  'Christmas Letters',
+  'Swedish Stories',
+  'Stories from My Life',
+];
