@@ -38,7 +38,6 @@ const admin = isAdmin(user);
 
         <!-- Desktop nav -->
         <nav class="hidden lg:flex items-center gap-7 pb-0.5">
-          <a href="/" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Archive</a>
           <a href="/essays" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Essays</a>
           <a href="/family-tree" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">Family Tree</a>
           {/* <a href="/anniversary" class="font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted hover:text-stamp transition-colors">60th Anniversary</a> */}
@@ -77,8 +76,7 @@ const admin = isAdmin(user);
 
       <!-- Mobile menu -->
       <nav id="mobile-menu" class="hidden lg:hidden mt-4 flex-col border-t border-rule pt-2">
-        <a href="/" class="block py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Archive</a>
-        <a href="/essays" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Essays</a>
+        <a href="/essays" class="block py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Essays</a>
         <a href="/family-tree" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Tree</a>
         <a href="https://artifacts.jameslandreth.com" class="block border-t border-rule/60 py-3 font-mono text-[14px] tracking-[0.12em] uppercase text-ink-muted transition-colors hover:text-stamp">Family Treasures</a>
         {admin && (
