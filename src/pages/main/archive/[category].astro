@@ -1,0 +1,57 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import DocumentCard from '../../../components/main/DocumentCard.astro';
+import { createServerClient } from '../../../lib/supabase';
+
+const { category } = Astro.params;
+const supabase = createServerClient();
+
+const { data: documents } = await supabase
+  .from('documents')
+  .select('*')
+  .eq('status', 'published')
+  .eq('category', category)
+  .order('year', { ascending: false });
+
+const docs = documents || [];
+
+if (docs.length === 0) {
+  return Astro.redirect('/');
+}
+---
+
+<MainLayout title={`${category} - Dr. James Landreth`}>
+  <div class="max-w-6xl mx-auto px-6 py-10">
+    <nav class="mb-8 flex items-center gap-2 font-mono text-[12px] tracking-[0.14em] uppercase text-rule" aria-label="Breadcrumb">
+      <a href="/" class="transition-colors duration-150 hover:text-stamp">Archive</a>
+      <span aria-hidden="true">/</span>
+      <span class="text-stamp">{category}</span>
+    </nav>
+
+    <section class="mb-10 border-b border-rule pb-8">
+      <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Browse by Category</p>
+      <h1 class="font-display text-4xl sm:text-5xl text-ink mb-3 leading-tight">{category}</h1>
+      <p class="font-serif text-lg text-ink-muted">
+        {docs.length} {docs.length === 1 ? 'document' : 'documents'}
+      </p>
+    </section>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {docs.map(doc => (
+        <DocumentCard
+          slug={doc.slug}
+          title={doc.title}
+          category={doc.category}
+          excerpt={doc.excerpt}
+          date={doc.date}
+          year={doc.year}
+          location={doc.location}
+          tags={doc.tags || []}
+          pages={doc.pages}
+          fileType={doc.file_type}
+          featured={doc.featured}
+        />
+      ))}
+    </div>
+  </div>
+</MainLayout>

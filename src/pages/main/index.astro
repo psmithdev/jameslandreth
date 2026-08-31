@@ -232,6 +232,19 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
           <div class="font-mono text-[13px] tracking-[0.15em] uppercase text-rule mt-1">Categories</div>
         </div>
       </div>
+
+      {categories.length > 0 && (
+        <div class="mt-8 flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <a
+              href={`/archive/${encodeURIComponent(category)}`}
+              class="border border-rule px-3 py-1.5 font-mono text-[12px] tracking-[0.1em] uppercase text-ink-muted transition-colors hover:border-stamp hover:text-stamp"
+            >
+              {category}
+            </a>
+          ))}
+        </div>
+      )}
     </section>
 
     <!-- Recently Added -->
