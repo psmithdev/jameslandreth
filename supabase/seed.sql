@@ -3,13 +3,13 @@
 -- ============================================
 
 INSERT INTO documents (slug, title, category, excerpt, date, year, location, tags, pages, file_type, featured, status) VALUES
-  ('famille-2017', 'Les Nouvelles de Famille 2017', 'Family Newsletter',
+  ('famille-2017', 'Les Nouvelles de Famille 2017', 'Yearly Newsletters',
    'Being a yearly news report of the adventures of Aleda, Jim, Mark and Leanne for 2017. Features family updates, travels, and memorable moments from the year.',
    'December 2017', 2017, 'United States',
    ARRAY['family', 'newsletter', '2017', 'travel', 'updates'],
    '4 pages', 'PDF', true, 'published'),
 
-  ('plague-year', 'Our Journal of the Plague Year', 'Travel Journal',
+  ('plague-year', 'Our Journal of the Plague Year', 'Yearly Newsletters',
    'With apologies to Daniel Defoe. The further adventures of Aleda, Jim, Mark and Leanne in 2020. A unique perspective on traveling during unprecedented times.',
    'December 2020', 2020, 'United States',
    ARRAY['travel', 'journal', '2020', 'covid', 'adventures'],

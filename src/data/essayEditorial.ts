@@ -122,6 +122,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'life-is-not-a-problem-to-be-solved-but-a-mystery-to-be-lived': {
     deck: 'A brief meditation on Joseph Campbell, following one’s bliss, and learning to live inside life’s mystery.',
     collections: ['ideas'],
+    shelf: 'swipe',
   },
   'lunch-at-marshall-field-s': {
     deck: 'A cherished Chicago holiday ritual returns through the dining room, decorations, and bustle of Marshall Field’s.',

@@ -29,7 +29,7 @@ const manifest = [
   {
     file: 'The-Little-Littlefield-Newsletter-rev.pdf',
     title: 'The Little Littlefield Newsletter',
-    category: 'Family Newsletter',
+    category: 'Yearly Newsletters',
     excerpt: 'A family newsletter from the Littlefields — news, milestones, and stories shared with relatives and friends.',
     tags: ['family', 'newsletter'],
     pages: '2 pages',
@@ -37,7 +37,7 @@ const manifest = [
   {
     file: 'christmas-letter-2016.pdf',
     title: 'Christmas Letter 2016',
-    category: 'Family Newsletter',
+    category: 'Yearly Newsletters',
     excerpt: "The family's 2016 Christmas letter, recounting the year's highlights and news.",
     date: 'December 2016',
     year: 2016,
@@ -47,7 +47,7 @@ const manifest = [
   {
     file: 'Christmas-greeting-2014-inside-whatever-is-beautiful.pdf',
     title: 'Christmas Greeting 2014',
-    category: 'Family Newsletter',
+    category: 'Yearly Newsletters',
     excerpt: "The 2014 Christmas greeting — 'whatever is beautiful' — sent to family and friends.",
     date: 'December 2014',
     year: 2014,
@@ -57,7 +57,7 @@ const manifest = [
   {
     file: 'Jokes-I-often-tell.pdf',
     title: 'Jokes I Often Tell',
-    category: 'Essay',
+    category: 'Jokes / Cartoons / Humor',
     excerpt: 'A well-worn collection of the jokes and one-liners Jim loves to tell.',
     tags: ['humor', 'family'],
     pages: '4 pages',

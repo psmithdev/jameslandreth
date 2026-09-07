@@ -41,7 +41,7 @@ const manifest = [
   { file: 'essays/Mrs Edith Swanson and the wig story.docx', title: 'Mrs. Edith Swanson and the Wig', date: 'February 4, 2020', year: 2020, tags: ['family', 'memoir'] },
   { file: 'essays/My Writing Class  2 revised.docx', title: 'My Writing Class', tags: ['writing', 'memoir'] },
   { file: 'essays/Physics is important Qunatum Mechanics and Reality.docx', title: 'Physics Is Important: Quantum Mechanics and Reality', tags: ['science', 'books'] },
-  { file: 'essays/Rhine Getaway.docx', title: 'Viking Rhine Getaway', date: 'June 7, 2023', year: 2023, location: 'Rhine River', tags: ['travel', 'Europe'] },
+  { file: 'essays/Rhine Getaway.docx', title: 'Viking Rhine Getaway', category: 'Travel', date: 'June 7, 2023', year: 2023, location: 'Rhine River', tags: ['travel', 'Europe'] },
   { file: 'essays/Ringling Bros Circus Closing after 146 years rev.docx', title: 'Ringling Bros. Circus Closing After 146 Years', tags: ['circus', 'reflection'] },
   { file: 'essays/Scotland the Brave      James L.docx', title: 'Scotland the Brave', tags: ['travel', 'Scotland'] },
   { file: 'essays/Some thoughts on Ireland.docx', title: 'Some Thoughts on Ireland', tags: ['travel', 'Ireland'] },
@@ -51,7 +51,7 @@ const manifest = [
   { file: 'essays/Thinking God Knows What.docx', title: 'Thinking God Knows What: James Joyce and Trieste', tags: ['literature', 'James Joyce'] },
   { file: 'essays/Valborg rev.docx', title: 'Valborg', tags: ['Sweden', 'traditions'] },
   { file: 'How well do you know JIm Littlefield word.docx', title: 'How Well Do You Know Jim Littlefield? (The Vanity Game)', tags: ['family', 'memoir', 'artifacts'] },
-  { file: 'Jim and Aleda.docx', title: 'Jim and Aleda: A Timeline', tags: ['family', 'memoir'] },
+  { file: 'Jim and Aleda.docx', title: 'Jim and Aleda: A Timeline', category: 'Family', tags: ['family', 'memoir'] },
   { file: 'Top 25 Defining US events in last 60 y.docx', title: 'Top 25 Defining U.S. Events of the Last 60 Years', tags: ['history', 'United States'] },
 ];
 
@@ -176,7 +176,7 @@ for (const item of manifest) {
     row: {
       slug,
       title: item.title,
-      category: 'Essay',
+      category: item.category || 'Essay',
       excerpt: item.excerpt || excerptFrom(text, item.title),
       date: item.date || null,
       year: item.year || null,
