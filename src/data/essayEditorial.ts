@@ -8,6 +8,7 @@ export type EssayCollection = {
 export type EssayEditorial = {
   deck: string;
   collections: string[];
+  shelf?: 'mine' | 'swipe';
   documentKind?: string;
   credit?: string;
   sourceNote?: string;
@@ -102,6 +103,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'james-joyce-and-his-influences': {
     deck: 'A preserved dissertation abstract tracing James Joyce’s influence on William Faulkner and Anthony Burgess.',
     collections: ['arts', 'ideas'],
+    shelf: 'swipe',
     documentKind: 'Preserved dissertation abstract',
     credit: 'Abstract by Maxine Burke, Drake University, July 1981',
     sourceNote: 'Preserved as reference material in the family document archive.',
@@ -136,6 +138,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'physics-is-important-quantum-mechanics-and-reality': {
     deck: 'A reading collection about quantum mechanics, reality, and why the questions of physics reach beyond equations.',
     collections: ['ideas'],
+    shelf: 'swipe',
     documentKind: 'Preserved reading collection',
     credit: 'Includes source material from Aeon on quantum mechanics and reality',
     sourceNote: 'This archive item preserves reading material rather than claiming original authorship of the source essay.',
@@ -184,6 +187,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
   'thinking-god-knows-what-james-joyce-and-trieste': {
     deck: 'A preserved biographical essay about James Joyce, Trieste, and the complicated geography of an artist’s life.',
     collections: ['arts', 'travel'],
+    shelf: 'swipe',
     documentKind: 'Preserved biographical article',
     credit: 'Article by Luciano Mangiafico, originally dated January 1, 2013',
     sourceNote: 'Preserved as James Joyce reference material in the family archive.',
@@ -204,6 +208,7 @@ export const essayEditorial: Record<string, EssayEditorial> = {
 
 export function getEssayEditorial(slug: string): EssayEditorial {
   return {
+    shelf: 'mine',
     documentKind: 'Original archive essay',
     credit: 'From the James Landreth family document archive',
     sourceNote: 'Transcribed for online reading from the preserved original document.',

@@ -4,6 +4,7 @@ import DocumentCard from '../../components/main/DocumentCard.astro';
 import { createServerClient } from '../../lib/supabase';
 import { anniversaryBook } from '../../data/anniversaryBook';
 import retrospectiveSlides from '../../data/retrospectiveSlides.json';
+import { getEssayEditorial } from '../../data/essayEditorial';
 
 const supabase = createServerClient();
 
@@ -28,6 +29,12 @@ const teaserLabel = featuredDocs.length > 0 ? 'Featured' : 'Recently Added';
 const firstSlide = retrospectiveSlides[0];
 const slideCount = retrospectiveSlides.length;
 const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length > 0).slice(0, 8);
+const essayDocs = docs
+  .filter((doc) => doc.category === 'Essay')
+  .map((doc) => ({ ...doc, shelf: getEssayEditorial(doc.slug).shelf || 'mine' }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+const myEssays = essayDocs.filter((doc) => doc.shelf === 'mine');
+const swipeFiles = essayDocs.filter((doc) => doc.shelf === 'swipe');
 ---
 
 <MainLayout>
@@ -246,6 +253,60 @@ const thumbnailSlides = retrospectiveSlides.filter(slide => slide.images.length 
         </div>
       )}
     </section>
+
+    {essayDocs.length > 0 && (
+      <section class="mb-12 border-b border-rule pb-12" aria-labelledby="homepage-essays-title">
+        <div class="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <p class="mb-2 font-mono text-[12px] tracking-[0.18em] uppercase text-stamp">Essays</p>
+            <h2 id="homepage-essays-title" class="text-balance font-display text-3xl text-ink">Browse Every Title</h2>
+          </div>
+          <a href="/essays" class="inline-flex min-h-11 items-center font-mono text-[11px] tracking-[0.13em] uppercase text-stamp transition-colors duration-150 hover:text-stamp-hover">
+            Open the reading room <span class="ml-2" aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <div class="grid gap-5 lg:grid-cols-2">
+          <section class="bg-card p-6 shadow-[0_0_0_1px_rgba(28,35,64,0.07),0_8px_24px_rgba(28,35,64,0.035)]" aria-labelledby="my-essays-title">
+            <div class="mb-5 flex items-end justify-between gap-4 border-b border-rule pb-4">
+              <div>
+                <p class="mb-1 font-mono text-[10px] tracking-[0.16em] uppercase text-stamp">Written by Jim</p>
+                <h3 id="my-essays-title" class="text-balance font-display text-2xl text-ink">My Essays</h3>
+              </div>
+              <span class="font-mono text-[11px] tracking-[0.12em] uppercase text-rule tabular-nums">{myEssays.length} titles</span>
+            </div>
+            <ol class="columns-1 gap-x-8 sm:columns-2 lg:columns-1 xl:columns-2">
+              {myEssays.map((essay) => (
+                <li class="mb-2 break-inside-avoid">
+                  <a href={`/docs/${essay.slug}`} class="group inline-flex min-h-10 items-center text-pretty font-serif text-[0.95rem] leading-snug text-ink-muted transition-colors duration-150 hover:text-stamp">
+                    <span class="mr-2 text-rule transition-colors duration-150 group-hover:text-stamp" aria-hidden="true">—</span>{essay.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section class="bg-parchment-dark/60 p-6 shadow-[0_0_0_1px_rgba(28,35,64,0.07)]" aria-labelledby="swipe-files-title">
+            <div class="mb-5 flex items-end justify-between gap-4 border-b border-rule pb-4">
+              <div>
+                <p class="mb-1 font-mono text-[10px] tracking-[0.16em] uppercase text-stamp">Collected &amp; preserved</p>
+                <h3 id="swipe-files-title" class="text-balance font-display text-2xl text-ink">Swipe Files</h3>
+              </div>
+              <span class="font-mono text-[11px] tracking-[0.12em] uppercase text-rule tabular-nums">{swipeFiles.length} titles</span>
+            </div>
+            <ol>
+              {swipeFiles.map((essay) => (
+                <li class="mb-2">
+                  <a href={`/docs/${essay.slug}`} class="group inline-flex min-h-10 items-center text-pretty font-serif text-[0.95rem] leading-snug text-ink-muted transition-colors duration-150 hover:text-stamp">
+                    <span class="mr-2 text-rule transition-colors duration-150 group-hover:text-stamp" aria-hidden="true">—</span>{essay.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </div>
+      </section>
+    )}
 
     <!-- Recently Added -->
     {teaserDocs.length > 0 && (
