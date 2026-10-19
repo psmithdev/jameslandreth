@@ -1,0 +1,223 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+---
+
+<MainLayout title="New England in Fall Color · Dr. James Landreth">
+  <div class="fol">
+    <section class="hero wrap">
+      <div class="crumb mono"><a href="/">Archive</a> / <a href="/archive/Travel">Travel</a> / New England</div>
+      <div>
+        <p class="eyebrow mono">Travel · New England · Autumn</p>
+        <h1>New England in Fall Color</h1>
+        <p class="lede">Twenty-three photographs from a road trip through Massachusetts, Vermont, New Hampshire and Maine.</p>
+        <div class="actions"><a class="btn primary" href="#trip">Begin the trip ↓</a><button class="btn" type="button" data-play-slideshow>▶ Play slideshow</button></div>
+      </div>
+      <figure class="letter">
+        <p class="mono">A note from Jim</p>
+        <blockquote>“It is a distillation from about 200 images I took and filtered through Lightroom program. Some of them are not too bad.”</blockquote>
+        <cite>— Jim Landreth</cite>
+      </figure>
+    </section>
+
+    <section id="trip" class="trip wrap">
+      <aside class="map-col" id="map-col">
+        <div class="map-card">
+          <div class="map-head mono"><span>The Route</span><span>Click a stop to jump</span></div>
+          <svg id="map" role="img" aria-label="Map of New England showing the trip route"></svg>
+          <div class="readout"><span class="num" data-readout-num>—</span><div><p class="name" data-readout-name>Starting in Boston</p><p class="state mono" data-readout-state></p><p class="trip-line mono" id="trip-line"></p></div></div>
+        </div>
+      </aside>
+      <div class="stops" id="stops"></div>
+    </section>
+
+    <section class="end wrap">
+      <div class="end-top">
+        <p class="eyebrow mono">Back in Boston</p>
+        <h2>The end of the road</h2>
+      </div>
+      <div class="end-grid">
+        <div class="end-map"><svg id="end-map" role="img" aria-label="The complete route"></svg></div>
+        <div>
+          <dl class="stats" id="end-stats"></dl>
+          <div class="colors"><h3>How the color changed</h3><p>Leaf color at each stop, in the order we drove.</p><div id="end-colors"></div></div>
+        </div>
+      </div>
+      <figure class="fav ph" id="end-fav"></figure>
+      <div class="actions"><button class="btn primary" type="button" data-play-slideshow>▶ Watch the slideshow</button><a class="btn" href="#" aria-disabled="true">Download all photographs ↓</a><a class="btn" href="/archive/Travel">More travel →</a></div>
+    </section>
+  </div>
+
+  <script is:inline src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+  <script is:inline src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+  <script is:inline src="/foliage/foliage-data.js"></script>
+  <script is:inline src="/foliage/foliage-app.js"></script>
+  <script is:inline>
+    (function () {
+      const A = FoliageApp;
+      const fig = p => `<figure class="ph">
+          <button class="ph-frame" type="button" data-photo-index="${p.index}" aria-label="Open photo ${p.n}">${A.media(p)}</button>
+          <figcaption><span class="ph-n">${p.n}</span><div>
+            <h3>${A.text(p.title, "Jim’s title")}</h3>
+            <p>${A.text(p.caption, "A sentence or two from Jim about this picture.")}</p>
+            <p class="meta">${A.meta(p)}</p>
+          </div></figcaption></figure>`;
+      const rows = ps => {
+        const out = []; let i = 0;
+        while (i < ps.length) {
+          if (ps[i].orientation === "portrait" && ps[i + 1] && ps[i + 1].orientation === "portrait") { out.push(`<div class="row pair">${fig(ps[i])}${fig(ps[i + 1])}</div>`); i += 2; }
+          else { out.push(`<div class="row">${fig(ps[i])}</div>`); i++; }
+        }
+        return out.join("");
+      };
+      const sw = s => `<span class="sw" aria-hidden="true">${s.foliage.swatches.map(c => `<i style="background:${c}"></i>`).join("")}</span>`;
+      const mi = n => `${A.estimated ? "≈ " : ""}${n.toLocaleString()} mi`;
+      document.getElementById("stops").innerHTML = A.stops.map(s => {
+        const ps = A.photosFor(s.id);
+        return `<section class="stop" data-stop-section id="stop-${s.id}">
+          <div class="band" aria-hidden="true">${s.foliage.swatches.map(c => `<i style="background:${c}"></i>`).join("")}</div>
+          <header class="stop-head"><span class="stop-num">${s.num}</span><div><h2>${A.esc(s.name)}</h2><p class="mono">${A.esc(s.state)} · ${A.text(s.date, "Date")} · ${ps.length} photographs</p><p class="mono stage">${sw(s)} ${A.esc(s.foliage.stage)}</p></div></header>
+          <aside class="note"><p class="mono">Jim’s note · ${A.esc(s.name)}</p><p class="note-body">${A.text(s.note, "A few sentences from Jim: where he stood, the weather, what caught his eye.")}</p><p class="mono note-mile">Mile ${mi(A.mileAt(s.index))} of ${mi(A.totalMiles)}</p></aside>
+          ${rows(ps)}</section>`;
+      }).join("");
+      const states = new Set(A.stops.map(s => s.state)).size;
+      document.getElementById("end-stats").innerHTML = [["Stops", A.stops.length], ["States", states], ["Photographs", A.D.photos.length], ["Miles driven", mi(A.totalMiles).replace(" mi", "")]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("") + (A.estimated ? `<p class="est" style="grid-column:1/-1">Miles estimated until Jim confirms the route</p>` : "");
+      document.getElementById("end-colors").innerHTML = A.stops.map(s => `<a class="c-row" href="#stop-${s.id}"><span class="stop-num">${s.num}</span><span><b>${A.esc(s.name)}</b><small>${A.esc(s.foliage.stage)}</small></span>${sw(s)}</a>`).join("");
+      const fp = A.D.photos[A.D.favorite];
+      document.getElementById("end-fav").outerHTML = `<div class="fav"><p class="eyebrow mono">Jim’s favorite · Stop ${A.byId[fp.stop].num} · ${A.esc(A.byId[fp.stop].name)}</p>${fig(fp)}</div>`;
+      const tl = document.getElementById("trip-line");
+      let lastA = -2;
+      const onTick = (prog, active) => {
+        if (active < 0) { if (lastA !== -1) tl.innerHTML = `${mi(A.totalMiles)} round trip`; lastA = -1; return; }
+        const s = A.stops[active], m = Math.round(A.mileAt(active) + A.legMiles[active] * prog[active]);
+        tl.innerHTML = `${sw(s)} ${A.esc(s.foliage.stage)} · Mile ${mi(m)} · ${A.text(s.date, "Date")}`;
+        lastA = active;
+      };
+      A.init({
+        map: "#map", mapCol: "#map-col", startLabel: "Starting in Boston", onTick,
+        theme: { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#4A5168", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168", here: true }
+      });
+      A.drawMap(document.getElementById("end-map"), { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#1C2340", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168" },
+        i => window.scrollTo({ top: document.getElementById(`stop-${A.stops[i].id}`).getBoundingClientRect().top + scrollY - 24, behavior: "smooth" }))
+        .then(m => m.update(A.stops.map(() => 1), 99));
+    })();
+  </script>
+</MainLayout>
+
+<style is:global>
+  /* Variables read by foliage-app.js (lightbox + photo placeholders) */
+  :root {
+    --ph-a: #EDE5D4; --ph-b: #E6DCC6; --ph-ink: #4A5168; --ph-tag: #FDFAF5; --todo: #4A5168;
+    --lb-bg: #161C33; --lb-fg: #F4EFE4; --lb-accent: #E8A595; --lb-rule: rgba(244, 239, 228, .28);
+  }
+
+  .fol {
+    --parch: #F4EFE4; --ink: #1C2340; --muted: #4A5168; --rule: #C5B89A; --card: #FDFAF5; --stamp: #8B1F1F; --stamp-h: #6E1818;
+    font-family: 'IBM Plex Serif', Georgia, serif;
+  }
+  .fol a { color: var(--stamp); }
+  .fol a:hover { color: var(--stamp-h); }
+  .fol .mono { font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; }
+  .fol .wrap { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+  .fol .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border: 1px solid var(--rule); background: transparent; color: var(--ink); font: 500 14px 'IBM Plex Mono', monospace; letter-spacing: .13em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+  .fol .btn:hover { border-color: var(--stamp); color: var(--stamp); }
+  .fol .btn.primary { background: var(--stamp); border-color: var(--stamp); color: var(--card); }
+  .fol .btn.primary:hover { background: var(--stamp-h); color: var(--card); }
+  .fol .btn[aria-disabled="true"] { opacity: .5; pointer-events: none; }
+
+  .fol .hero { padding-top: 56px; padding-bottom: 64px; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr); gap: 64px; align-items: end; }
+  .fol .crumb { grid-column: 1/-1; font-size: 13px; letter-spacing: .14em; color: var(--muted); margin-bottom: -24px; }
+  .fol .crumb a { color: var(--muted); text-decoration: none; }
+  .fol .crumb a:hover { color: var(--stamp); }
+  .fol .eyebrow { margin: 0 0 18px; font-size: 14px; letter-spacing: .2em; color: var(--stamp); }
+  .fol .hero h1 { margin: 0 0 28px; font: 400 clamp(52px, 7vw, 104px)/1.02 'Libre Baskerville', Georgia, serif; letter-spacing: -.01em; text-wrap: balance; }
+  .fol .lede { margin: 0 0 36px; font-size: 24px; line-height: 1.5; color: var(--muted); max-width: 34ch; text-wrap: pretty; }
+  .fol .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .fol .letter { margin: 0; background: var(--card); border: 1px solid var(--rule); padding: 36px 36px 30px; box-shadow: 0 14px 42px rgba(28, 35, 64, .08); }
+  .fol .letter .mono { margin: 0 0 18px; font-size: 12px; letter-spacing: .18em; color: var(--stamp); }
+  .fol .letter blockquote { margin: 0 0 20px; font: italic 400 25px/1.55 'Libre Baskerville', Georgia, serif; text-wrap: pretty; }
+  .fol .letter cite { font: normal 500 14px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+  .fol .trip { display: grid; grid-template-columns: minmax(340px, .78fr) minmax(0, 1.22fr); gap: 56px; padding-top: 48px; }
+  .fol .map-col { position: sticky; top: 20px; height: calc(100vh - 40px); align-self: start; }
+  .fol .map-card { height: 100%; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--rule); padding: 18px; }
+  .fol .map-head { display: flex; justify-content: space-between; font-size: 13px; letter-spacing: .16em; color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+  .fol .map-head span:first-child { color: var(--stamp); }
+  .fol #map { flex: 1; min-height: 0; width: 100%; display: block; }
+  .fol .readout { display: flex; gap: 18px; align-items: center; border-top: 1px solid var(--rule); padding-top: 14px; }
+  .fol .readout .num { font: 700 42px/1 'IBM Plex Mono', monospace; color: var(--stamp); min-width: 64px; }
+  .fol .readout .name { margin: 0 0 4px; font: 400 26px/1.15 'Libre Baskerville', Georgia, serif; }
+  .fol .readout .state { margin: 0; font-size: 13px; letter-spacing: .14em; color: var(--muted); }
+  .fol .readout .trip-line { margin: 8px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .12em; color: var(--ink); }
+
+  .fol .stop { padding-bottom: 64px; }
+  .fol .stop-head { display: flex; gap: 22px; align-items: baseline; padding-top: 22px; margin-bottom: 32px; }
+  .fol .stop-num { font: 600 18px 'IBM Plex Mono', monospace; color: var(--stamp); letter-spacing: .1em; }
+  .fol .stop-head h2 { margin: 0 0 8px; font: 400 clamp(36px, 4vw, 52px)/1.1 'Libre Baskerville', Georgia, serif; }
+  .fol .stop-head p { margin: 0; font-size: 14px; letter-spacing: .14em; color: var(--muted); }
+  .fol .row { display: grid; gap: 28px; margin-bottom: 44px; }
+  .fol .row.pair { grid-template-columns: 1fr 1fr; }
+  .fol .ph { margin: 0; }
+  .fol .ph-frame { display: block; width: 100%; padding: 10px; background: var(--card); border: 1px solid var(--rule); cursor: zoom-in; transition: border-color .15s, box-shadow .2s; }
+  .fol .ph-frame:hover { border-color: var(--stamp); box-shadow: 0 10px 30px rgba(28, 35, 64, .1); }
+  .fol .ph figcaption { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding-top: 16px; }
+  .fol .ph-n { font: 500 14px 'IBM Plex Mono', monospace; color: var(--stamp); padding-top: 6px; }
+  .fol .ph h3 { margin: 0 0 6px; font: 400 24px/1.3 'Libre Baskerville', Georgia, serif; }
+  .fol .ph p { margin: 0 0 8px; font-size: 20px; line-height: 1.5; color: var(--muted); text-wrap: pretty; }
+  .fol .ph .meta { font: 400 13px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+
+  .fol .band { display: flex; height: 8px; }
+  .fol .band i { flex: 1; }
+  .fol .stage { display: flex; align-items: center; gap: 12px; margin-top: 10px !important; }
+  .fol .sw { display: inline-flex; gap: 3px; }
+  .fol .sw i { display: block; width: 20px; height: 12px; }
+  .fol .note { background: var(--card); border: 1px solid var(--rule); padding: 26px 30px; margin: 0 0 44px; max-width: 44em; }
+  .fol .note .mono { margin: 0 0 12px; font-size: 12px; letter-spacing: .18em; color: var(--stamp); }
+  .fol .note-body { margin: 0 0 14px; font: italic 400 22px/1.6 'Libre Baskerville', Georgia, serif; text-wrap: pretty; }
+  .fol .note .note-mile { margin: 0; color: var(--muted); }
+  .fol .end { padding-top: 80px; padding-bottom: 40px; border-top: 1px solid var(--rule); margin-top: 24px; }
+  .fol .end-top { text-align: center; }
+  .fol .end-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; margin: 56px 0 72px; align-items: start; }
+  .fol .end-map { background: var(--card); border: 1px solid var(--rule); padding: 18px; }
+  .fol #end-map { display: block; width: 100%; aspect-ratio: 560/700; }
+  .fol .stats { display: grid; grid-template-columns: 1fr 1fr; margin: 0 0 44px; border-top: 2px solid var(--ink); }
+  .fol .stats div { padding: 20px 0; border-bottom: 1px solid var(--rule); }
+  .fol .stats dt { font: 400 13px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .fol .stats dd { margin: 6px 0 0; font: 400 52px/1 'Libre Baskerville', Georgia, serif; }
+  .fol .colors h3 { margin: 0 0 6px; font: 400 28px/1.2 'Libre Baskerville', Georgia, serif; }
+  .fol .colors > p { margin: 0 0 18px; font-size: 18px; color: var(--muted); }
+  .fol .c-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); }
+  .fol .c-row:hover { color: var(--stamp); }
+  .fol .c-row .stop-num { font-size: 15px; }
+  .fol .c-row b { display: block; font: 400 21px/1.2 'Libre Baskerville', Georgia, serif; }
+  .fol .c-row small { font: 400 12px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .fol .c-row .sw i { width: 30px; height: 22px; }
+  .fol .fav { max-width: 980px; margin: 0 auto 64px; }
+  .fol .fav > .eyebrow { text-align: center; }
+  .fol .end .actions { justify-content: center; }
+  .fol .est { font: 400 13px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: var(--muted); margin: 10px 0 0; }
+  .fol .end .eyebrow { margin-bottom: 14px; }
+  .fol .end h2 { margin: 0 0 18px; font: 400 clamp(40px, 5vw, 64px)/1.1 'Libre Baskerville', Georgia, serif; }
+
+  @media (max-width: 960px) {
+    .fol .hero { grid-template-columns: 1fr; gap: 40px; }
+    .fol .crumb { margin-bottom: 0; }
+    .fol .trip { grid-template-columns: 1fr; gap: 0; padding-top: 0; }
+    .fol .map-col { top: 0; height: 44vh; z-index: 20; margin: 0 -32px; padding: 10px 16px; background: var(--parch); border-bottom: 1px solid var(--rule); }
+    .fol .map-card { padding: 10px; }
+    .fol .map-head { display: none; }
+    .fol .readout { padding-top: 8px; }
+    .fol .readout .num { font-size: 28px; min-width: 44px; }
+    .fol .readout .name { font-size: 20px; }
+    .fol .readout .trip-line { display: none; }
+    .fol .stops { padding-top: 32px; }
+    .fol .end-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .fol .stats dd { font-size: 40px; }
+    .fol .wrap { padding: 0 20px; }
+    .fol .map-col { margin: 0 -20px; }
+    .fol .row.pair { grid-template-columns: 1fr; }
+    .fol .letter { padding: 26px; }
+    .fol .letter blockquote { font-size: 22px; }
+  }
+</style>
