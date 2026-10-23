@@ -27,7 +27,8 @@ import MainLayout from '../../../layouts/MainLayout.astro';
     <section id="trip" class="trip wrap">
       <aside class="map-col" id="map-col">
         <div class="map-card">
-          <div class="map-head mono"><span>The Route</span><span>Click a chapter to jump</span></div>
+          <div class="map-head mono"><span>The Route</span><span>Photo chapters are numbered</span></div>
+          <p class="route-via mono">Via Saratoga Springs · Woodstock · Franconia Notch · Kancamagus · Portland</p>
           <svg id="map" role="img" aria-label="Map of New England showing the trip route"></svg>
           <div class="readout"><span class="num" data-readout-num>—</span><div><p class="name" data-readout-name>Starting in Boston</p><p class="state mono" data-readout-state></p><p class="trip-line mono" id="trip-line"></p></div></div>
         </div>
@@ -151,6 +152,7 @@ import MainLayout from '../../../layouts/MainLayout.astro';
   .fol .map-card { height: 100%; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--rule); padding: 18px; }
   .fol .map-head { display: flex; justify-content: space-between; font-size: 13px; letter-spacing: .16em; color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
   .fol .map-head span:first-child { color: var(--stamp); }
+  .fol .route-via { margin: 9px 0 0; font-size: 9px; line-height: 1.5; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
   .fol #map { flex: 1; min-height: 0; width: 100%; display: block; }
   .fol .readout { display: flex; gap: 18px; align-items: center; border-top: 1px solid var(--rule); padding-top: 14px; }
   .fol .readout .num { font: 700 42px/1 'IBM Plex Mono', monospace; color: var(--stamp); min-width: 64px; }

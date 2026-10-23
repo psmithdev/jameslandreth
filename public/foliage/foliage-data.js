@@ -51,7 +51,7 @@ window.FOLIAGE = {
       state: "Vermont",
       lon: -72.6874,
       lat: 44.4654,
-      label: { dx: -14, dy: -9, anchor: "end" },
+      label: { dx: -14, dy: -14, anchor: "end" },
       date: "Oct 5-6",
       note: "The route crossed into Vermont through Woodstock and continued to Stowe. Covered bridges, church steeples and the view from the von Trapp Family Lodge supplied the New England scenes we had come to see.",
       milesToNext: null,
@@ -64,7 +64,7 @@ window.FOLIAGE = {
       state: "Vermont",
       lon: -72.5754,
       lat: 44.2601,
-      label: { dx: 14, dy: 7, anchor: "start" },
+      label: { dx: -14, dy: 28, anchor: "end" },
       date: "Oct 7",
       note: "We passed Vermont's state capital on the way east. The Winooski River, the capitol dome and the hills beyond marked the transition from the Green Mountains toward New Hampshire.",
       milesToNext: null,
@@ -73,11 +73,11 @@ window.FOLIAGE = {
     {
       id: "white-mountains",
       name: "The White Mountains",
-      mapName: "White Mtns.",
+      mapName: "North Conway",
       state: "New Hampshire",
       lon: -71.1284,
       lat: 44.0537,
-      label: { dx: 14, dy: -10, anchor: "start" },
+      label: { dx: 14, dy: -14, anchor: "start" },
       date: "Oct 7-8",
       note: "The coach entered the White Mountain National Forest, with a gondola view across the ridges and stops near Mount Webster, Crawford Notch and the Willey House. Here the autumn color filled entire mountainsides.",
       milesToNext: null,
@@ -99,16 +99,46 @@ window.FOLIAGE = {
     {
       id: "portland",
       name: "Portland Head Light",
-      mapName: "Portland",
+      mapName: "Head Light",
       state: "Maine",
       lon: -70.2078,
       lat: 43.6231,
-      label: { dx: -14, dy: -12, anchor: "end" },
+      label: { dx: -14, dy: -16, anchor: "end" },
       date: "Oct 10",
       note: "The final morning brought Portland Head Light at Fort Williams Park before the coach followed the coast back to Boston. It was the last view of Maine and the end of the eight-day tour.",
       milesToNext: null,
       foliage: { stage: "Return to Boston", swatches: ["#B98B46", "#7A4B32", "#315A72"] }
     }
+  ],
+  routeLegs: [
+    { from: "uss-constitution", to: "gardner" },
+    { from: "gardner", to: "stockbridge" },
+    {
+      from: "stockbridge",
+      to: "stowe",
+      via: [
+        { name: "Saratoga Springs", lon: -73.7846, lat: 43.0831 },
+        { name: "Woodstock", lon: -72.5184, lat: 43.6242 }
+      ]
+    },
+    { from: "stowe", to: "montpelier" },
+    {
+      from: "montpelier",
+      to: "white-mountains",
+      via: [
+        { name: "Franconia Notch", lon: -71.6817, lat: 44.1742 },
+        { name: "Kancamagus", lon: -71.4210, lat: 44.0350 }
+      ]
+    },
+    { from: "white-mountains", to: "maine-coast" },
+    {
+      from: "maine-coast",
+      to: "portland",
+      via: [
+        { name: "Portland", lon: -70.2568, lat: 43.6591 }
+      ]
+    },
+    { from: "portland", to: "uss-constitution" }
   ],
   photos: [
     { stop: "uss-constitution", orientation: "portrait", file: "/images/new-england-2026/uss-aft.webp", title: "Old Ironsides from aft", caption: "USS Constitution with her ensign flying and one of the ship's boats alongside.", date: "Oct 2, 2026", credit: "Jim Landreth" },

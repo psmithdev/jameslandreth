@@ -4,6 +4,7 @@
   const pad = n => String(n).padStart(2, "0");
   const stops = D.stops.map((s, i) => ({ ...s, index: i, num: pad(i + 1) }));
   const byId = Object.fromEntries(stops.map(s => [s.id, s]));
+  const routeLegs = D.routeLegs || stops.map((s, i) => ({ from: s.id, to: stops[(i + 1) % stops.length].id }));
   D.photos.forEach((p, i) => { p.index = i; p.n = pad(i + 1); });
   const hav = (a, b) => { const r = x => x * Math.PI / 180, R = 3958.8, dLa = r(b.lat - a.lat), dLo = r(b.lon - a.lon);
     return 2 * R * Math.asin(Math.sqrt(Math.sin(dLa / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLo / 2) ** 2)); };
@@ -143,12 +144,16 @@
       proj.fitExtent([[60, 60], [W - 60, H - 60]], { type: "MultiPoint", coordinates: stops.map(s => [s.lon, s.lat]) });
     }
     const pts = stops.map(s => proj([s.lon, s.lat]));
-    const legD = pts.map((p, i) => {
-      const q = pts[(i + 1) % pts.length], dx = q[0] - p[0], dy = q[1] - p[1], k = 0.16;
-      const c = [(p[0] + q[0]) / 2 - dy * k, (p[1] + q[1]) / 2 + dx * k];
-      return `M${p[0]},${p[1]} Q${c[0]},${c[1]} ${q[0]},${q[1]}`;
+    const waypointData = routeLegs.flatMap(leg => leg.via || []);
+    const legD = routeLegs.map(leg => {
+      const routePoints = [byId[leg.from], ...(leg.via || []), byId[leg.to]].map(p => proj([p.lon, p.lat]));
+      return d3.line().curve(d3.curveCatmullRom.alpha(0.5))(routePoints);
     });
     svg.append("g").selectAll("path").data(legD).join("path").attr("d", d => d).attr("fill", "none").attr("stroke", T.ghost).attr("stroke-width", 1.6).attr("stroke-dasharray", "2 7").attr("stroke-linecap", "round");
+    const waypoints = svg.append("g").attr("class", "map-waypoints").selectAll("g").data(waypointData).join("g")
+      .attr("transform", d => { const p = proj([d.lon, d.lat]); return `translate(${p[0]},${p[1]})`; });
+    waypoints.append("circle").attr("r", 3).attr("fill", T.dotFill).attr("stroke", T.ghost).attr("stroke-width", 1.4);
+    waypoints.append("title").text(d => d.name);
     const routeG = svg.append("g");
     if (T.glow) routeG.style("filter", `drop-shadow(0 0 6px ${T.glow})`);
     const legs = legD.map(d => {
