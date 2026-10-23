@@ -48,7 +48,7 @@
     return `<div class="ph-empty ${cls}" style="aspect-ratio:${ratio}"><span>Photo ${p.n} · ${esc(where)}</span></div>`;
   }
   const text = (v, fallback) => v ? esc(v) : `<span class="todo">${esc(fallback)}</span>`;
-  const meta = p => [p.date ? esc(p.date) : `<span class="todo">Date</span>`, p.camera ? esc(p.camera) : `<span class="todo">Camera &amp; settings</span>`].join(" · ");
+  const meta = p => [p.date, p.credit ? `Photograph by ${p.credit}` : ""].filter(Boolean).map(esc).join(" · ");
 
   // ---------- Lightbox ----------
   let lb, cur = 0, playing = false, timer = null;
@@ -90,7 +90,7 @@
   function render() {
     const p = D.photos[cur], s = byId[p.stop];
     lb.querySelector(".lb-count").textContent = `${p.n} / ${pad(D.photos.length)}`;
-    lb.querySelector(".lb-stop").textContent = `Stop ${s.num} · ${s.name}, ${s.state}`;
+    lb.querySelector(".lb-stop").textContent = `Chapter ${s.num} · ${s.name}, ${s.state}`;
     lb.querySelector(".lb-media").innerHTML = media(p);
     lb.querySelector(".lb-title").innerHTML = text(p.title, "Jim’s title");
     lb.querySelector(".lb-cap").innerHTML = text(p.caption, "A sentence or two from Jim about this picture.");
@@ -170,7 +170,7 @@
       const dot = g.append("circle").attr("r", 6.5).attr("fill", T.dotFill).attr("stroke", T.dotStroke).attr("stroke-width", 2);
       const label = g.append("text").attr("x", s.label.dx).attr("y", s.label.dy).attr("text-anchor", s.label.anchor)
         .attr("font-family", "IBM Plex Mono, monospace").attr("font-size", 15).attr("letter-spacing", "0.06em").attr("fill", T.label)
-        .text(`${s.num} ${s.name}`);
+        .text(`${s.num} ${s.mapName || s.name}`);
       return { ring, dot, label };
     });
     return {
@@ -219,7 +219,7 @@
         const s = stops[Math.max(active, 0)];
         set("[data-readout-num]", active < 0 ? "—" : s.num);
         set("[data-readout-name]", active < 0 ? opts.startLabel || "Scroll to begin" : s.name);
-        set("[data-readout-state]", active < 0 ? `${stops.length} stops · ${D.photos.length} photographs` : `${s.state} · Stop ${s.num} of ${pad(stops.length)}`);
+        set("[data-readout-state]", active < 0 ? `${stops.length} chapters · ${D.photos.length} photographs` : `${s.state} · Chapter ${s.num} of ${pad(stops.length)}`);
       }
     }
     let raf = 0;

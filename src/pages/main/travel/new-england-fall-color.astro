@@ -9,7 +9,7 @@ import MainLayout from '../../../layouts/MainLayout.astro';
       <div>
         <p class="eyebrow mono">Travel · New England · Autumn</p>
         <h1>New England in Fall Color</h1>
-        <p class="lede">Twenty-three photographs from a road trip through Massachusetts, Vermont, New Hampshire and Maine.</p>
+        <p class="lede">Jim and Aleda’s nine-day journey through Massachusetts, Vermont, New Hampshire and Maine, told in 45 photographs.</p>
         <div class="actions"><a class="btn primary" href="#trip">Begin the trip ↓</a><button class="btn" type="button" data-play-slideshow>▶ Play slideshow</button></div>
       </div>
       <figure class="letter">
@@ -19,10 +19,15 @@ import MainLayout from '../../../layouts/MainLayout.astro';
       </figure>
     </section>
 
+    <figure class="hero-photo wrap">
+      <img src="/images/new-england-2026/white-mountains-lake.webp" alt="Autumn trees reflected in a quiet New Hampshire lake beneath a blue sky" width="1602" height="982" />
+      <figcaption><span>New Hampshire · Oct 8, 2026</span><span>Photograph by Jim Landreth</span></figcaption>
+    </figure>
+
     <section id="trip" class="trip wrap">
       <aside class="map-col" id="map-col">
         <div class="map-card">
-          <div class="map-head mono"><span>The Route</span><span>Click a stop to jump</span></div>
+          <div class="map-head mono"><span>The Route</span><span>Click a chapter to jump</span></div>
           <svg id="map" role="img" aria-label="Map of New England showing the trip route"></svg>
           <div class="readout"><span class="num" data-readout-num>—</span><div><p class="name" data-readout-name>Starting in Boston</p><p class="state mono" data-readout-state></p><p class="trip-line mono" id="trip-line"></p></div></div>
         </div>
@@ -33,7 +38,7 @@ import MainLayout from '../../../layouts/MainLayout.astro';
     <section class="end wrap">
       <div class="end-top">
         <p class="eyebrow mono">Back in Boston</p>
-        <h2>The end of the road</h2>
+        <h2>Back where the route began</h2>
       </div>
       <div class="end-grid">
         <div class="end-map"><svg id="end-map" role="img" aria-label="The complete route"></svg></div>
@@ -43,7 +48,7 @@ import MainLayout from '../../../layouts/MainLayout.astro';
         </div>
       </div>
       <figure class="fav ph" id="end-fav"></figure>
-      <div class="actions"><button class="btn primary" type="button" data-play-slideshow>▶ Watch the slideshow</button><a class="btn" href="#" aria-disabled="true">Download all photographs ↓</a><a class="btn" href="/archive/Travel">More travel →</a></div>
+      <div class="actions"><button class="btn primary" type="button" data-play-slideshow>▶ Watch the slideshow</button><a class="btn" href="https://www.insightvacations.com/en-us/tours/new-england-s-fall-foliage?optionId=844" target="_blank" rel="noreferrer">Tour itinerary ↗</a><a class="btn" href="/archive/Travel">More travel →</a></div>
     </section>
   </div>
 
@@ -75,15 +80,15 @@ import MainLayout from '../../../layouts/MainLayout.astro';
         const ps = A.photosFor(s.id);
         return `<section class="stop" data-stop-section id="stop-${s.id}">
           <div class="band" aria-hidden="true">${s.foliage.swatches.map(c => `<i style="background:${c}"></i>`).join("")}</div>
-          <header class="stop-head"><span class="stop-num">${s.num}</span><div><h2>${A.esc(s.name)}</h2><p class="mono">${A.esc(s.state)} · ${A.text(s.date, "Date")} · ${ps.length} photographs</p><p class="mono stage">${sw(s)} ${A.esc(s.foliage.stage)}</p></div></header>
+          <header class="stop-head"><span class="stop-num">${s.num}</span><div><h2>${A.esc(s.name)}</h2><p class="mono">${A.esc(s.state)} · ${A.text(s.date, "Date")} · ${ps.length} ${ps.length === 1 ? "photograph" : "photographs"}</p><p class="mono stage">${sw(s)} ${A.esc(s.foliage.stage)}</p></div></header>
           <aside class="note"><p class="mono">Jim’s note · ${A.esc(s.name)}</p><p class="note-body">${A.text(s.note, "A few sentences from Jim: where he stood, the weather, what caught his eye.")}</p><p class="mono note-mile">Mile ${mi(A.mileAt(s.index))} of ${mi(A.totalMiles)}</p></aside>
           ${rows(ps)}</section>`;
       }).join("");
       const states = new Set(A.stops.map(s => s.state)).size;
-      document.getElementById("end-stats").innerHTML = [["Stops", A.stops.length], ["States", states], ["Photographs", A.D.photos.length], ["Miles driven", mi(A.totalMiles).replace(" mi", "")]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("") + (A.estimated ? `<p class="est" style="grid-column:1/-1">Miles estimated until Jim confirms the route</p>` : "");
+      document.getElementById("end-stats").innerHTML = [["Chapters", A.stops.length], ["States", states], ["Photographs", A.D.photos.length], ["Route miles", mi(A.totalMiles).replace(" mi", "")]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("") + (A.estimated ? `<p class="est" style="grid-column:1/-1">Approximate route mileage; Jim and Aleda traveled by tour coach.</p>` : "");
       document.getElementById("end-colors").innerHTML = A.stops.map(s => `<a class="c-row" href="#stop-${s.id}"><span class="stop-num">${s.num}</span><span><b>${A.esc(s.name)}</b><small>${A.esc(s.foliage.stage)}</small></span>${sw(s)}</a>`).join("");
       const fp = A.D.photos[A.D.favorite];
-      document.getElementById("end-fav").outerHTML = `<div class="fav"><p class="eyebrow mono">Jim’s favorite · Stop ${A.byId[fp.stop].num} · ${A.esc(A.byId[fp.stop].name)}</p>${fig(fp)}</div>`;
+      document.getElementById("end-fav").outerHTML = `<div class="fav"><p class="eyebrow mono">Jim’s favorite · Chapter ${A.byId[fp.stop].num} · ${A.esc(A.byId[fp.stop].name)}</p>${fig(fp)}</div>`;
       const tl = document.getElementById("trip-line");
       let lastA = -2;
       const onTick = (prog, active) => {
@@ -136,6 +141,10 @@ import MainLayout from '../../../layouts/MainLayout.astro';
   .fol .letter .mono { margin: 0 0 18px; font-size: 12px; letter-spacing: .18em; color: var(--stamp); }
   .fol .letter blockquote { margin: 0 0 20px; font: italic 400 25px/1.55 'Libre Baskerville', Georgia, serif; text-wrap: pretty; }
   .fol .letter cite { font: normal 500 14px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+  .fol .hero-photo { margin-top: 32px; margin-bottom: 16px; }
+  .fol .hero-photo img { display: block; width: 100%; height: auto; max-height: 74vh; object-fit: cover; border: 1px solid var(--rule); padding: 10px; background: var(--card); box-sizing: border-box; }
+  .fol .hero-photo figcaption { display: flex; justify-content: space-between; gap: 20px; padding-top: 10px; font: 400 12px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 
   .fol .trip { display: grid; grid-template-columns: minmax(340px, .78fr) minmax(0, 1.22fr); gap: 56px; padding-top: 48px; }
   .fol .map-col { position: sticky; top: 20px; height: calc(100vh - 40px); align-self: start; }
@@ -219,5 +228,6 @@ import MainLayout from '../../../layouts/MainLayout.astro';
     .fol .row.pair { grid-template-columns: 1fr; }
     .fol .letter { padding: 26px; }
     .fol .letter blockquote { font-size: 22px; }
+    .fol .hero-photo figcaption { display: grid; gap: 5px; }
   }
 </style>
