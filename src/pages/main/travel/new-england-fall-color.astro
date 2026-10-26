@@ -61,8 +61,6 @@ export const prerender = true;
     </section>
   </div>
 
-  <script is:inline defer src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
-  <script is:inline defer src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
   <script is:inline defer src="/foliage/foliage-data.js"></script>
   <script is:inline defer src="/foliage/foliage-app.js"></script>
   <script is:inline>
@@ -98,6 +96,8 @@ export const prerender = true;
       document.getElementById("end-colors").innerHTML = A.stops.map(s => `<a class="c-row" href="#stop-${s.id}"><span class="stop-num">${s.num}</span><span><b>${A.esc(s.name)}</b><small>${A.esc(s.foliage.stage)}</small></span>${sw(s)}</a>`).join("");
       const fp = A.D.photos[A.D.favorite];
       document.getElementById("end-fav").outerHTML = `<div class="fav"><p class="eyebrow mono">Jim’s favorite · Chapter ${A.byId[fp.stop].num} · ${A.esc(A.byId[fp.stop].name)}</p>${fig(fp)}</div>`;
+      A.initLightbox();
+
       const tl = document.getElementById("trip-line");
       let lastA = -2;
       const onTick = (prog, active) => {
@@ -106,13 +106,48 @@ export const prerender = true;
         tl.innerHTML = `${sw(s)} ${A.esc(s.foliage.stage)} · Mile ${mi(m)} · ${A.text(s.date, "Date")}`;
         lastA = active;
       };
-      A.init({
-        map: "#map", mapCol: "#map-col", startLabel: "Starting in Boston", onTick,
-        theme: { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#4A5168", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168", here: true }
+      const loadScript = (src, integrity) => new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.integrity = integrity;
+        script.crossOrigin = "anonymous";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.append(script);
       });
-      A.drawMap(document.getElementById("end-map"), { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#1C2340", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168" },
-        i => window.scrollTo({ top: document.getElementById(`stop-${A.stops[i].id}`).getBoundingClientRect().top + scrollY - 24, behavior: "smooth" }))
-        .then(m => m.update(A.stops.map(() => 1), 99));
+      let mapsStarted = false;
+      const startMaps = async () => {
+        if (mapsStarted) return;
+        mapsStarted = true;
+        try {
+          await Promise.all([
+            loadScript("https://unpkg.com/d3@7.9.0/dist/d3.min.js", "sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"),
+            loadScript("https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js", "sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67")
+          ]);
+          await Promise.all([
+            A.init({
+              map: "#map", mapCol: "#map-col", startLabel: "Starting in Boston", onTick,
+              theme: { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#4A5168", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168", here: true }
+            }),
+            A.drawMap(document.getElementById("end-map"), { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#1C2340", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168" },
+              i => window.scrollTo({ top: document.getElementById(`stop-${A.stops[i].id}`).getBoundingClientRect().top + scrollY - 24, behavior: "smooth" }))
+              .then(m => m.update(A.stops.map(() => 1), 99))
+          ]);
+        } catch (error) {
+          console.warn("Map libraries unavailable", error);
+        }
+      };
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (!entries.some(entry => entry.isIntersecting)) return;
+          observer.disconnect();
+          startMaps();
+        }, { rootMargin: "300px 0px" });
+        observer.observe(document.getElementById("trip"));
+      } else {
+        startMaps();
+      }
     }, { once: true });
   </script>
 </MainLayout>

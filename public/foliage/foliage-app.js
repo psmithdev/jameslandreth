@@ -55,6 +55,7 @@
   let lb, cur = 0, playing = false, timer = null;
   const DWELL = 5000;
   function buildLightbox() {
+    if (lb) return;
     document.body.insertAdjacentHTML("beforeend", `
     <div class="lb" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
       <div class="lb-top"><span class="lb-count"></span><span class="lb-stop"></span><button class="lb-btn lb-close" type="button">Close ✕</button></div>
@@ -234,5 +235,5 @@
     tick();
   }
 
-  window.FoliageApp = { D, stops, byId, esc, pad, media, text, meta, init, drawMap, legMiles, mileAt, totalMiles, estimated, photosFor: id => D.photos.filter(p => p.stop === id) };
+  window.FoliageApp = { D, stops, byId, esc, pad, media, text, meta, initLightbox: buildLightbox, init, drawMap, legMiles, mileAt, totalMiles, estimated, photosFor: id => D.photos.filter(p => p.stop === id) };
 })();
