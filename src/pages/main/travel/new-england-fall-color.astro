@@ -66,7 +66,7 @@ export const prerender = true;
   <script is:inline>
     document.addEventListener("DOMContentLoaded", () => {
       const A = FoliageApp;
-      const fig = p => `<figure class="ph">
+      const fig = p => `<figure class="ph${p.orientation === "square" ? " ph-square" : ""}">
           <button class="ph-frame" type="button" data-photo-index="${p.index}" aria-label="Open photo ${p.n}">${A.media(p)}</button>
           <figcaption><span class="ph-n">${p.n}</span><div>
             <h3>${A.text(p.title, "Jim’s title")}</h3>
@@ -211,6 +211,8 @@ export const prerender = true;
   .fol .row { display: grid; gap: 28px; margin-bottom: 44px; }
   .fol .row.pair { grid-template-columns: 1fr 1fr; }
   .fol .ph { margin: 0; }
+  .fol .ph-square { width: min(100%, 900px); margin-inline: auto; }
+  .fol .ph-square .ph-img { object-fit: contain; }
   .fol .ph-frame { display: block; width: 100%; padding: 10px; background: var(--card); border: 1px solid var(--rule); cursor: zoom-in; transition: border-color .15s, box-shadow .2s; }
   .fol .ph-frame:hover { border-color: var(--stamp); box-shadow: 0 10px 30px rgba(28, 35, 64, .1); }
   .fol .ph figcaption { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding-top: 16px; }

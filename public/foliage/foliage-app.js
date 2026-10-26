@@ -43,7 +43,7 @@
   document.head.insertAdjacentHTML("beforeend", `<style>${css}</style>`);
 
   function media(p, cls = "") {
-    const ratio = p.orientation === "portrait" ? "2 / 3" : "3 / 2";
+    const ratio = p.orientation === "portrait" ? "2 / 3" : p.orientation === "square" ? "1 / 1" : "3 / 2";
     const where = byId[p.stop].name;
     if (p.file) return `<img class="ph-img ${cls}" src="${esc(p.file)}" alt="${esc(p.title || where)}" loading="lazy" style="aspect-ratio:${ratio}">`;
     return `<div class="ph-empty ${cls}" style="aspect-ratio:${ratio}"><span>Photo ${p.n} · ${esc(where)}</span></div>`;
