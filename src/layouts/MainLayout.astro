@@ -5,9 +5,13 @@ import AccountMenu from '../components/AccountMenu.astro';
 
 interface Props {
   title?: string;
+  externalFonts?: boolean;
 }
 
-const { title = 'Dr. James Landreth - Document Archive' } = Astro.props;
+const {
+  title = 'Dr. James Landreth - Document Archive',
+  externalFonts = true,
+} = Astro.props;
 const user = (Astro.locals as any).user;
 const admin = isAdmin(user);
 ---
@@ -18,9 +22,13 @@ const admin = isAdmin(user);
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" />
+  {externalFonts && (
+    <Fragment>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" />
+    </Fragment>
+  )}
   <title>{title}</title>
 </head>
 <body class="min-h-screen bg-parchment text-ink antialiased">

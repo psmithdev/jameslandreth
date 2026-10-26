@@ -18,7 +18,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Determine which site we're serving
   const isArtifacts = host.startsWith('artifacts.');
+  const pathname = url.pathname;
   (locals as any).site = isArtifacts ? 'artifacts' : 'main';
+
+  // This public, content-only feature is prerendered. Serve its static asset
+  // directly so the public URL keeps working without invoking SSR or auth.
+  if (!isArtifacts && pathname === '/travel/new-england-fall-color') {
+    const assetUrl = new URL(`/main${pathname}${url.search}`, url);
+    return (locals as any).runtime.env.ASSETS.fetch(assetUrl.toString());
+  }
 
   // Try to load user session from cookies
   const accessToken = getAccessToken(request);
@@ -33,8 +41,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Host-based rewriting: rewrite root paths to the correct page directory
-  const pathname = url.pathname;
-
   // Skip rewriting for API routes, static assets, and already-prefixed paths
   if (
     pathname.startsWith('/api/') ||

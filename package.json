@@ -21,6 +21,9 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.13",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-serif": "^5.2.7",
+    "@fontsource/libre-baskerville": "^5.2.8",
     "@supabase/supabase-js": "^2.49.0",
     "astro": "^6.0.7"
   },

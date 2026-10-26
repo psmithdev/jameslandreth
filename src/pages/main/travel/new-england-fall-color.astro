@@ -1,8 +1,16 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
+import '@fontsource/libre-baskerville/400.css';
+import '@fontsource/libre-baskerville/400-italic.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import '@fontsource/ibm-plex-serif/400.css';
+
+export const prerender = true;
 ---
 
-<MainLayout title="New England in Fall Color · Dr. James Landreth">
+<MainLayout title="New England in Fall Color · Dr. James Landreth" externalFonts={false}>
   <div class="fol">
     <section class="hero wrap">
       <div class="crumb mono"><a href="/">Archive</a> / <a href="/archive/Travel">Travel</a> / New England</div>
@@ -53,12 +61,12 @@ import MainLayout from '../../../layouts/MainLayout.astro';
     </section>
   </div>
 
-  <script is:inline src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
-  <script is:inline src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
-  <script is:inline src="/foliage/foliage-data.js"></script>
-  <script is:inline src="/foliage/foliage-app.js"></script>
+  <script is:inline defer src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+  <script is:inline defer src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+  <script is:inline defer src="/foliage/foliage-data.js"></script>
+  <script is:inline defer src="/foliage/foliage-app.js"></script>
   <script is:inline>
-    (function () {
+    document.addEventListener("DOMContentLoaded", () => {
       const A = FoliageApp;
       const fig = p => `<figure class="ph">
           <button class="ph-frame" type="button" data-photo-index="${p.index}" aria-label="Open photo ${p.n}">${A.media(p)}</button>
@@ -105,7 +113,7 @@ import MainLayout from '../../../layouts/MainLayout.astro';
       A.drawMap(document.getElementById("end-map"), { land: "#EDE5D4", ctx: "#F7F3EA", stroke: "#C5B89A", stateLabel: "#7A6F57", label: "#1C2340", labelActive: "#1C2340", route: "#8B1F1F", ghost: "#B5A684", dotFill: "#FDFAF5", dotStroke: "#4A5168" },
         i => window.scrollTo({ top: document.getElementById(`stop-${A.stops[i].id}`).getBoundingClientRect().top + scrollY - 24, behavior: "smooth" }))
         .then(m => m.update(A.stops.map(() => 1), 99));
-    })();
+    }, { once: true });
   </script>
 </MainLayout>
 
