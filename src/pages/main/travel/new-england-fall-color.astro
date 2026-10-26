@@ -212,7 +212,7 @@ export const prerender = true;
   .fol .row.pair { grid-template-columns: 1fr 1fr; }
   .fol .ph { margin: 0; }
   .fol .ph-square { width: min(100%, 900px); margin-inline: auto; }
-  .fol .ph-square .ph-img { object-fit: contain; }
+  .fol .ph-square .ph-img { aspect-ratio: 25 / 24 !important; object-fit: cover; object-position: center bottom; }
   .fol .ph-frame { display: block; width: 100%; padding: 10px; background: var(--card); border: 1px solid var(--rule); cursor: zoom-in; transition: border-color .15s, box-shadow .2s; }
   .fol .ph-frame:hover { border-color: var(--stamp); box-shadow: 0 10px 30px rgba(28, 35, 64, .1); }
   .fol .ph figcaption { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding-top: 16px; }
