@@ -5,6 +5,7 @@ import { createServerClient } from '../../lib/supabase';
 import { anniversaryBook } from '../../data/anniversaryBook';
 import retrospectiveSlides from '../../data/retrospectiveSlides.json';
 import { getEssayEditorial } from '../../data/essayEditorial';
+import { frontPageTreasure, treasureTeaser } from '../../data/frontPageTreasure';
 
 const supabase = createServerClient();
 
@@ -35,20 +36,128 @@ const essayDocs = docs
   .sort((a, b) => a.title.localeCompare(b.title));
 const myEssays = essayDocs.filter((doc) => doc.shelf === 'mine');
 const swipeFiles = essayDocs.filter((doc) => doc.shelf === 'swipe');
+
+const artifactsSiteUrl = import.meta.env.DEV
+  ? 'http://artifacts.localhost:4321'
+  : 'https://artifacts.jameslandreth.com';
+
+let treasureQuery = supabase
+  .from('artifacts')
+  .select('slug, title, category, family, description, images')
+  .is('deleted_at', null)
+  .eq('status', 'available');
+treasureQuery = frontPageTreasure.slug
+  ? treasureQuery.eq('slug', frontPageTreasure.slug)
+  : treasureQuery.not('images', 'eq', '{}').order('created_at', { ascending: false });
+const { data: treasureRows } = await treasureQuery.limit(1);
+const treasure = treasureRows?.[0] ?? null;
+const treasureImage = treasure?.images?.[0] ?? null;
 ---
 
 <MainLayout>
 
-  <!-- Anniversary Showcase -->
+  <!-- Headline: New England trip -->
   <section class="border-b border-rule bg-card">
     <div class="max-w-6xl mx-auto px-6 py-12 lg:py-14">
-      <div class="mb-10 max-w-5xl">
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
+        <a href="/travel/new-england-fall-color" class="block border border-rule bg-parchment p-3 transition-colors hover:border-stamp">
+          <img
+            src="/images/new-england-2026/white-mountains-lake.webp"
+            alt="Autumn trees reflected in a quiet New Hampshire lake beneath a blue sky"
+            width="1602"
+            height="982"
+            class="block h-auto w-full"
+            loading="eager"
+          />
+        </a>
+        <div>
+          <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Latest Journey · October 2026</p>
+          <h2 class="font-display text-4xl sm:text-5xl text-ink mb-5 leading-tight">New England in Fall Color</h2>
+          <p class="font-serif text-xl text-ink-muted leading-relaxed mb-6">
+            Jim and Aleda&rsquo;s nine-day journey through Massachusetts, Vermont, New Hampshire
+            and Maine, told in photographs along a mapped route.
+          </p>
+          <a
+            href="/travel/new-england-fall-color"
+            class="inline-flex border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
+          >
+            Begin the Trip
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Family Treasures spotlight -->
+  {treasure && (
+    <section class="border-b border-rule bg-parchment">
+      <div class="max-w-6xl mx-auto px-6 py-10 lg:py-12">
+        <div class="grid gap-8 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:items-center">
+          <a href={`${artifactsSiteUrl}/items/${treasure.slug}`} class="block border border-rule bg-card p-3 transition-colors hover:border-stamp-art">
+            {treasureImage ? (
+              <img src={treasureImage} alt={treasure.title} class="block aspect-square w-full object-contain bg-parchment-dark" loading="lazy" />
+            ) : (
+              <div class="flex aspect-square items-center justify-center bg-parchment-dark font-mono text-[13px] tracking-[0.1em] uppercase text-rule">No Photo</div>
+            )}
+          </a>
+          <div>
+            <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp-art mb-3">From the Family Treasures · Looking for a Good Home</p>
+            <h2 class="font-display text-3xl sm:text-4xl text-ink mb-4 leading-tight">{treasure.title}</h2>
+            <p class="font-serif text-lg text-ink-muted leading-relaxed mb-6 max-w-2xl">{treasureTeaser(treasure.description)}</p>
+            <div class="flex flex-wrap gap-3">
+              <a
+                href={`${artifactsSiteUrl}/items/${treasure.slug}`}
+                class="inline-flex border border-stamp-art bg-stamp-art px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-art-hover"
+              >
+                See Details &amp; Claim
+              </a>
+              <a
+                href={artifactsSiteUrl}
+                class="inline-flex border border-rule px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-ink transition-colors hover:border-stamp-art hover:text-stamp-art"
+              >
+                Browse All Treasures
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Landreth Family Album + Anniversary -->
+  <section class="border-b border-rule bg-card">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-14">
+      <section class="mb-12 border border-rule bg-parchment px-5 py-4 sm:px-6">
+        <div class="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-center">
+          <figure class="relative bg-card p-3 shadow-[0_14px_42px_rgba(28,35,64,0.12)] outline outline-1 outline-[rgba(0,0,0,0.1)]">
+            <img
+              src={anniversaryBook.cover}
+              alt="Cover spread of the Landreth Family Album"
+              class="block aspect-[2298/896] h-auto w-full object-contain outline outline-1 outline-[rgba(0,0,0,0.1)]"
+              data-anniversary-book-cover
+              loading="lazy"
+            />
+          </figure>
+          <div class="py-1">
+            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Commemorative Book</p>
+            <h3 class="font-display text-2xl sm:text-3xl text-ink leading-tight mb-4">{anniversaryBook.title}</h3>
+            <p class="font-serif text-ink-muted leading-relaxed mb-6">
+              A finished {anniversaryBook.pageCount}-page family album, captured from the printed-book
+              layout and rebuilt here as a readable online book.
+            </p>
+            <a
+              href="/anniversary-book"
+              class="inline-flex border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
+            >
+              Open Book Reader
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div class="mb-8 max-w-5xl">
         <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-stamp mb-3">Diamond Anniversary · June 11, 2026</p>
-        <h2 class="font-display text-4xl sm:text-5xl text-ink mb-5 leading-tight">Aleda &amp; Jim: Sixty Years Together</h2>
-        <p class="font-serif text-xl text-ink-muted leading-relaxed">
-          A homepage preview for the anniversary newspaper, the wedding portrait, and the full
-          retrospective slideshow from the early years before Saint Louis.
-        </p>
+        <h2 class="font-display text-3xl sm:text-4xl text-ink leading-tight">Sixty Years Together</h2>
       </div>
 
       <div class="grid gap-5 lg:grid-cols-3">
@@ -109,34 +218,6 @@ const swipeFiles = essayDocs.filter((doc) => doc.shelf === 'swipe');
           </a>
         </article>
       </div>
-
-      <section class="mt-6 border border-rule bg-parchment px-5 py-4 sm:px-6">
-        <div class="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-center">
-          <figure class="relative bg-card p-3 shadow-[0_14px_42px_rgba(28,35,64,0.12)] outline outline-1 outline-[rgba(0,0,0,0.1)]">
-            <img
-              src={anniversaryBook.cover}
-              alt="Cover spread of the Landreth Family Album"
-              class="block aspect-[2298/896] h-auto w-full object-contain outline outline-1 outline-[rgba(0,0,0,0.1)]"
-              data-anniversary-book-cover
-              loading="lazy"
-            />
-          </figure>
-          <div class="py-1">
-            <p class="font-mono text-[12px] tracking-[0.18em] uppercase text-stamp mb-3">Commemorative Book</p>
-            <h3 class="font-display text-2xl sm:text-3xl text-ink leading-tight mb-4">{anniversaryBook.title}</h3>
-            <p class="font-serif text-ink-muted leading-relaxed mb-6">
-              A finished {anniversaryBook.pageCount}-page family album, captured from the printed-book
-              layout and rebuilt here as a readable online book.
-            </p>
-            <a
-              href="/anniversary-book"
-              class="inline-flex border border-stamp bg-stamp px-5 py-3 font-mono text-[13px] tracking-[0.12em] uppercase text-card transition-colors hover:bg-stamp-hover"
-            >
-              Open Book Reader
-            </a>
-          </div>
-        </div>
-      </section>
 
       <section id="anniversary-slideshow" class="mt-8 border border-rule bg-parchment p-4 sm:p-6">
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
